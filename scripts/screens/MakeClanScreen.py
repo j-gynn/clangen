@@ -553,6 +553,7 @@ class MakeClanScreen(Screens):
 
     def handle_saved_clan_event(self, event):
         if event.ui_element == self.elements["continue"]:
+            game.reset_switch_clans()
             self.change_screen("camp screen")
 
     def exit_screen(self):

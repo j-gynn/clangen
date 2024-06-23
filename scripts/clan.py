@@ -41,21 +41,9 @@ class Clan:
 
     BIOME_TYPES = ["Forest", "Plains", "Mountainous", "Beach"]
 
-    CAT_TYPES = [
-        "newborn",
-        "kitten",
-        "apprentice",
-        "warrior",
-        "medicine",
-        "deputy",
-        "leader",
-        "elder",
-        "mediator",
-        "general",
-    ]
-
     leader_lives = 0
     clan_cats = []
+    dead_this_moon = []  # cats which have died this moon
     starclan_cats = []
     darkforest_cats = []
     unknown_cats = []
@@ -88,18 +76,18 @@ class Clan:
     all_clans = []
 
     def __init__(
-        self,
-        name="",
-        leader=None,
-        deputy=None,
-        medicine_cat=None,
-        biome="Forest",
-        camp_bg=None,
-        symbol=None,
-        game_mode="classic",
-        starting_members=[],
-        starting_season="Newleaf",
-        self_run_init_functions=True,
+            self,
+            name="",
+            leader=None,
+            deputy=None,
+            medicine_cat=None,
+            biome="Forest",
+            camp_bg=None,
+            symbol=None,
+            game_mode="classic",
+            starting_members=[],
+            starting_season="Newleaf",
+            self_run_init_functions=True,
     ):
         self.history = History()
         if name == "":
@@ -142,12 +130,11 @@ class Clan:
             self.clan_settings[setting] = values[0]
             self.setting_lists[setting] = values
 
-        all_settings = []
-        all_settings.append(_settings["general"])
-        all_settings.append(_settings["role"])
-        all_settings.append(_settings["relation"])
-        all_settings.append(_settings["freshkill_tactics"])
-        all_settings.append(_settings["clan_focus"])
+        all_settings = [_settings["general"],
+                        _settings["role"],
+                        _settings["relation"],
+                        _settings["freshkill_tactics"],
+                        _settings["clan_focus"]]
 
         for setting in all_settings:  # Add all the settings to the settings dictionary
             for setting_name, inf in setting.items():
@@ -232,11 +219,11 @@ class Clan:
                     self.add_cat(Cat.all_cats[i])
                     not_found = False
             if (
-                Cat.all_cats[i] != self.leader
-                and Cat.all_cats[i] != self.medicine_cat
-                and Cat.all_cats[i] != self.deputy
-                and Cat.all_cats[i] != self.instructor
-                and not_found
+                    Cat.all_cats[i] != self.leader
+                    and Cat.all_cats[i] != self.medicine_cat
+                    and Cat.all_cats[i] != self.deputy
+                    and Cat.all_cats[i] != self.instructor
+                    and not_found
             ):
                 Cat.all_cats[i].example = True
                 self.remove_cat(Cat.all_cats[i].ID)
@@ -295,10 +282,10 @@ class Clan:
         It should not be removed from the list of cats in the clan
         """
         if (
-            cat.ID in Cat.all_cats
-            and cat.dead
-            and cat.ID not in self.starclan_cats
-            and cat.df is False
+                cat.ID in Cat.all_cats
+                and cat.dead
+                and cat.ID not in self.starclan_cats
+                and cat.df is False
         ):
             # The dead-value must be set to True before the cat can go to starclan
             self.starclan_cats.append(cat.ID)
@@ -348,10 +335,10 @@ class Clan:
         TODO: DOCS
         """
         if (
-            cat.ID in Cat.all_cats
-            and not cat.outside
-            and not cat.dead
-            and cat.ID in Cat.outside_cats
+                cat.ID in Cat.all_cats
+                and not cat.outside
+                and not cat.dead
+                and cat.ID in Cat.outside_cats
         ):
             # The outside-value must be set to True before the cat can go to cotc
             Cat.outside_cats.pop(cat.ID)
@@ -458,6 +445,14 @@ class Clan:
         game.save_clanlist(clan)
         quit(savesettings=False, clearevents=True)
 
+    def reset(self):
+        """Called when creating a new clan, used to remove any existing underlying fluff from previous clan"""
+
+        self.dead_this_moon.clear()
+        self.starclan_cats.clear()
+        self.darkforest_cats.clear()
+        self.unknown_cats.clear()
+
     def save_clan(self):
         """
         TODO: DOCS
@@ -553,14 +548,14 @@ class Clan:
         )
 
         if (
-            list_index == len(self.setting_lists[setting_name]) - 1
+                list_index == len(self.setting_lists[setting_name]) - 1
         ):  # The option is at the list's end, go back to 0
             self.clan_settings[setting_name] = self.setting_lists[setting_name][0]
         else:
             # Else move on to the next item on the list
             self.clan_settings[setting_name] = self.setting_lists[setting_name][
                 list_index + 1
-            ]
+                ]
 
     def save_clan_settings(self):
         game.safe_save(
@@ -574,11 +569,11 @@ class Clan:
 
         version_info = None
         if os.path.exists(
-            get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.json"
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.json"
         ):
             version_info = self.load_clan_json()
         elif os.path.exists(
-            get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.txt"
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.txt"
         ):
             self.load_clan_txt()
         else:
@@ -605,9 +600,9 @@ class Clan:
             return
         game.switches["error_message"] = "There was an error loading the clan.txt"
         with open(
-            get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.txt",
-            "r",
-            encoding="utf-8",
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.txt",
+                "r",
+                encoding="utf-8",
         ) as read_file:  # pylint: disable=redefined-outer-name
             clan_data = read_file.read()
         clan_data = clan_data.replace("\t", ",")
@@ -778,9 +773,9 @@ class Clan:
 
         game.switches["error_message"] = "There was an error loading the clan.json"
         with open(
-            get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.json",
-            "r",
-            encoding="utf-8",
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "clan.json",
+                "r",
+                encoding="utf-8",
         ) as read_file:  # pylint: disable=redefined-outer-name
             clan_data = ujson.loads(read_file.read())
 
@@ -852,17 +847,17 @@ class Clan:
 
         if "other_clan_chosen_symbol" not in clan_data:
             for name, relation, temper in zip(
-                clan_data["other_clans_names"].split(","),
-                clan_data["other_clans_relations"].split(","),
-                clan_data["other_clan_temperament"].split(","),
+                    clan_data["other_clans_names"].split(","),
+                    clan_data["other_clans_relations"].split(","),
+                    clan_data["other_clan_temperament"].split(","),
             ):
                 game.clan.all_clans.append(OtherClan(name, int(relation), temper))
         else:
             for name, relation, temper, symbol in zip(
-                clan_data["other_clans_names"].split(","),
-                clan_data["other_clans_relations"].split(","),
-                clan_data["other_clan_temperament"].split(","),
-                clan_data["other_clan_chosen_symbol"].split(","),
+                    clan_data["other_clans_names"].split(","),
+                    clan_data["other_clans_relations"].split(","),
+                    clan_data["other_clan_temperament"].split(","),
+                    clan_data["other_clan_chosen_symbol"].split(","),
             ):
                 game.clan.all_clans.append(
                     OtherClan(name, int(relation), temper, symbol)
@@ -914,12 +909,12 @@ class Clan:
 
     def load_clan_settings(self):
         if os.path.exists(
-            get_save_dir() + f'/{game.switches["clan_list"][0]}/clan_settings.json'
+                get_save_dir() + f'/{game.switches["clan_list"][0]}/clan_settings.json'
         ):
             with open(
-                get_save_dir() + f'/{game.switches["clan_list"][0]}/clan_settings.json',
-                "r",
-                encoding="utf-8",
+                    get_save_dir() + f'/{game.switches["clan_list"][0]}/clan_settings.json',
+                    "r",
+                    encoding="utf-8",
             ) as write_file:
                 _load_settings = ujson.loads(write_file.read())
 
@@ -936,7 +931,7 @@ class Clan:
         file_path = get_save_dir() + f"/{game.clan.name}/herbs.json"
         if os.path.exists(file_path):
             with open(
-                file_path, "r", encoding="utf-8"
+                    file_path, "r", encoding="utf-8"
             ) as read_file:  # pylint: disable=redefined-outer-name
                 clan.herbs = ujson.loads(read_file.read())
 
@@ -969,7 +964,7 @@ class Clan:
         file_path = get_save_dir() + f"/{game.clan.name}/pregnancy.json"
         if os.path.exists(file_path):
             with open(
-                file_path, "r", encoding="utf-8"
+                    file_path, "r", encoding="utf-8"
             ) as read_file:  # pylint: disable=redefined-outer-name
                 clan.pregnancy_data = ujson.load(read_file)
         else:
@@ -997,7 +992,7 @@ class Clan:
         try:
             if os.path.exists(file_path):
                 with open(
-                    file_path, "r", encoding="utf-8"
+                        file_path, "r", encoding="utf-8"
                 ) as read_file:  # pylint: disable=redefined-outer-name
                     disaster = ujson.load(read_file)
                     if disaster:
@@ -1114,7 +1109,7 @@ class Clan:
         try:
             if os.path.exists(file_path):
                 with open(
-                    file_path, "r", encoding="utf-8"
+                        file_path, "r", encoding="utf-8"
                 ) as read_file:  # pylint: disable=redefined-outer-name
                     pile = ujson.load(read_file)
                     clan.freshkill_pile = FreshkillPile(pile)
@@ -1331,9 +1326,9 @@ class StarClan:
         white = pygame.Surface((sprites.size, sprites.size))
         fade_level = 0
         if cat.dead:
-            for f in self.forgotten_stages:  # pylint: disable=consider-using-dict-items
+            for f, forgot_range in self.forgotten_stages:
                 if cat.dead_for in range(
-                    self.forgotten_stages[f][0], self.forgotten_stages[f][1]
+                        forgot_range[0], forgot_range[1]
                 ):
                     fade_level = f
         white.fill((255, 255, 255, fade_level))

@@ -584,7 +584,7 @@ class Cat:
             self.grief(body)
 
         if not self.outside:
-            Cat.dead_cats.append(self)
+            game.clan.dead_this_moon.append(self)
             if game.clan.instructor.df is False:
                 self.df = False
                 game.clan.add_to_starclan(self)

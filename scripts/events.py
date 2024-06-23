@@ -170,15 +170,15 @@ class Events:
 
             Cat.grief_strings.clear()
 
-        if Cat.dead_cats:
+        if game.clan.dead_this_moon:
             ghost_names = []
             shaken_cats = []
             extra_event = None
-            for ghost in Cat.dead_cats:
+            for ghost in game.clan.dead_this_moon:
                 ghost_names.append(str(ghost.name))
             insert = adjust_list_text(ghost_names)
 
-            if len(Cat.dead_cats) > 1 and game.clan.game_mode != "classic":
+            if len(game.clan.dead_this_moon) > 1 and game.clan.game_mode != "classic":
                 event = (
                     f"The past moon, {insert} have taken their place in StarClan. {game.clan.name}Clan mourns their "
                     f"loss, and their Clanmates will miss where they had been in their lives. Moments of their "
@@ -237,7 +237,7 @@ class Events:
                 )
 
             game.cur_events_list.append(
-                Single_Event(event, ["birth_death"], [i.ID for i in Cat.dead_cats])
+                Single_Event(event, ["birth_death"], [i.ID for i in game.clan.dead_this_moon])
             )
             if extra_event:
                 game.cur_events_list.append(
@@ -245,7 +245,7 @@ class Events:
                         extra_event, ["birth_death"], [i.ID for i in shaken_cats]
                     )
                 )
-            Cat.dead_cats.clear()
+            game.clan.dead_this_moon.clear()
 
         if game.clan.game_mode in ['expanded', 'cruel season'] and game.clan.freshkill_pile:
             # make a notification if the Clan does not have enough prey

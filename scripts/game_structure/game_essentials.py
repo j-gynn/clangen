@@ -143,8 +143,7 @@ class Game:
     map_info = {}
 
     # SETTINGS
-    settings = {}
-    settings["mns open"] = False
+    settings = {"mns open": False}
     setting_lists = {}
 
     debug_settings = {
@@ -200,6 +199,30 @@ class Game:
         if self.config["fun"]["april_fools"]:
             self.config["fun"]["newborns_can_roam"] = True
             self.config["fun"]["newborns_can_patrol"] = True
+
+    @classmethod
+    def reset_switch_clans(cls):
+        """Clear class-wide variables, useful when switching clans."""
+        cls.cur_events_list.clear()
+        cls.ceremony_events_list.clear()
+        cls.birth_death_events_list.clear()
+        cls.relation_events_list.clear()
+        cls.health_events_list.clear()
+        cls.other_clans_events_list.clear()
+        cls.misc_events_list.clear()
+        cls.herb_events_list.clear()
+        cls.freshkill_event_list.clear()
+
+        cls.mediated.clear()
+        cls.just_died.clear()
+
+        cls.allegiance_list.clear()
+        cls.game_mode = ""
+        cls.cat_to_fade.clear()
+        cls.patrolled.clear()
+        cls.cur_events.clear()
+
+        game.clan.reset()  # mmm hate this.
 
     def update_game(self):
         if self.current_screen != self.switches["cur_screen"]:
