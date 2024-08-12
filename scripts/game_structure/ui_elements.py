@@ -50,7 +50,11 @@ class UISurfaceImageButton(pygame_gui.elements.UIButton):
         text_is_multiline: bool = False,
         text_layer_object_id: Optional[Union[ObjectID, str]] = None,
         tab_movement: Dict[str, bool] = None,
+        alt_text=None,
     ):
+        if alt_text is not None:
+            self.alt_text = alt_text
+
         if isinstance(object_id, ObjectID):
             self._is_tab = (
                 object_id.object_id is not None and "tab" in object_id.object_id
@@ -245,7 +249,10 @@ class UIImageButton(pygame_gui.elements.UIButton):
         allow_double_clicks: bool = False,
         generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
         visible: int = 1,
+        alt_text=None,
     ):
+        if alt_text is not None:
+            self.alt_text = alt_text
         super().__init__(
             relative_rect=relative_rect,
             text=text,
@@ -603,7 +610,10 @@ class UISpriteButton:
         object_id=None,
         tool_tip_text=None,
         anchors=None,
+        alt_text=None,
     ):
+        if alt_text is not None:
+            self.alt_text = alt_text
         input_sprite = pygame.transform.scale(sprite, relative_rect.size)
         # if downscaling, apply a light blur to get rid of crunchiness.
         if relative_rect.height < sprite.height or relative_rect.width < sprite.width:
@@ -635,6 +645,7 @@ class UISpriteButton:
             tool_tip_text=tool_tip_text,
             container=container,
             anchors=anchors,
+            alt_text=alt_text,
         )
 
     def return_cat_id(self):
@@ -698,7 +709,10 @@ class CatButton(UIImageButton):
         tool_tip_text=None,
         container=None,
         anchors=None,
+        alt_text=None,
     ):
+        if alt_text is not None:
+            self.alt_text = alt_text
         self.cat_id = cat_id
         self.cat_object = cat_object
         super().__init__(

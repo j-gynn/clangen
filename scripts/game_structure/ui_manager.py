@@ -60,6 +60,9 @@ class UIManager(pygame_gui.UIManager):
             self.window_resolution, self.root_container
         )
 
+        self.unprocessed_hover = False
+        self.hovered_element = None
+
     def create_tool_tip(
         self,
         text: str,
@@ -107,6 +110,30 @@ class UIManager(pygame_gui.UIManager):
         """
         self.offset = offset
         self.root_container.set_position(offset)
+
+    def _handle_hovering(self, time_delta):
+        hover_handled = False
+        sorted_layers = sorted(self.ui_group.layers(), reverse=True)
+        for layer in sorted_layers:
+            for ui_element in self.ui_group.get_sprites_from_layer(layer):
+                if ui_element.visible:
+                    # Only check hover for visible elements - ignore hidden elements
+                    # we need to check hover even after already found what we are hovering,
+                    # so, we can unhover previously hovered stuff
+                    element_is_hovered = ui_element.check_hover(
+                        time_delta, hover_handled
+                    )
+                    if element_is_hovered and ui_element != self.root_container:
+                        hover_handled = True
+                        self.unprocessed_hover = self.hovered_element != ui_element
+                        self.hovered_element = ui_element
+                        self.hovering_any_ui_element = True
+                    elif element_is_hovered and ui_element == self.root_container:
+                        # if we are just hovering over the root container
+                        # set 'hovering any' to False
+                        self.hovering_any_ui_element = False
+                        self.hovered_element = None
+                        self.unprocessed_hover = False
 
 
 class UIManagerContainer(pygame_gui.core.UIContainer):

@@ -7,7 +7,6 @@ from math import floor
 from typing import Optional, Tuple
 
 import pygame
-import pygame_gui
 
 from scripts.game_structure.ui_manager import UIManager
 from scripts.ui.generate_screen_scale_json import generate_screen_scale
@@ -18,7 +17,7 @@ screen_x = 800
 screen_y = 700
 screen_scale = 1
 game_screen_size = (800, 700)
-MANAGER: Optional[pygame_gui.UIManager] = None
+MANAGER: Optional[UIManager] = None
 screen = None
 curr_variable_dict = {}
 

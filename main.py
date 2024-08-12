@@ -22,6 +22,9 @@ import threading
 import time
 from importlib.util import find_spec
 
+import accessible_output3.outputs.auto
+import pygame_gui
+
 import scripts.game_structure.screen_settings
 
 if not getattr(sys, "frozen", False):
@@ -155,6 +158,8 @@ else:
 
 print("Version Name: ", VERSION_NAME)
 print("Running on commit " + get_version_info().version_number)
+reader = accessible_output3.outputs.auto.Auto()
+reader.output("loading")
 
 # Load game
 from scripts.game_structure.load_cat import load_cats, version_convert
@@ -284,6 +289,7 @@ cursor_img = pygame.image.load("resources/images/cursor.png").convert_alpha()
 cursor = pygame.cursors.Cursor((9, 0), cursor_img)
 disabled_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
 
+reader.output("game loaded", interrupt=True)
 while 1:
     time_delta = clock.tick(game.switches["fps"]) / 1000.0
 
@@ -344,6 +350,38 @@ while 1:
                 )
 
         MANAGER.process_events(event)
+
+        if MANAGER.unprocessed_hover:
+            extra_text = ""
+            if isinstance(MANAGER.hovered_element, pygame_gui.elements.UIButton):
+                extra_text += (
+                    ", disabled, button"
+                    if not MANAGER.hovered_element.is_enabled
+                    else ", button"
+                )
+
+            if (
+                hasattr(MANAGER.hovered_element, "alt_text")
+                and MANAGER.hovered_element.alt_text is not None
+            ):
+                reader.output(
+                    MANAGER.hovered_element.alt_text + extra_text, interrupt=True
+                )
+            elif (
+                hasattr(MANAGER.hovered_element, "text")
+                and MANAGER.hovered_element.text != ""
+            ):
+                reader.output(MANAGER.hovered_element.text + extra_text, interrupt=True)
+            elif (
+                hasattr(MANAGER.hovered_element, "html_text")
+                and MANAGER.hovered_element.html_text != ""
+            ):
+                reader.output(
+                    MANAGER.hovered_element.html_text + extra_text, interrupt=True
+                )
+            else:
+                reader.output("unknown element", interrupt=True)
+            MANAGER.unprocessed_hover = False
 
     MANAGER.update(time_delta)
 
