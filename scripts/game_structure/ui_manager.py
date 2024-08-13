@@ -2,6 +2,7 @@ import io
 import os
 from typing import Tuple, Optional, Union, List, Dict
 
+import accessible_output3.outputs.auto
 import pygame
 import pygame_gui
 from pygame_gui import PackageResource
@@ -62,6 +63,8 @@ class UIManager(pygame_gui.UIManager):
 
         self.unprocessed_hover = False
         self.hovered_element = None
+        self.uninterruptible_ongoing = 0
+        self.reader = accessible_output3.outputs.auto.Auto()
 
     def create_tool_tip(
         self,
@@ -125,7 +128,9 @@ class UIManager(pygame_gui.UIManager):
                     )
                     if element_is_hovered and ui_element != self.root_container:
                         hover_handled = True
-                        self.unprocessed_hover = self.hovered_element != ui_element
+                        self.unprocessed_hover = (
+                            self.hovered_element != ui_element
+                        ) and not self.unprocessed_hover
                         self.hovered_element = ui_element
                         self.hovering_any_ui_element = True
                     elif element_is_hovered and ui_element == self.root_container:
@@ -134,6 +139,78 @@ class UIManager(pygame_gui.UIManager):
                         self.hovering_any_ui_element = False
                         self.hovered_element = None
                         self.unprocessed_hover = False
+
+    def speak_reader(self, high_priority=0):
+        # if self.reader.is_system_output():
+        #     return
+        if not self._check_reader_priority(high_priority):
+            return
+
+        if not self.unprocessed_hover:
+            return
+
+        extra_text = ""
+        if isinstance(self.hovered_element, pygame_gui.elements.UIButton):
+            extra_text += (
+                ", disabled, button"
+                if not self.hovered_element.is_enabled
+                else ", button"
+            )
+
+        if (
+            hasattr(self.hovered_element, "alt_text")
+            and self.hovered_element.alt_text is not None
+        ):
+            if (
+                self.hovered_element.alt_text == "{skip}"
+            ):  # this item shouldn't be read out
+                return
+            self.reader.output(
+                self.hovered_element.alt_text + extra_text, interrupt=True
+            )
+        elif hasattr(self.hovered_element, "text") and self.hovered_element.text != "":
+            self.reader.output(self.hovered_element.text + extra_text, interrupt=True)
+        elif (
+            hasattr(self.hovered_element, "html_text")
+            and self.hovered_element.html_text != ""
+        ):
+            self.reader.output(
+                self.hovered_element.text_box_layout.plain_text + extra_text,
+                interrupt=True,
+            )
+        elif hasattr(
+            self.hovered_element, "tool_tip_text"
+        ) and self.hovered_element.tool_tip_text not in [None, ""]:
+            self.reader.output(
+                self.hovered_element.tool_tip_text + extra_text,
+                interrupt=True,
+            )
+        else:
+            self.reader.output("", interrupt=True)
+        self.unprocessed_hover = False
+
+    def reader_broadcast(self, msg: str, high_priority: int = 0, should_interrupt=True):
+        """
+        Send a string to the screenreader to speak.
+        :param msg: String to send
+        :param high_priority: How many frames to block input for following this message, default 0
+        :param should_interrupt: Whether this message should attempt to interrupt other messsages, default True
+        :return:
+        """
+        if not self._check_reader_priority(high_priority):
+            return
+        self.reader.output(msg, interrupt=should_interrupt)
+
+    def _check_reader_priority(self, high_priority):
+        if (
+            self.uninterruptible_ongoing > 0
+            and self.uninterruptible_ongoing > high_priority
+        ):
+            self.uninterruptible_ongoing -= 1
+            return False
+        if high_priority != 0:
+            self.uninterruptible_ongoing = high_priority
+        return True
 
 
 class UIManagerContainer(pygame_gui.core.UIContainer):

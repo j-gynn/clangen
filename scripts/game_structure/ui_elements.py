@@ -5,6 +5,8 @@ from typing import Union, Tuple, Optional, Dict, Iterable, Callable, List
 
 import pygame
 import pygame_gui
+from pygame import Rect, Surface
+from pygame.rect import RectType, FRect, FRectType
 from pygame_gui.core import UIContainer, IContainerLikeInterface, UIElement, ObjectID
 from pygame_gui.core.gui_type_hints import RectLike, Coordinate
 from pygame_gui.core.interfaces import IUIManagerInterface
@@ -760,8 +762,11 @@ class UITextBoxTweaked(pygame_gui.elements.UITextBox):
         pre_parsing_enabled: bool = True,
         text_kwargs=None,
         allow_split_dashes: bool = True,
+        alt_text=None,
     ):
         self.line_spaceing = line_spacing
+        if alt_text is not None:
+            self.alt_text = alt_text
 
         super().__init__(
             html_text,
@@ -1332,3 +1337,40 @@ class UICatListDisplay(UIContainer):
             if self.first_button:
                 self.first_button.enable()
                 self.last_button.enable()
+
+
+class UIImage(pygame_gui.elements.UIImage):
+    """
+    A drop-in replacement for the pygame_gui version that allows us to add alt-text to an image
+    """
+
+    def __init__(
+        self,
+        relative_rect: Union[
+            Rect, RectType, FRect, FRectType, tuple[float, float, float, float]
+        ],
+        image_surface: Surface,
+        manager: Optional[IUIManagerInterface] = None,
+        image_is_alpha_premultiplied: bool = False,
+        container: Optional[IContainerLikeInterface] = None,
+        parent_element: Optional[UIElement] = None,
+        object_id: Optional[Union[ObjectID, str]] = None,
+        anchors: Optional[Dict[str, Union[str, UIElement]]] = None,
+        visible: int = 1,
+        *,
+        alt_text: Optional[str] = None,
+        starting_height: int = 1,
+    ):
+        super().__init__(
+            relative_rect,
+            image_surface,
+            manager,
+            image_is_alpha_premultiplied,
+            container,
+            parent_element,
+            object_id,
+            anchors,
+            visible,
+            starting_height=starting_height,
+        )
+        self.alt_text = alt_text

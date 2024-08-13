@@ -17,6 +17,7 @@ from scripts.game_structure.ui_elements import (
     UIImageButton,
     UITextBoxTweaked,
     UISurfaceImageButton,
+    UIImage,
 )
 from scripts.utility import (
     event_text_adjust,
@@ -534,6 +535,8 @@ class ProfileScreen(Screens):
         if game.last_screen_forProfile == "med den screen":
             self.toggle_conditions_tab()
 
+        MANAGER.reader_broadcast(self.the_cat.name.screenreader_name + "'s profile")
+
     def clear_profile(self):
         """Clears all profile objects."""
         for ele in self.profile_elements:
@@ -606,12 +609,13 @@ class ProfileScreen(Screens):
                 + "Clan into the Dark Forest."
             )
 
-        self.profile_elements["cat_name"] = pygame_gui.elements.UITextBox(
+        self.profile_elements["cat_name"] = UITextBoxTweaked(
             cat_name,
             ui_scale(pygame.Rect((0, 0), (-1, 40))),
             manager=MANAGER,
             object_id=get_text_box_theme("#text_box_40_horizcenter"),
             anchors={"centerx": "centerx"},
+            alt_text=self.the_cat.name.screenreader_name,
         )
         self.profile_elements["cat_name"].set_relative_position(
             ui_scale_offset((0, 140))
@@ -627,12 +631,14 @@ class ProfileScreen(Screens):
             anchors={"centerx": "centerx"},
         )
 
+        text, alt_text = self.generate_column1(self.the_cat)
         self.profile_elements["cat_info_column1"] = UITextBoxTweaked(
-            self.generate_column1(self.the_cat),
+            text,
             ui_scale(pygame.Rect((300, 230), (180, 200))),
             object_id=get_text_box_theme("#text_box_22_horizleft"),
             line_spacing=1,
             manager=MANAGER,
+            alt_text=alt_text,
         )
         self.profile_elements["cat_info_column2"] = UITextBoxTweaked(
             self.generate_column2(self.the_cat),
@@ -644,24 +650,30 @@ class ProfileScreen(Screens):
 
         # Set the cat backgrounds.
         if game.clan.clan_settings["backgrounds"]:
-            self.profile_elements["background"] = pygame_gui.elements.UIImage(
+            self.profile_elements["background"] = UIImage(
                 ui_scale(pygame.Rect((55, 200), (240, 210))),
                 pygame.transform.scale(
                     self.get_platform(), ui_scale_dimensions((240, 210))
                 ),
                 manager=MANAGER,
+                alt_text="{skip}",
             )
             self.profile_elements["background"].disable()
 
         # Create cat image object
-        self.profile_elements["cat_image"] = pygame_gui.elements.UIImage(
+        self.profile_elements["cat_image"] = UIImage(
             ui_scale(pygame.Rect((100, 200), (150, 150))),
             pygame.transform.scale(
                 self.the_cat.sprite, ui_scale_dimensions((150, 150))
             ),
             manager=MANAGER,
+            starting_height=2,
+            alt_text=f"image: " + self.the_cat.describe_cat(screenreader=True),
         )
-        self.profile_elements["cat_image"].disable()
+        if game.clan.clan_settings["backgrounds"]:
+            self.profile_elements["background"].join_focus_sets(
+                self.profile_elements["cat_image"]
+            )
 
         # if cat is a med or med app, show button for their den
         self.profile_elements["med_den"] = UISurfaceImageButton(
@@ -735,6 +747,8 @@ class ProfileScreen(Screens):
             if self.the_cat.dead or self.the_cat.outside:
                 self.profile_elements["mediation"].disable()
 
+        MANAGER.reader_broadcast(self.the_cat.name.screenreader_name, high_priority=30)
+
     def determine_previous_and_next_cat(self):
         """'Determines where the next and previous buttons point too."""
 
@@ -798,28 +812,39 @@ class ProfileScreen(Screens):
     def generate_column1(self, the_cat):
         """Generate the left column information"""
         output = ""
-        # SEX/GENDER
-        if the_cat.genderalign is None or the_cat.genderalign == the_cat.gender:
-            output += str(the_cat.gender)
-        else:
-            output += str(the_cat.genderalign)
-        # NEWLINE ----------
-        output += "\n"
-
+        reader = ""
         # AGE
         if the_cat.age == "kitten":
             output += "young"
+            reader += "young"
         elif the_cat.age == "senior":
             output += "senior"
+            reader += "senior"
         else:
             output += the_cat.age
+            reader += the_cat.age
         # NEWLINE ----------
         output += "\n"
+        reader += " "
+
+        # SEX/GENDER
+        if the_cat.genderalign is None or the_cat.genderalign == the_cat.gender:
+            output += str(the_cat.gender)
+            reader += str(the_cat.gender)
+        else:
+            output += str(the_cat.genderalign)
+            reader += str(the_cat.genderalign)
+        # NEWLINE ----------
+        output += "\n"
+        reader += ", "
 
         # EYE COLOR
         output += "eyes: " + str(the_cat.describe_eyes())
+        reader += "with " + str(the_cat.describe_eyes()) + " eyes"
+
         # NEWLINE ----------
         output += "\n"
+        reader += " "
 
         # PELT TYPE
         output += "pelt: " + the_cat.pelt.name.lower()
@@ -918,7 +943,7 @@ class ProfileScreen(Screens):
             # NEWLINE ----------
             output += "\n"
 
-        return output
+        return output, reader
 
     def generate_column2(self, the_cat):
         """Generate the right column information"""
@@ -1110,7 +1135,7 @@ class ProfileScreen(Screens):
             pass
         else:
             self.open_tab = "history"
-            self.backstory_background = pygame_gui.elements.UIImage(
+            self.backstory_background = UIImage(
                 ui_scale(pygame.Rect((89, 465), (620, 157))),
                 get_box(
                     BoxStyles.ROUNDED_BOX, (620, 157), sides=(True, True, False, True)
@@ -1813,7 +1838,7 @@ class ProfileScreen(Screens):
 
             rect = ui_scale(pygame.Rect((0, 0), (624, 151)))
             rect.bottomleft = ui_scale_offset((0, 0))
-            self.conditions_background = pygame_gui.elements.UIImage(
+            self.conditions_background = UIImage(
                 rect,
                 self.conditions_tab,
                 starting_height=2,

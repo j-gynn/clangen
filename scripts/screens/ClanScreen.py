@@ -140,9 +140,6 @@ class ClanScreen(Screens):
                 i += 1
                 if i > self.max_sprites_displayed:
                     break
-                cat_name = Cat.all_cats[x].name.prefix + str(
-                    Cat.all_cats[x].name
-                ).replace(Cat.all_cats[x].name.prefix, " ")
                 try:
                     self.cat_buttons.append(
                         UISpriteButton(
@@ -152,7 +149,7 @@ class ClanScreen(Screens):
                             Cat.all_cats[x].sprite,
                             cat_id=x,
                             starting_height=i,
-                            alt_text=f"{cat_name} sprite",
+                            alt_text=Cat.all_cats[x].name.screenreader_name,
                         )
                     )
                 except:

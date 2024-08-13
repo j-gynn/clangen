@@ -23,7 +23,6 @@ import time
 from importlib.util import find_spec
 
 import accessible_output3.outputs.auto
-import pygame_gui
 
 import scripts.game_structure.screen_settings
 
@@ -351,37 +350,7 @@ while 1:
 
         MANAGER.process_events(event)
 
-        if MANAGER.unprocessed_hover:
-            extra_text = ""
-            if isinstance(MANAGER.hovered_element, pygame_gui.elements.UIButton):
-                extra_text += (
-                    ", disabled, button"
-                    if not MANAGER.hovered_element.is_enabled
-                    else ", button"
-                )
-
-            if (
-                hasattr(MANAGER.hovered_element, "alt_text")
-                and MANAGER.hovered_element.alt_text is not None
-            ):
-                reader.output(
-                    MANAGER.hovered_element.alt_text + extra_text, interrupt=True
-                )
-            elif (
-                hasattr(MANAGER.hovered_element, "text")
-                and MANAGER.hovered_element.text != ""
-            ):
-                reader.output(MANAGER.hovered_element.text + extra_text, interrupt=True)
-            elif (
-                hasattr(MANAGER.hovered_element, "html_text")
-                and MANAGER.hovered_element.html_text != ""
-            ):
-                reader.output(
-                    MANAGER.hovered_element.html_text + extra_text, interrupt=True
-                )
-            else:
-                reader.output("unknown element", interrupt=True)
-            MANAGER.unprocessed_hover = False
+        MANAGER.speak_reader()
 
     MANAGER.update(time_delta)
 

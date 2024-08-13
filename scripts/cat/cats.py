@@ -953,13 +953,14 @@ class Cat:
 
         self.personality.set_kit(self.is_baby())  # Update kit trait stuff
 
-    def describe_cat(self, short=False):
+    def describe_cat(self, short=False, screenreader=False):
         """Generates a string describing the cat's appearance and gender.
 
         :param short: Whether to truncate the output, default False
         :type short: bool
+        :param screenreader: Whether this description is for the screenreader, default False
         """
-        output = Pelt.describe_appearance(self, short)
+        output = Pelt.describe_appearance(self, short, screenreader)
         # Add "a" or "an"
         if output[0].lower() in "aeiou":
             output = f"an {output}"
