@@ -628,13 +628,18 @@ class Patrol:
     def generate_patrol_events(self, patrol_dict):
         all_patrol_events = []
         for patrol in patrol_dict:
+            weight = patrol.get("weight", 20)
+            if isinstance(weight, dict):
+                weight = self.calculate_dynamic_value(weight)
+                weight = max(1, weight)
+
             patrol_event = PatrolEvent(
                 patrol_id=patrol.get("patrol_id"),
                 biome=patrol.get("biome"),
                 camp=patrol.get("camp"),
                 season=patrol.get("season"),
                 tags=patrol.get("tags"),
-                weight=patrol.get("weight", 20),
+                weight=weight,
                 types=patrol.get("types"),
                 intro_text=patrol.get("intro_text"),
                 intro_text_kwargs=patrol.get("intro_text_kwargs"),
@@ -690,6 +695,12 @@ class Patrol:
         fail_outcomes = PatrolOutcome.prepare_allowed_outcomes(fail_outcomes, self)
 
         # Choose a success and fail outcome
+        for outcome in success_outcomes:
+            if isinstance(outcome.weight, dict):
+                outcome.weight = self.calculate_dynamic_value(outcome.weight)
+        for outcome in fail_outcomes:
+            if isinstance(outcome.weight, dict):
+                outcome.weight = self.calculate_dynamic_value(outcome.weight)
         chosen_success = choices(
             success_outcomes, weights=[x.weight for x in success_outcomes]
         )[0]
@@ -701,13 +712,16 @@ class Patrol:
 
         print(f"PATROL ID: {self.patrol_event.patrol_id} | SUCCESS: {success}")
 
+        if isinstance(final_event.exp, dict):
+            final_event.exp = self.calculate_dynamic_value(final_event.exp)
+
         # Run the chosen outcome
         return final_event.execute_outcome(self)
 
     def calculate_success(
         self, success_outcome: PatrolOutcome, fail_outcome: PatrolOutcome
     ) -> Tuple[PatrolOutcome, bool]:
-        """Returns both the chosen event, and a boolian that's True if success, and False is fail."""
+        """Returns both the chosen event, and a boolean that's True if success, and False is fail."""
 
         patrol_size = len(self.patrol_cats)
         total_exp = sum([x.experience for x in self.patrol_cats])
@@ -719,13 +733,33 @@ class Patrol:
             (1 + 0.10 * patrol_size) * total_exp / (patrol_size * gm_modifier * 2)
         )
 
-        success_chance = self.patrol_event.chance_of_success + int(exp_adustment)
+        if isinstance(self.patrol_event.chance_of_success, dict):
+            base_success_chance = self.calculate_dynamic_value(
+                self.patrol_event.chance_of_success
+            )
+            # constraining value to 10-85 or custom range
+            base_success_chance = max(
+                base_success_chance,
+                self.patrol_event.chance_of_success["min_size"]
+                if "min_size" in self.patrol_event.chance_of_success
+                else 10,
+            )
+            base_success_chance = min(
+                base_success_chance,
+                self.patrol_event.chance_of_success["max_size"]
+                if "max_size" in self.patrol_event.chance_of_success
+                else 85,
+            )
+        else:
+            # old-style success chance, just use the base value
+            base_success_chance = self.patrol_event.chance_of_success
+        success_chance = base_success_chance + int(exp_adustment)
         success_chance = min(success_chance, 90)
 
         # Now, apply success and fail skill
         print(
             "starting chance:",
-            self.patrol_event.chance_of_success,
+            base_success_chance,
             "| EX_updated chance:",
             success_chance,
         )
@@ -774,6 +808,27 @@ class Patrol:
             )
 
         return (success_outcome if success else fail_outcome, success)
+
+    def calculate_dynamic_value(self, value_dict):
+        if "base" not in value_dict:
+            raise KeyError("Dict format used but no base value!")
+        value = value_dict.pop("base")
+
+        if (
+            "season" in value_dict
+            and game.clan.current_season.lower() in value_dict["season"]
+        ):
+            value += value_dict["season"][game.clan.current_season.lower()]
+
+        if "biome" in value_dict and game.clan.biome.lower() in value_dict["biome"]:
+            value += value_dict["season"][game.clan.biome.lower()]
+
+        if "patrol_size" in value_dict:
+            size = len(self.patrol_cats)
+            patrol_size = "many" if size > 4 else "some" if size > 1 else "one"
+            if patrol_size in value_dict["patrol_size"]:
+                value += value_dict["patrol_size"][patrol_size]
+        return value
 
     def update_resources(self, biome_dir, leaf):
         resource_dir = "resources/dicts/patrols/"
