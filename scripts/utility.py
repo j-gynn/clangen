@@ -1710,48 +1710,73 @@ def attr_repl(text, text_kwargs, raise_exception=False, *, cat_count=0, patrol=F
     if values[0].upper() == "PRONOUN" or values[0].upper() == "VERB":
         return text  # this is a pronoun tag and should be ignored
 
-    if values[0].upper().startswith("BIOME"):
-        keys = [game.clan.biome.lower(), "any"]
-    elif values[0].upper().startswith("SEASON"):
-        keys = [game.clan.current_season.lower(), "any"]
-    elif values[0].upper().startswith("SIZE"):
-        if patrol:
-            # one: 1
-            # some: 2-4
-            # many: 5-6
-            size = "many" if cat_count > 4 else "some" if cat_count > 1 else "one"
-            keys = [size, "any"]
-        elif not patrol:
-            # one: 1-10
-            # some: 11-100
-            # many: 100+
-            size = "many" if cat_count > 50 else "some" if cat_count > 20 else "one"
-            keys = [size, "any"]
-        else:
-            keys = ["any"]
+    # handling multi-type attributes
+    if "_" in values[0]:
+        subvalues = values[0].upper().split("_")
     else:
-        if raise_exception:
-            raise KeyError(f"Attribute tag: {values[0]} does not exist.")
-        return "error3_nonexistent_attribute"
+        subvalues = [values[0].upper()]
 
     try:
-        output = text_kwargs[values[1]]
+        record = text_kwargs[values[1]]
     except KeyError:
         if raise_exception:
             raise
-        return "error4_missing_id_in_kwargs"
+        return "error3_missing_id_in_kwargs"
 
-    if "any" not in output:
-        print(f"WARNING: no default key detected for {text}. This may not be an error.")
+    output = record
+    for value in subvalues:
+        keys = []
+        if value.startswith("BIOME"):
+            keys.append(game.clan.biome.lower())
+        elif values[0].upper().startswith("SEASON"):
+            keys.append(game.clan.current_season.lower())
+        elif values[0].upper().startswith("SIZE"):
+            if patrol:
+                # one: 1
+                # some: 2-4
+                # many: 5-6
+                keys.append(
+                    "many" if cat_count > 4 else "some" if cat_count > 1 else "one"
+                )
+            elif not patrol:
+                # one: 1-10
+                # some: 11-100
+                # many: 100+
+                keys.append(
+                    "many" if cat_count > 50 else "some" if cat_count > 20 else "one"
+                )
+        else:
+            if raise_exception:
+                raise KeyError(f"Attribute tag: {value} does not exist.")
+            return "error4_nonexistent_attribute"
 
-    for key in keys:
-        if key in output:
-            return output[key]
-    if raise_exception:
-        raise KeyError(
-            f"No key present in string. Ensure value for 'any' is present in attribute tag."
-        )
-    return "error5_no_match"
+        keys.append("any")
+
+        match = False
+        anykey = False
+        for key in keys:
+            if key in output:
+                match = True
+                anykey = key == "any"
+                output = record[key]
+                break
+
+        if not match:
+            if raise_exception:
+                raise KeyError(
+                    f"No key found. Ensure 'any' is an option to avoid this!."
+                )
+            return "error5_no_match"
+
+        if anykey:  # if we had to go to default, go no further
+            break
+
+    if isinstance(output, str):
+        return output
+    elif raise_exception:
+        raise TypeError(f"Expected to return string, got: {type(output)}")
+    else:
+        return "error6_typeerror"
 
 
 def process_text(text, cat_dict, text_kwargs=None, raise_exception=False, cat_count=0):

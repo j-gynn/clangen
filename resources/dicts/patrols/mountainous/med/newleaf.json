@@ -170,53 +170,6 @@
         ]
     },
     {
-        "patrol_id": "mtn_med_gatheringbetony_newleaf1",
-        "biome": ["mountainous"],
-        "season": ["newleaf"],
-        "types": ["herb_gathering"],
-        "tags": [],
-        "patrol_art": "med_general_intro",
-        "min_cats": 1,
-        "max_cats": 1,
-        "min_max_status": {
-            "apprentice": [-1, -1],
-            "healer cats": [1, 6],
-            "normal adult": [-1, -1]
-        },
-        "weight": 20,
-        "intro_text": "The betony plants stretch outwards, racing to take advantage of the newleaf sun. It's the perfect time to harvest them, and p_l is glad for the sun on their pelt after the long winter.",
-        "decline_text": "They have second thoughts about leaving their patients behind and decide to go another day.",
-        "chance_of_success": 70,
-        "success_outcomes": [
-            {
-                "text": "While they haven't yet grown their flowers, the betony has no shortage of leaves for p_l to harvest. There's even a little goldenrod to pick up, half-hidden under the enthusiastic betony plant.",
-                "exp": 10,
-                "weight": 20,
-                "herbs": ["goldenrod", "betony"]
-            },
-            {
-                "text": "Betony is especially useful for cats who breathe with a rasp, and p_l is always keen to help Clanmates with the condition. With the great haul of betony p_l brings back, they'll be able to dose their Clanmates and prevent coughs and chest infections - and they've even found a little goldenrod to go with it!",
-                "exp": 10,
-                "weight": 5,
-                "herbs": ["many_herbs", "goldenrod", "betony"]
-            },
-            {
-                "text": "s_c is able to find the sought-after herb quickly, as they can easily pick out the shape of its leaves among the other plants, and they bring back a great haul of betony for the herb stores. They're even able to pick out a goldenrod bush on their path home.",
-                "exp": 10,
-                "weight": 20,
-                "stat_skill": ["SENSE,2"],
-                "herbs": ["many_herbs", "goldenrod", "betony"]
-            }
-        ],
-        "fail_outcomes": [
-            {
-                "text": "Hang on. Has p_l identified the betony correctly? It's difficult to tell without the distinctive purple blossoms. They're not sure, and not willing to risk it. Better to be safe than sorry.",
-                "exp": 0,
-                "weight": 20
-            }
-        ]
-    },
-    {
         "patrol_id": "mtn_med_gatheringbetony_newleaf2",
         "biome": ["mountainous"],
         "season": ["newleaf"],

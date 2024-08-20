@@ -630,7 +630,7 @@ class Patrol:
         for patrol in patrol_dict:
             weight = patrol.get("weight", 20)
             if isinstance(weight, dict):
-                weight = self.calculate_dynamic_value(weight)
+                weight = self.get_dynamic_int(weight)
                 weight = max(1, weight)
 
             patrol_event = PatrolEvent(
@@ -697,10 +697,10 @@ class Patrol:
         # Choose a success and fail outcome
         for outcome in success_outcomes:
             if isinstance(outcome.weight, dict):
-                outcome.weight = self.calculate_dynamic_value(outcome.weight)
+                outcome.weight = self.get_dynamic_int(outcome.weight)
         for outcome in fail_outcomes:
             if isinstance(outcome.weight, dict):
-                outcome.weight = self.calculate_dynamic_value(outcome.weight)
+                outcome.weight = self.get_dynamic_int(outcome.weight)
         chosen_success = choices(
             success_outcomes, weights=[x.weight for x in success_outcomes]
         )[0]
@@ -713,7 +713,10 @@ class Patrol:
         print(f"PATROL ID: {self.patrol_event.patrol_id} | SUCCESS: {success}")
 
         if isinstance(final_event.exp, dict):
-            final_event.exp = self.calculate_dynamic_value(final_event.exp)
+            final_event.exp = self.get_dynamic_int(final_event.exp)
+
+        if isinstance(final_event.herbs, dict):
+            final_event.herbs = self.get_dynamic_list(final_event.herbs)
 
         # Run the chosen outcome
         return final_event.execute_outcome(self)
@@ -734,7 +737,7 @@ class Patrol:
         )
 
         if isinstance(self.patrol_event.chance_of_success, dict):
-            base_success_chance = self.calculate_dynamic_value(
+            base_success_chance = self.get_dynamic_int(
                 self.patrol_event.chance_of_success
             )
             # constraining value to 10-85 or custom range
@@ -809,19 +812,22 @@ class Patrol:
 
         return (success_outcome if success else fail_outcome, success)
 
-    def calculate_dynamic_value(self, value_dict):
+    def get_dynamic_int(self, value_dict):
         if "base" not in value_dict:
             raise KeyError("Dict format used but no base value!")
         value = value_dict.pop("base")
 
         if (
-            "season" in value_dict
-            and game.clan.current_season.lower() in value_dict["season"]
+            "season".casefold() in value_dict
+            and game.clan.current_season.casefold() in value_dict["season"]
         ):
-            value += value_dict["season"][game.clan.current_season.lower()]
+            value += value_dict["season"][game.clan.current_season.casefold()]
 
-        if "biome" in value_dict and game.clan.biome.lower() in value_dict["biome"]:
-            value += value_dict["biome"][game.clan.biome.lower()]
+        if (
+            "biome".casefold() in value_dict
+            and game.clan.biome.casefold() in value_dict["biome"]
+        ):
+            value += value_dict["season"][game.clan.biome.casefold()]
 
         if "patrol_size" in value_dict:
             size = len(self.patrol_cats)
@@ -829,6 +835,33 @@ class Patrol:
             if patrol_size in value_dict["patrol_size"]:
                 value += value_dict["patrol_size"][patrol_size]
         return value
+
+    def get_dynamic_list(self, value_dict) -> List:
+        if "base" not in value_dict:
+            raise KeyError("Dict format used but no base value!")
+        value = set(value_dict.pop("base"))
+        blacklist = set()
+
+        size = len(self.patrol_cats)
+        for trait, check in [
+            ["season".casefold(), game.clan.current_season.casefold()],
+            ["biome".casefold(), game.clan.biome.casefold()],
+            [
+                "patrol_size".casefold(),
+                "many" if size > 4 else "some" if size > 1 else "one",
+            ],
+        ]:
+            if trait in value_dict and check in value_dict[trait]:
+                for item in value_dict[trait][check]:
+                    # if we are removing an item:
+                    if item.startswith("-"):
+                        if item[1:] in value:
+                            value.remove(item[1:])
+                        # add that item to the blacklist, so we can't re-add it
+                        blacklist.add(item[1:])
+                    elif item not in blacklist:
+                        value.add(item)
+        return list(value)
 
     def update_resources(self, biome_dir, leaf):
         resource_dir = "resources/dicts/patrols/"

@@ -3571,5 +3571,113 @@
                 ]
             }
         ]
+    },
+    {
+        "patrol_id": "gen_med_gatheringbetony_solo",
+        "biome": ["forest", "mountainous", "plains", "beach"],
+        "season": ["newleaf", "greenleaf", "leaf-fall"],
+        "types": ["herb_gathering"],
+        "tags": [],
+        "patrol_art": "med_general_intro",
+        "min_cats": 1,
+        "max_cats": 1,
+        "min_max_status": {
+            "apprentice": [-1, -1],
+            "healer cats": [1, 6],
+            "normal adult": [-1, -1]
+        },
+        "weight": 20,
+        "intro_text": "{SEASON/intro}{BIOME_SEASON/bonus}",
+        "intro_text_kwargs": {
+            "intro": {
+                "newleaf": "The betony plants stretch outwards, racing to take advantage of the newleaf sun.",
+                "greenleaf": "p_l wanders off into the territory, keeping an eye out for the purple flowers that betony grows.",
+                "leaf-fall": "As the betony plants start to dramatically give up on life as leaf-fall progresses, p_l takes the opportunity to go harvest from them.",
+                "any": "p_l heads off in search of betony."
+            },
+            "extra": {
+                "any": "",
+                "mountainous": {
+                    "newleaf": " It's the perfect time to harvest them, and p_l is glad for the sun on {PRONOUN/p_l/poss} pelt after the long winter."
+                }
+            }
+        },
+        "decline_text": "{PRONOUN/p_l/subject/CAP} {VERB/p_l/have/has} second thoughts about leaving {PRONOUN/p_l/poss} patients behind, and {VERB/p_l/decide/decides} to go another day.",
+        "chance_of_success": 70,
+        "success_outcomes": [
+            {
+                "text": "{SEASON/text}{BIOME_SEASON/bonus}",
+                "text_kwargs": {
+                    "text": {
+                        "newleaf": "While they haven't yet grown their flowers, the betony has no shortage of leaves for p_l to harvest.",
+                        "greenleaf": "The betony shrubs are in full bloom, with bees buzzing busily around them, and p_l follows their industrious example as {PRONOUN/p_l/subject} {VERB/p_l/gather/gathers}.",
+                        "leaf-fall": "The betony plants are determined to enjoy the last of the sun's warmth, reaching up cheerfully to the sky as p_l gathers their leaves."
+                    },
+                    "bonus": {
+                        "any": "",
+                        "mountainous": {
+                            "any": "",
+                            "newleaf": " There's even a little goldenrod to pick up, half-hidden under the enthusiastic betony plant.",
+                            "greenleaf": " {PRONOUN/p_l/subject/CAP} {VERB/p_l/prune/prunes} back enough betony to find a surprisingly intact goldenrod plant hidden under it, also ready for harvest.",
+                            "leaf-fall": " One of the plants is having a polite disagreement with a goldenrod bush about who gets the space in the sun, giving p_l two prey with one blow."
+                        }
+                    }
+                },
+                "exp": 10,
+                "weight": 20,
+                "herbs": {
+                    "base": ["betony"],
+                    "biome": {
+                        "mountainous": ["goldenrod"]
+                    }
+                }
+            },
+            {
+                "text": "Betony is especially useful for cats who breathe with a rasp, and p_l is always keen to help Clanmates with the condition. With the great haul of betony p_l brings back, {PRONOUN/p_l/subject}'ll be able to dose their Clanmates and prevent coughs and chest infections{BIOME/bonus}",
+                "text_kwargs": {
+                    "bonus": {
+                        "any": ".",
+                        "mountainous": " - and {PRONOUN/p_l/subject}{VERB/p_l/'ve/'s} even found a little goldenrod to go with it!"
+                    }
+                },
+                "exp": 10,
+                "weight": 5,
+                "herbs": {
+                    "base": ["many_herbs", "betony"],
+                    "biome": {
+                        "mountainous": ["goldenrod"]
+                    }
+                }
+            },
+            {
+                "text": "As ever, s_c's keen eyes pick out {PRONOUN/s_c/poss} target quickly, and {PRONOUN/s_c/subject} {VERB/s_c/bring/brings} back a great haul of betony for the herb stores. {BIOME/bonus}",
+                "text_kwargs": {
+                    "bonus": {
+                        "any": "",
+                        "mountainous": "{PRONOUN/s_c/subject/CAP}{VERB/s_c/'re/'s} even able to pick out a goldenrod bush on {PRONOUN/s_c/poss} path home."
+                    }
+                },
+                "exp": 10,
+                "weight": 20,
+                "stat_skill": ["SENSE,2"],
+                "herbs": ["many_herbs", "betony"]
+            }
+        ],
+        "fail_outcomes": [
+            {
+                "text": "{BIOME_SEASON/fail}",
+                "text_kwargs": {
+                    "fail": {
+                        "any": "Hang on. Has p_l identified the betony correctly? {PRONOUN/p_l/subject/CAP}{VERB/p_l/'re/'s} not sure, and not willing to risk it. Better to be safe than sorry.",
+                        "mountainous": {
+                            "greenleaf": "...Wait. {VERB/p_l/Have/Has} {PRONOUN/p_l/subject} passed the betony already? p_l doubles back, and while {PRONOUN/p_l/subject} {VERB/p_l/find/finds} a shrub that looks a lot like betony, it's surrounded by suspicious hoofprints and devoid of flowers. Without the blooms, p_l isn't confident in {PRONOUN/p_l/poss} identification, and returns to camp with nothing to show for {PRONOUN/p_l/poss} long trek.",
+                            "any": "Hang on. Has p_l identified the betony correctly? It's difficult to tell without the distinctive purple blossoms. {PRONOUN/p_l/subject/CAP}{VERB/p_l/'re/'s} not sure, and not willing to risk it. Better to be safe than sorry."
+                        }
+                    }
+                },
+                "exp": 0,
+                "weight": 20
+            }
+        ]
     }
 ]

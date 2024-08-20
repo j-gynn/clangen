@@ -185,51 +185,6 @@
         ]
     },
     {
-        "patrol_id": "mtn_med_gatheringbetony_greenleaf1",
-        "biome": ["mountainous"],
-        "season": ["greenleaf"],
-        "types": ["herb_gathering"],
-        "tags": [],
-        "patrol_art": "med_general_intro",
-        "min_cats": 1,
-        "max_cats": 1,
-        "min_max_status": {
-            "healer cats": [1, 6]
-        },
-        "weight": 20,
-        "intro_text": "p_l wanders off into the territory, keeping an eye out for the purple flowers that betony grows.",
-        "decline_text": "They have second thoughts about leaving their patients behind, and decide to go another day.",
-        "chance_of_success": 70,
-        "success_outcomes": [
-            {
-                "text": "The betony shrubs are in full bloom, with bees buzzing busily around them, and p_l follows their industrious example as {PRONOUN/p_l/subject} {VERB/p_l/gather/gathers}. {PRONOUN/p_l/subject/CAP} {VERB/p_l/prune/prunes} back enough betony to find a surprisingly intact goldenrod plant hidden under it, also ready for harvest.",
-                "exp": 10,
-                "weight": 20,
-                "herbs": ["goldenrod", "betony"]
-            },
-            {
-                "text": "Betony is especially useful for cats who breathe with a rasp, and p_l is always keen to help Clanmates with the condition. With the great haul of betony p_l brings back, {PRONOUN/p_l/subject}'ll be able to dose {PRONOUN/p_l/poss} Clanmates and prevent coughs and chest infections - and {PRONOUN/p_l/subject}{VERB/p_l/'ve/'s} even found a little goldenrod to go with it!",
-                "exp": 10,
-                "weight": 5,
-                "herbs": ["many_herbs", "goldenrod", "betony"]
-            },
-            {
-                "text": "s_c is able to find the sought-after herb quickly, as {PRONOUN/s_c/subject} can easily spot the purple blossoms among the other plants, and {PRONOUN/p_l/subject} {VERB/s_c/bring/brings} back a great haul of betony for the herb stores. {PRONOUN/s_c/subject/CAP}{VERB/s_c/'re/'s} even able to pick out a goldenrod bush on {PRONOUN/s_c/poss} path home.",
-                "exp": 10,
-                "weight": 20,
-                "stat_skill": ["SENSE,2"],
-                "herbs": ["many_herbs", "goldenrod", "betony"]
-            }
-        ],
-        "fail_outcomes": [
-            {
-                "text": "...Wait. {VERB/p_l/Have/Has} {PRONOUN/p_l/subject} passed the betony already? p_l doubles back, and while {PRONOUN/p_l/subject} {VERB/p_l/find/finds} a shrub that looks a lot like betony, it's surrounded by suspicious hoofprints and devoid of flowers. Without the blooms, p_l isn't confident in {PRONOUN/p_l/poss} identification, and returns to camp with nothing to show for {PRONOUN/p_l/poss} long trek.",
-                "exp": 0,
-                "weight": 20
-            }
-        ]
-    },
-    {
         "patrol_id": "mtn_med_gatheringbetony_greenleaf2",
         "biome": ["mountainous"],
         "season": ["greenleaf"],
