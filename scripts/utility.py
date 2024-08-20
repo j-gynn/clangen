@@ -1708,7 +1708,7 @@ def name_repl(m, cat_dict):
 def attr_repl(text, text_kwargs, raise_exception=False, *, cat_count=0, patrol=False):
     values = text.group(1).split("/")
     if values[0].upper() == "PRONOUN" or values[0].upper() == "VERB":
-        return text  # this is a pronoun tag and should be ignored
+        return text.match  # this is a pronoun tag and should be ignored
 
     # handling multi-type attributes
     if "_" in values[0]:
@@ -1779,13 +1779,17 @@ def attr_repl(text, text_kwargs, raise_exception=False, *, cat_count=0, patrol=F
         return "error6_typeerror"
 
 
-def process_text(text, cat_dict, text_kwargs=None, raise_exception=False, cat_count=0):
+def process_text(
+    text, cat_dict, text_kwargs=None, raise_exception=False, cat_count=0, patrol=False
+):
     """Add the correct name and pronouns into a string."""
 
     if text_kwargs is not None:
         adjust_text = re.sub(
             r"\{(.*?)}",
-            lambda x: attr_repl(x, text_kwargs, raise_exception, cat_count=cat_count),
+            lambda x: attr_repl(
+                x, text_kwargs, raise_exception, cat_count=cat_count, patrol=patrol
+            ),
             text,
         )
     else:
@@ -2078,6 +2082,10 @@ def event_text_adjust(
 
     replace_dict = {}
 
+    # runs the text kwargs part
+    if text_kwargs:
+        text = process_text(text, None, text_kwargs=text_kwargs)
+
     # main_cat
     if "m_c" in text:
         replace_dict["m_c"] = (str(main_cat.name), choice(main_cat.pronouns))
@@ -2156,7 +2164,7 @@ def event_text_adjust(
 
     # assign all names and pronouns
     if replace_dict or text_kwargs:
-        text = process_text(text, replace_dict, text_kwargs=text_kwargs)
+        text = process_text(text, replace_dict)
 
     # multi_cat
     if "multi_cat" in text:

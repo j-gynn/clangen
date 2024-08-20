@@ -3587,7 +3587,7 @@
             "normal adult": [-1, -1]
         },
         "weight": 20,
-        "intro_text": "{SEASON/intro}{BIOME_SEASON/bonus}",
+        "intro_text": "{SEASON/intro}{BIOME_SEASON/extra}",
         "intro_text_kwargs": {
             "intro": {
                 "newleaf": "The betony plants stretch outwards, racing to take advantage of the newleaf sun.",

@@ -1153,7 +1153,7 @@ class Patrol:
         if stat_cat:
             replace_dict["s_c"] = (str(stat_cat.name), choice(stat_cat.pronouns))
 
-        text = process_text(text, replace_dict, text_kwargs=text_kwargs)
+        text = process_text(text, replace_dict, text_kwargs=text_kwargs, patrol=True)
         text = adjust_prey_abbr(text)
 
         other_clan_name = self.other_clan.name
