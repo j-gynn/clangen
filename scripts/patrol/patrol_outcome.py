@@ -21,7 +21,7 @@ from scripts.utility import (
     unpack_rel_block,
     event_text_adjust,
     create_new_cat_block,
-    gather_cat_objects
+    gather_cat_objects,
 )
 from scripts.game_structure.game_essentials import game
 from scripts.cat.skills import SkillPath
@@ -45,6 +45,7 @@ class PatrolOutcome:
         success: bool = True,
         antagonize: bool = False,
         text: str = None,
+        text_kwargs: Dict = None,
         weight: int = 20,
         exp: int = 0,
         stat_trait: List[str] = None,
@@ -67,10 +68,10 @@ class PatrolOutcome:
         outcome_art_clean: Union[str, None] = None,
         stat_cat: Cat = None,
     ):
-
         self.success = success
         self.antagonize = antagonize
         self.text = text if text is not None else ""
+        self.text_kwargs = text_kwargs if text_kwargs is not None else {}
         self.weight = weight
         self.exp = exp
         self.stat_trait = stat_trait if stat_trait is not None else []
@@ -121,7 +122,6 @@ class PatrolOutcome:
         reg_outcomes = []
         special_outcomes = []
         for out in outcomes:
-
             # We want to gather special (ie, gated with stat or relationship constaints)
             # outcomes seperatly, so we can ensure that those occur if possible.
             special = False
@@ -171,6 +171,7 @@ class PatrolOutcome:
                     success=success,
                     antagonize=antagonize,
                     text=_d.get("text"),
+                    text_kwargs=_d.get("text_kwargs", {}),
                     weight=_d.get("weight"),
                     exp=_d.get("exp"),
                     stat_skill=_d.get("stat_skill"),
@@ -217,22 +218,29 @@ class PatrolOutcome:
         results = [self._handle_new_cats(patrol)]
 
         # the text has to be processed before - otherwise leader might be referenced with their warrior name
-        processed_text = event_text_adjust(Cat,
-                                           self.text,
-                                           patrol_leader=patrol.patrol_leader,
-                                           random_cat=patrol.random_cat,
-                                           stat_cat=self.stat_cat,
-                                           patrol_cats=patrol.patrol_cats,
-                                           patrol_apprentices=patrol.patrol_apprentices,
-                                           new_cats=patrol.new_cats,
-                                           clan=game.clan,
-                                           other_clan=patrol.other_clan)
+        processed_text = event_text_adjust(
+            Cat,
+            self.text,
+            patrol_leader=patrol.patrol_leader,
+            random_cat=patrol.random_cat,
+            stat_cat=self.stat_cat,
+            patrol_cats=patrol.patrol_cats,
+            patrol_apprentices=patrol.patrol_apprentices,
+            new_cats=patrol.new_cats,
+            clan=game.clan,
+            other_clan=patrol.other_clan,
+            text_kwargs=self.text_kwargs,
+        )
 
-        # This order is important. 
+        # This order is important.
         results.append(self._handle_death(patrol))
         results.append(self._handle_lost(patrol))
         results.append(self._handle_condition_and_scars(patrol))
-        results.append(unpack_rel_block(Cat, self.relationship_effects, patrol, stat_cat=self.stat_cat))
+        results.append(
+            unpack_rel_block(
+                Cat, self.relationship_effects, patrol, stat_cat=self.stat_cat
+            )
+        )
         results.append(self._handle_rep_changes())
         results.append(self._handle_other_clan_relations(patrol))
         results.append(self._handle_prey(patrol))
@@ -247,8 +255,10 @@ class PatrolOutcome:
 
         return processed_text, " ".join(results), self.get_outcome_art()
 
-    def _allowed_stat_cat_specific(self, kitty: Cat, patrol: 'Patrol', allowed_specific) -> bool:
-        """Helper that handled specific stat cat requirements. """
+    def _allowed_stat_cat_specific(
+        self, kitty: Cat, patrol: "Patrol", allowed_specific
+    ) -> bool:
+        """Helper that handled specific stat cat requirements."""
 
         if "any" in allowed_specific:
             # Special allowed_specific that allows all.
@@ -413,8 +423,8 @@ class PatrolOutcome:
 
         return ""
 
-    def _handle_death(self, patrol: 'Patrol') -> str:
-        """Handle killing cats """
+    def _handle_death(self, patrol: "Patrol") -> str:
+        """Handle killing cats"""
 
         if not self.dead_cats:
             return ""
@@ -422,7 +432,9 @@ class PatrolOutcome:
         # body_tags = ("body", "no_body")
         # leader_lives = ("all_lives", "some_lives")
 
-        cats_to_kill = gather_cat_objects(Cat, self.dead_cats, patrol, stat_cat=self.stat_cat)
+        cats_to_kill = gather_cat_objects(
+            Cat, self.dead_cats, patrol, stat_cat=self.stat_cat
+        )
 
         if not cats_to_kill:
             print(
@@ -465,7 +477,9 @@ class PatrolOutcome:
         if not self.lost_cats:
             return ""
 
-        cats_to_lose = gather_cat_objects(Cat, self.lost_cats, patrol, stat_cat=self.stat_cat)
+        cats_to_lose = gather_cat_objects(
+            Cat, self.lost_cats, patrol, stat_cat=self.stat_cat
+        )
 
         if not cats_to_lose:
             print(
@@ -526,15 +540,21 @@ class PatrolOutcome:
                 old_illnesses = list(_cat.illnesses.keys())
                 old_perm_cond = list(_cat.permanent_condition.keys())
 
-                if set(possible_injuries).issubset(old_injuries + old_illnesses + old_perm_cond):
-                    print("WARNING: All possible conditions are already on this cat! (poor kitty)")
+                if set(possible_injuries).issubset(
+                    old_injuries + old_illnesses + old_perm_cond
+                ):
+                    print(
+                        "WARNING: All possible conditions are already on this cat! (poor kitty)"
+                    )
                     continue
 
                 give_injury = choice(possible_injuries)
                 # If the cat already has this injury, reroll it to get something new
-                while give_injury in old_injuries \
-                        or give_injury in old_illnesses \
-                        or give_injury in old_perm_cond:
+                while (
+                    give_injury in old_injuries
+                    or give_injury in old_illnesses
+                    or give_injury in old_perm_cond
+                ):
                     give_injury = choice(possible_injuries)
 
                 if give_injury in INJURIES:
@@ -569,12 +589,14 @@ class PatrolOutcome:
                     results.append(f"{_cat.name} got: {combined_conditions}.")
                 else:
                     # If no results are shown, assume the cat didn't get the patrol history. Default override.
-                    self.__handle_condition_history(_cat, give_injury, patrol, default_overide=True)
+                    self.__handle_condition_history(
+                        _cat, give_injury, patrol, default_overide=True
+                    )
 
         return " ".join(results)
 
     def _handle_rep_changes(self) -> str:
-        """ Handles any changes in outsider rep"""
+        """Handles any changes in outsider rep"""
 
         if not isinstance(self.outsider_rep, int):
             return ""
@@ -758,8 +780,11 @@ class PatrolOutcome:
             in_event_cats["s_c"] = self.stat_cat
 
         for i, attribute_list in enumerate(self.new_cat):
-
-            patrol.new_cats.append(create_new_cat_block(Cat, Relationship, patrol, in_event_cats, i, attribute_list))
+            patrol.new_cats.append(
+                create_new_cat_block(
+                    Cat, Relationship, patrol, in_event_cats, i, attribute_list
+                )
+            )
 
             for cat in patrol.new_cats[-1]:
                 if cat.dead:
@@ -777,17 +802,22 @@ class PatrolOutcome:
             if sub[0].moons < 3:
                 # Search for parent
                 for sub_sub in patrol.new_cats:
-                    if sub_sub[0] != sub[0] and (
-                            sub_sub[0].gender == "female" or game.clan.clan_settings['same sex birth']) \
-                            and sub_sub[0].ID in (sub[0].parent1, sub[0].parent2) and not (
-                            sub_sub[0].dead or sub_sub[0].outside):
+                    if (
+                        sub_sub[0] != sub[0]
+                        and (
+                            sub_sub[0].gender == "female"
+                            or game.clan.clan_settings["same sex birth"]
+                        )
+                        and sub_sub[0].ID in (sub[0].parent1, sub[0].parent2)
+                        and not (sub_sub[0].dead or sub_sub[0].outside)
+                    ):
                         sub_sub[0].get_injured("recovering from birth")
                         break  # Break - only one parent ever gives birth
 
         return " ".join(results)
 
-    def _handle_mentor_app(self, patrol: 'Patrol') -> str:
-        """Handles mentor inflence on apprentices """
+    def _handle_mentor_app(self, patrol: "Patrol") -> str:
+        """Handles mentor inflence on apprentices"""
 
         for cat in patrol.patrol_cats:
             if Cat.fetch_cat(cat.mentor) in patrol.patrol_cats:

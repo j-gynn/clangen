@@ -2175,6 +2175,438 @@
                 ]
             }
         ]
-
+    },
+    {
+        "patrol_id": "multi_bord_rogue_sizemany",
+        "biome": ["forest", "plain", "mountainous", "beach"],
+        "season": ["any"],
+        "types": ["border"],
+        "tags": [],
+        "patrol_art": "bord_general_intro",
+        "min_cats": 4,
+        "max_cats": 6,
+        "min_max_status": {},
+        "weight": 20,
+        "intro_text": "As the patrol is marking the border lines, a gang of rogues {BIOME/hiding_spot}! An ambush!",
+        "intro_text_kwargs": {
+            "hiding_spot": {
+                "mountainous": "leaps out from behind a tumble of rocks",
+                "forest": "bursts from the bushes",
+                "plains": "bursts from the long grass",
+                "beach": "bursts from the beach grass",
+                "any": "bursts from behind cover"
+            }
+        },
+        "decline_text": "The patrol turns tail and races away! The borders are left open for the rogues to muddy.",
+        "chance_of_success": {
+            "base": 10,
+            "biome": {
+                "mountainous": 10,
+                "forest": 20
+            }
+        },
+        "success_outcomes": [
+            {
+                "text": "The patrol descends into battle without a second thought, {BIOME/terrain}.",
+                "text_kwargs": {
+                    "terrain": {
+                        "mountainous": "easily driving the rogues away as they use their knowledge of the rocky terrain to their advantage",
+                        "any": "eventually driving the rogues away"
+                    }
+                },
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "mountainous": 5,
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["platonic", "trust"],
+                        "amount": 5
+                    }
+                ]
+            },
+            {
+                "text": "s_c immediately leaps to protect their Clanmates. {PRONOUN/s_c/poss/CAP} ferocity in battle terrifies the rogues. Realizing that they've sorely underestimated the Clan cats, the rogues turn tail and run.",
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "stat_skill": ["FIGHTER,2"],
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["platonic", "respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            },
+            {
+                "text": "s_c revels in the battle, leaping into the fray with {PRONOUN/s_c/poss} teeth bared and claws unsheathed. The rogues are quickly driven away by the patrol.",
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "stat_trait": ["bloodthirsty", "fierce", "vengeful"],
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["platonic", "respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            }
+        ],
+        "fail_outcomes": [
+            {
+                "text": "The rogues are terrifyingly coordinated and use the patrol's shock and confusion against them. The patrol cats are picked off one by one, and only a couple manage to escape the slaughter.",
+                "exp": 0,
+                "weight": 10,
+                "dead_cats": ["multi"],
+                "history_text": {
+                    "scar": "m_c was badly scarred when rogues ambushed {PRONOUN/m_c/poss} patrol.",
+                    "reg_death": "This cat was killed when rogues ambushed {PRONOUN/m_c/poss} patrol.",
+                    "lead_death": "{VERB/m_c/were/was} killed in a rogue ambush"
+                },
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["comfort", "trust"],
+                        "amount": -5
+                    }
+                ]
+            },
+            {
+                "text": "Taken by surprise, the patrol scatters and loses cohesion. The rogues are quick to take advantage of the confusion, and eventually the patrol retreats, r_c badly wounded.",
+                "exp": 0,
+                "weight": 10,
+                "injury": [
+                    {
+                        "cats": ["r_c"],
+                        "injuries": ["battle_injury"],
+                        "scars": ["FACE", "CATBITE", "THROAT", "RIGHTBLIND"]
+                    }
+                ],
+                "history_text": {
+                    "scar": "m_c was badly scarred when rogues ambushed {PRONOUN/m_c/poss} patrol.",
+                    "reg_death": "This cat was killed when rogues ambushed {PRONOUN/m_c/poss} patrol.",
+                    "lead_death": "{VERB/m_c/were/was} killed in a rogue ambush"
+                }
+            }
+        ]
+    },
+    {
+        "patrol_id": "multi_bord_rogue_sizeone",
+        "biome": ["beach", "forest", "mountainous", "plains"],
+        "season": ["any"],
+        "types": ["border"],
+        "tags": [],
+        "patrol_art": "bord_general_intro",
+        "min_cats": 1,
+        "max_cats": 1,
+        "min_max_status": {},
+        "weight": 20,
+        "intro_text": "As r_c is marking the border lines, a gang of rogues {BIOME/hiding_spot}! An ambush!",
+        "intro_text_kwargs": {
+            "hiding_spot": {
+                "mountainous": "leaps out from behind a tumble of rocks",
+                "forest": "bursts from the bushes",
+                "plains": "bursts from the long grass",
+                "beach": "bursts from the beach grass"
+            }
+        },
+        "decline_text": "r_c turns tail and races away! The rogues have {PRONOUN/r_c/object} far outnumbered; warning the Clan is more important than playing the hero.",
+        "chance_of_success": {
+            "base": 10,
+            "biome": {
+                "mountainous": 20,
+                "forest": 10
+            }
+        },
+        "success_outcomes": [
+            {
+                "text": "Stunned for a moment, r_c is nearly caught in the teeth of the first rogue, but {BIOME/terrain} to dodge and weave through the onslaught of attacks, eventually escaping the fray and pelting towards camp with yowls of warning bursting from {PRONOUN/r_c/poss} lungs.",
+                "text_kwargs": {
+                    "any": "{PRONOUN/r_c/subject} {VERB/r_c/manage/manages}",
+                    "mountainous": "{PRONOUN/r_c/subject} {VERB/r_c/use/uses} {PRONOUN/r_c/poss} superior knowledge of the rocky terrain"
+                },
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "relationships": [
+                    {
+                        "cats_to": ["r_c"],
+                        "cats_from": ["clan"],
+                        "mutual": false,
+                        "values": ["trust", "respect"],
+                        "amount": 15
+                    }
+                ]
+            },
+            {
+                "text": "s_c snarls at the rogues, outnumbered but not cowed. {PRONOUN/s_c/subject/CAP} {VERB/s_c/throw/throws} {PRONOUN/s_c/self} at the intruders with such ferocity that the rogues are taken aback. Alarmed by the Clan cat's lack of fear and self-preservation, the rogues freeze. s_c sees {PRONOUN/s_c/poss} opportunity to run and takes it, racing back to the camp to gather more warriors and return.",
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "stat_skill": ["FIGHTER,3"],
+                "relationships": [
+                    {
+                        "cats_to": ["s_c"],
+                        "cats_from": ["clan"],
+                        "mutual": false,
+                        "values": ["trust", "respect"],
+                        "amount": 15
+                    }
+                ]
+            }
+        ],
+        "fail_outcomes": [
+            {
+                "text": "s_c snarls at the rogues, outnumbered but not cowed. {PRONOUN/s_c/subject/CAP} {VERB/s_c/throw/throws} {PRONOUN/s_c/self} at the intruders with such ferocity that the rogues are taken aback. The shock only lasts a moment before they descend on the warrior once more. Eventually, s_c has no choice but to escape before {PRONOUN/s_c/subject}{VERB/s_c/'re/'s} killed.",
+                "exp": 0,
+                "weight": 20,
+                "stat_trait": ["bloodthirsty", "fierce", "vengeful"],
+                "relationships": [
+                    {
+                        "cats_to": ["s_c"],
+                        "cats_from": ["clan"],
+                        "mutual": false,
+                        "values": ["trust", "respect"],
+                        "amount": 15
+                    }
+                ]
+            },
+            {
+                "text": "The rogues greatly outnumber r_c and have no trouble killing the lone cat. {PRONOUN/r_c/poss/CAP} body is discovered the next day, covered in wounds and cold.",
+                "exp": 0,
+                "weight": 10,
+                "dead_cats": ["r_c"],
+                "history_text": {
+                    "reg_death": "This cat was killed when rogues ambushed {PRONOUN/m_c/object} while on a solo patrol.",
+                    "lead_death": "{VERB/m_c/were/was} killed in a rogue ambush"
+                },
+                "relationships": [
+                    {
+                        "cats_to": ["r_c"],
+                        "cats_from": ["clan"],
+                        "mutual": false,
+                        "values": ["trust", "respect"],
+                        "amount": 15
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "patrol_id": "multi_bord_roguetaunt",
+        "biome": ["beach", "forest", "mountainous", "plains"],
+        "season": ["any"],
+        "types": ["border"],
+        "tags": [],
+        "patrol_art": "bord_general_intro",
+        "min_cats": 4,
+        "max_cats": 6,
+        "min_max_status": {},
+        "weight": 20,
+        "intro_text": "As the patrol is marking the border lines, a gang of rogues {BIOME/intro}",
+        "intro_text_kwargs": {
+            "intro": {
+                "beach": "stalk out of the beach grass to confront the Clan cats!",
+                "forest": "stride out of the brush, challenging the Clan cats.",
+                "mountainous": "stride confidently out from behind a tumble of rocks, yowling as they confront the Clan cats!",
+                "plains": "stride out of the long grass to confront the Clan cats!",
+                "any": "stalk towards the Clan cats to confront them."
+            }
+        },
+        "decline_text": "The patrol turns tail and races away! The borders are left open for the rogues to muddy.",
+        "chance_of_success": {
+            "base": 10,
+            "biome": {
+                "mountainous": 10,
+                "forest": 20
+            }
+        },
+        "success_outcomes": [
+            {
+                "text": "The rogues posture and jeer, eventually provoking a battle. The Clan cats are strong, however, and the rogues seem to be weakened by hunger. The patrol easily drives the intruders away.",
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 20,
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            },
+            {
+                "text": "The rogues posture and jeer, eventually provoking a battle. However, the Clan cats are strong {BIOME/terrain} a short fight, the rogues are forced to retreat.",
+                "text_kwargs": {
+                    "terrain": {
+                        "mountainous": "and experienced at using the rocky terrain to their advantage. After",
+                        "any": "and after"
+                    }
+                },
+                "exp": {
+                    "base": 30,
+                    "biome": {
+                        "forest": -10
+                    }
+                },
+                "weight": 5,
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            },
+            {
+                "text": "s_c takes the lead, confronting the gang with confidence. Eventually, the rogues admit that they've been struggling to find enough prey and were looking to steal richer territory from the Clan. Tensions are eased when s_c informs the rogues of a prey-rich {BIOME/location} outside of c_n territory.",
+                "text_kwargs": {
+                    "location": {
+                        "plains": "forest",
+                        "mountainous": "meadow",
+                        "forest": "plains",
+                        "beach": "forest",
+                        "any": "spot"
+                    }
+                },
+                "exp": 30,
+                "weight": 20,
+                "stat_skill": ["SPEAKER,1"],
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            },
+            {
+                "text": "s_c takes the lead, confronting the gang with confidence. Eventually, the rogues admit that they've been struggling to find enough prey and were looking to steal richer territory from the Clan. Tensions are eased when s_c informs the rogues of a prey-rich {BIOME/location} outside of c_n territory.",
+                "text_kwargs": {
+                    "location": {
+                        "plains": "forest",
+                        "mountainous": "meadow",
+                        "forest": "plains",
+                        "beach": "forest",
+                        "any": "spot"
+                    }
+                },
+                "exp": 30,
+                "weight": 20,
+                "stat_trait": ["bold", "confident", "charming"],
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": 5
+                    }
+                ]
+            }
+        ],
+        "fail_outcomes": [
+            {
+                "text": "The rogues are terrifyingly coordinated and use the patrol's momentary surprise to their advantage. The patrol cats are picked off one by one, and only a couple manage to escape the slaughter.",
+                "exp": 0,
+                "weight": 10,
+                "dead_cats": ["multi"],
+                "history_text": {
+                    "scar": "m_c was badly scarred when rogues attacked {PRONOUN/m_c/poss} patrol.",
+                    "reg_death": "This cat was killed when rogues attacked {PRONOUN/m_c/poss} patrol.",
+                    "lead_death": "killed in a rogue ambush"
+                },
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": -5
+                    }
+                ]
+            },
+            {
+                "text": "The rogues posture and jeer, eventually provoking a battle. They prove to be strong fighters, and r_c is badly injured, forcing the patrol to retreat.",
+                "exp": 0,
+                "weight": 10,
+                "injury": [
+                    {
+                        "cats": ["r_c"],
+                        "injuries": ["battle_injury"],
+                        "scars": ["CATBITE"]
+                    }
+                ],
+                "history_text": {
+                    "scar": "m_c was badly scarred when rogues attacked {PRONOUN/m_c/poss} patrol.",
+                    "reg_death": "This cat was killed when rogues attacked {PRONOUN/m_c/poss} patrol.",
+                    "lead_death": "killed in a rogue ambush"
+                },
+                "relationships": [
+                    {
+                        "cats_to": ["patrol"],
+                        "cats_from": ["patrol"],
+                        "mutual": false,
+                        "values": ["respect", "trust"],
+                        "amount": -5
+                    }
+                ]
+            }
+        ],
+        "antag_fail_outcomes": [
+            {
+                "text": "The patrol descends into battle without a second thought, but the rogues are stronger than expected, and eventually the patrol is forced to retreat.",
+                "exp": 0,
+                "weight": 20
+            }
+        ],
+        "antag_success_outcomes": [
+            {
+                "text": "The patrol descends into battle without a second thought, eventually driving the rogues away.",
+                "exp": 30,
+                "weight": 20
+            }
+        ]
     }
 ]

@@ -821,7 +821,7 @@ class Patrol:
             value += value_dict["season"][game.clan.current_season.lower()]
 
         if "biome" in value_dict and game.clan.biome.lower() in value_dict["biome"]:
-            value += value_dict["season"][game.clan.biome.lower()]
+            value += value_dict["biome"][game.clan.biome.lower()]
 
         if "patrol_size" in value_dict:
             size = len(self.patrol_cats)

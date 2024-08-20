@@ -1742,7 +1742,7 @@ def attr_repl(text, text_kwargs, raise_exception=False, *, cat_count=0, patrol=F
         return "error4_missing_id_in_kwargs"
 
     if "any" not in output:
-        print("WARNING: no default key detected. Ensure 'any' is present.")
+        print(f"WARNING: no default key detected for {text}. This may not be an error.")
 
     for key in keys:
         if key in output:
@@ -1766,14 +1766,17 @@ def process_text(text, cat_dict, text_kwargs=None, raise_exception=False, cat_co
     else:
         adjust_text = text
 
-    adjust_text = re.sub(
-        r"\{(.*?)}", lambda x: pronoun_repl(x, cat_dict, raise_exception), adjust_text
-    )
+    if cat_dict:
+        adjust_text = re.sub(
+            r"\{(.*?)}",
+            lambda x: pronoun_repl(x, cat_dict, raise_exception),
+            adjust_text,
+        )
 
-    name_patterns = [r"(?<!\{)" + re.escape(l) + r"(?!\})" for l in cat_dict]
-    adjust_text = re.sub(
-        "|".join(name_patterns), lambda x: name_repl(x, cat_dict), adjust_text
-    )
+        name_patterns = [r"(?<!\{)" + re.escape(l) + r"(?!\})" for l in cat_dict]
+        adjust_text = re.sub(
+            "|".join(name_patterns), lambda x: name_repl(x, cat_dict), adjust_text
+        )
     return adjust_text
 
 
