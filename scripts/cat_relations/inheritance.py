@@ -161,40 +161,26 @@ class Inheritance:
         info = {
             "additional": [],
             "type": [],
+            "ids": {},
         }
-        if cat_id in self.parents:
-            info["type"].append(self.parents[cat_id]["type"])
-            info["additional"].extend(self.parents[cat_id]["additional"])
-        if cat_id in self.kits:
-            info["type"].append(self.kits[cat_id]["type"])
-            info["additional"].extend(self.kits[cat_id]["additional"])
-        if cat_id in self.siblings:
-            info["type"].append(self.siblings[cat_id]["type"])
-            info["additional"].extend(self.siblings[cat_id]["additional"])
-        if cat_id in self.parents_siblings:
-            info["type"].append(self.parents_siblings[cat_id]["type"])
-            info["additional"].extend(self.parents_siblings[cat_id]["additional"])
-        if cat_id in self.cousins:
-            info["type"].append(self.cousins[cat_id]["type"])
-            info["additional"].extend(self.cousins[cat_id]["additional"])
-        if cat_id in self.grand_parents:
-            info["type"].append(self.grand_parents[cat_id]["type"])
-            info["additional"].extend(self.grand_parents[cat_id]["additional"])
-        if cat_id in self.grand_kits:
-            info["type"].append(self.grand_kits[cat_id]["type"])
-            info["additional"].extend(self.grand_kits[cat_id]["additional"])
-        if cat_id in self.siblings_kits:
-            info["type"].append(self.siblings_kits[cat_id]["type"])
-            info["additional"].extend(self.siblings_kits[cat_id]["additional"])
-        if cat_id in self.siblings_mates:
-            info["type"].append(self.siblings_mates[cat_id]["type"])
-            info["additional"].extend(self.siblings_mates[cat_id]["additional"])
-        if cat_id in self.kits_mates:
-            info["type"].append(self.kits_mates[cat_id]["type"])
-            info["additional"].extend(self.kits_mates[cat_id]["additional"])
-        if cat_id in self.mates:
-            info["type"].append(self.mates[cat_id]["type"])
-            info["additional"].extend(self.mates[cat_id]["additional"])
+        for relation in [
+            self.parents,
+            self.kits,
+            self.siblings,
+            self.parents_siblings,
+            self.cousins,
+            self.grand_parents,
+            self.grand_kits,
+            self.siblings_kits,
+            self.siblings_mates,
+            self.kits_mates,
+            self.mates,
+        ]:
+            if cat_id in relation:
+                info["type"].append(relation[cat_id]["type"])
+                info["additional"].extend(relation[cat_id]["additional"])
+                if "ids" in relation[cat_id]:
+                    info["ids"][relation[cat_id]["type"]] = relation[cat_id]["ids"]
         return info
 
     def remove_parent(self, cat):
