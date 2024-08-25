@@ -150,7 +150,7 @@ class Game:
 
     debug_settings = {
         "showcoords": False,
-        "showbounds": False,
+        "showbounds": True,
         "visualdebugmode": False,
         "showfps": False,
     }
@@ -444,7 +444,6 @@ class Game:
 
         copy_of_info = ""
         for cat in game.cat_to_fade:
-
             inter_cat = self.cat_class.all_cats[cat]
 
             # Add ID to list of faded cats.
@@ -489,7 +488,6 @@ class Game:
             with open(
                 get_save_dir() + "/" + clanname + "/faded_cats_info_copy.txt", "a"
             ) as write_file:
-
                 if not os.path.exists(
                     get_save_dir() + "/" + clanname + "/faded_cats_info_copy.txt"
                 ):

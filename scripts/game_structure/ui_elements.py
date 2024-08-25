@@ -1,11 +1,16 @@
 import html
 from functools import lru_cache
 from math import ceil
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Union, Dict, Iterable, Callable
 
 import pygame
 import pygame_gui
-from pygame_gui.core import UIContainer
+from pygame_gui import (
+    UI_BUTTON_PRESSED,
+    UI_BUTTON_DOUBLE_CLICKED,
+    UI_BUTTON_START_PRESS,
+)
+from pygame_gui.core import UIContainer, IContainerLikeInterface, UIElement, ObjectID
 from pygame_gui.core.gui_type_hints import RectLike, Coordinate
 from pygame_gui.core.interfaces import IUIManagerInterface
 from pygame_gui.core.text.html_parser import HTMLParser
@@ -14,13 +19,80 @@ from pygame_gui.core.utility import translate
 from pygame_gui.elements import UIAutoResizingContainer
 
 from scripts.game_structure import image_cache
-from scripts.game_structure.game_essentials import game
+from scripts.game_structure.game_essentials import game, screen
 from scripts.utility import scale, shorten_text_to_fit
 
 
 class UIImageButton(pygame_gui.elements.UIButton):
     """Subclass of pygame_gui's button class. This allows for auto-scaling of the
     button image."""
+
+    def __init__(
+        self,
+        relative_rect: Union[RectLike, Coordinate],
+        text: str,
+        manager: Optional[IUIManagerInterface] = None,
+        container: Optional[IContainerLikeInterface] = None,
+        tool_tip_text: Union[str, None] = None,
+        starting_height: int = 1,
+        parent_element: UIElement = None,
+        object_id: Union[ObjectID, str, None] = None,
+        anchors: Dict[str, Union[str, UIElement]] = None,
+        allow_double_clicks: bool = False,
+        generate_click_events_from: Iterable[int] = frozenset([pygame.BUTTON_LEFT]),
+        visible: int = 1,
+        mask: Union[pygame.Mask, pygame.Surface, None] = None,
+        mask_padding: int = 2,
+        *,
+        command: Union[Callable, Dict[int, Callable]] = None,
+        tool_tip_object_id: Optional[ObjectID] = None,
+        text_kwargs: Optional[Dict[str, str]] = None,
+        tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
+        max_dynamic_width: Optional[int] = None,
+    ):
+        self.mask_padding = mask_padding if mask_padding is not None else 0
+        super().__init__(
+            relative_rect,
+            text,
+            manager,
+            container,
+            tool_tip_text,
+            starting_height,
+            parent_element,
+            object_id,
+            anchors,
+            allow_double_clicks,
+            generate_click_events_from,
+            visible,
+            command=command,
+            tool_tip_object_id=tool_tip_object_id,
+            text_kwargs=text_kwargs,
+            tool_tip_text_kwargs=tool_tip_text_kwargs,
+            max_dynamic_width=max_dynamic_width,
+        )
+
+        self._mask = None
+        self.mask = mask
+
+    @property
+    def mask(self):
+        return self._mask
+
+    @mask.setter
+    def mask(self, val: Union[pygame.Mask, pygame.Surface, None]):
+        if not isinstance(val, pygame.Mask | pygame.Surface | None):
+            return
+        if val is not None:
+            if isinstance(val, pygame.Surface):
+                val = pygame.mask.from_surface(val, threshold=250)
+
+            size = val.get_size()
+            val.scale(
+                (size[0] + self.mask_padding * 2, size[1] + self.mask_padding * 2)
+            )
+            self._mask = val
+        else:
+            self._mask = None
 
     def _set_any_images_from_theme(self):
         changed = False
@@ -32,6 +104,7 @@ class UIImageButton(pygame_gui.elements.UIButton):
             normal_image = pygame.transform.scale(
                 normal_image, self.relative_rect.size
             )  # auto-rescale the image
+            self.mask = normal_image
         except LookupError:
             normal_image = None
         finally:
@@ -89,6 +162,36 @@ class UIImageButton(pygame_gui.elements.UIButton):
 
         return changed
 
+    def hover_point(self, hover_x: int, hover_y: int) -> bool:
+        # if not self.rect.collidepoint((hover_x, hover_y)):
+        #     return False
+        pos_in_mask = (
+            hover_x - self.rect.x,
+            hover_y - self.rect.y,
+        )
+        if self.mask is None:
+            return self.rect.collidepoint((hover_x, hover_y))
+        if (
+            0 <= pos_in_mask[0] < self.mask.get_size()[0]
+            and 0 <= pos_in_mask[1] < self.mask.get_size()[1]
+        ):
+            return (
+                bool(self.mask.get_at(pos_in_mask))
+                if self.mask is not None
+                else self.rect.collidepoint((hover_x, hover_y))
+            )
+
+    def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
+        hover = super().check_hover(time_delta, hovered_higher_element)
+        if game.debug_settings["showbounds"] and self.mask is not None:
+            olist = self.mask.outline()
+            olist = [(x + self.rect[0], y + self.rect[1]) for x, y in olist]
+            if hover:
+                pygame.draw.lines(screen, (0, 255, 0), True, olist, width=4)
+            # else:
+            #     pygame.draw.lines(screen, (255, 0, 0), True, olist, width=4)
+        return hover
+
 
 class UIModifiedScrollingContainer(pygame_gui.elements.UIScrollingContainer):
     def __init__(
@@ -102,7 +205,6 @@ class UIModifiedScrollingContainer(pygame_gui.elements.UIScrollingContainer):
         allow_scroll_x: bool = False,
         allow_scroll_y: bool = False,
     ):
-
         super().__init__(
             relative_rect=relative_rect,
             manager=manager,
@@ -269,7 +371,6 @@ class UIImageVerticalScrollBar(pygame_gui.elements.UIVerticalScrollBar):
         visible: int = 1,
         starting_height: int = 1,
     ):
-
         super().__init__(
             relative_rect=relative_rect,
             visible_percentage=visible_percentage,
@@ -370,8 +471,8 @@ class UISpriteButton:
         object_id=None,
         tool_tip_text=None,
         anchors=None,
+        mask_padding=None,
     ):
-
         # We have to scale the image before putting it into the image object. Otherwise, the method of upscaling that
         # UIImage uses will make the pixel art fuzzy
         self.image = pygame_gui.elements.UIImage(
@@ -398,6 +499,8 @@ class UISpriteButton:
             tool_tip_text=tool_tip_text,
             container=container,
             anchors=anchors,
+            mask=self.image.image,
+            mask_padding=mask_padding,
         )
 
     def return_cat_id(self):
@@ -461,9 +564,12 @@ class CatButton(UIImageButton):
         tool_tip_text=None,
         container=None,
         anchors=None,
+        mask=None,
+        mask_padding=None,
     ):
         self.cat_id = cat_id
         self.cat_object = cat_object
+
         super().__init__(
             relative_rect,
             text,
@@ -475,7 +581,9 @@ class CatButton(UIImageButton):
             tool_tip_text=tool_tip_text,
             container=container,
             anchors=anchors,
-            allow_double_clicks=True
+            allow_double_clicks=True,
+            mask=mask,
+            mask_padding=mask_padding,
         )
 
     def return_cat_id(self):
@@ -511,7 +619,6 @@ class UITextBoxTweaked(pygame_gui.elements.UITextBox):
         text_kwargs=None,
         allow_split_dashes: bool = True,
     ):
-
         self.line_spaceing = line_spacing
 
         super().__init__(
@@ -598,7 +705,6 @@ class UIRelationStatusBar:
         manager=None,
         style="bars",
     ):
-
         # Change the color of the bar depending on the value and if it's a negative or positive trait
         if percent_full > 49:
             if positive_trait:
@@ -658,7 +764,6 @@ class IDImageButton(UIImageButton):
         manager=None,
         layer_starting_height=1,
     ):
-
         if ids:
             self.ids = ids
         else:
@@ -772,7 +877,6 @@ class UICheckbox(UIImageButton):
         manager,
         check: bool = False,
     ):
-
         self.checked = check
 
         relative_rect = scale(pygame.Rect(position, (68, 68)))
