@@ -22,6 +22,7 @@ class ClanScreen(Screens):
 
     def __init__(self, name=None):
         super().__init__(name)
+        self.taken_spaces = {}
         self.show_den_labels = None
         self.show_den_text = None
         self.label_toggle = None
@@ -121,6 +122,8 @@ class ClanScreen(Screens):
         # We have to convert the positions to something pygame_gui buttons will understand
         # This should be a temp solution. We should change the code that determines positions.
         i = 0
+        all_positions = list(self.taken_spaces.values())
+        used_positions = all_positions.copy()
         for x in game.clan.clan_cats:
             if (
                 not Cat.all_cats[x].dead
@@ -137,6 +140,11 @@ class ClanScreen(Screens):
                     break
 
                 # try:
+                layer = 2
+                place = self.taken_spaces[Cat.all_cats[x].ID]
+                layer += all_positions.count(place) - used_positions.count(place)
+                used_positions.remove(place)
+
                 self.cat_buttons.append(
                     UISpriteButton(
                         scale(
@@ -144,15 +152,14 @@ class ClanScreen(Screens):
                         ),
                         Cat.all_cats[x].sprite,
                         cat_id=x,
-                        starting_height=i + 1,
+                        starting_height=layer,
                         tool_tip_text=str(Cat.all_cats[x].name),
-                        mask_padding=3,
                     )
                 )
                 # except:
-                #     print(
-                #         f"ERROR: placing {Cat.all_cats[x].name}'s sprite on Clan page"
-                #     )
+                # print(
+                #     f"ERROR: placing {Cat.all_cats[x].name}'s sprite on Clan page"
+                # )
 
         # Den Labels
         # Redo the locations, so that it uses layout on the Clan page
@@ -344,7 +351,7 @@ class ClanScreen(Screens):
                         just_pos[0] += 15 * random.choice([-1, 1])
                     if "y" in pos[1]:
                         just_pos[1] += 15
-                return tuple(just_pos)
+                return tuple(just_pos), pos[0]
             dens.pop(chosen_index)
             weights.pop(chosen_index)
             if not dens:
@@ -386,6 +393,7 @@ class ClanScreen(Screens):
             if Cat.all_cats[x].dead or Cat.all_cats[x].outside:
                 continue
 
+            base_pos = None
             # Newborns are not meant to be placed. They are hiding.
             if (
                 Cat.all_cats[x].status == "newborn"
@@ -396,41 +404,66 @@ class ClanScreen(Screens):
                     or game.config["fun"]["newborns_can_roam"]
                 ):
                     # Free them
-                    Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                    [
+                        Cat.all_cats[x].placement,
+                        base_pos,
+                    ] = self.choose_nonoverlapping_positions(
                         first_choices, all_dens, [1, 100, 1, 1, 1, 100, 50]
                     )
                 else:
                     continue
 
             if Cat.all_cats[x].status in ["apprentice", "mediator apprentice"]:
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [1, 50, 1, 1, 100, 100, 1]
                 )
             elif Cat.all_cats[x].status == "deputy":
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [1, 50, 1, 1, 1, 50, 1]
                 )
 
             elif Cat.all_cats[x].status == "elder":
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [1, 1, 2000, 1, 1, 1, 1]
                 )
             elif Cat.all_cats[x].status == "kitten":
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [60, 8, 1, 1, 1, 1, 1]
                 )
             elif Cat.all_cats[x].status in ["medicine cat apprentice", "medicine cat"]:
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [20, 20, 20, 400, 1, 1, 1]
                 )
             elif Cat.all_cats[x].status in ["warrior", "mediator"]:
-                Cat.all_cats[x].placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [1, 1, 1, 1, 1, 60, 60]
                 )
             elif Cat.all_cats[x].status == "leader":
-                game.clan.leader.placement = self.choose_nonoverlapping_positions(
+                [
+                    Cat.all_cats[x].placement,
+                    base_pos,
+                ] = self.choose_nonoverlapping_positions(
                     first_choices, all_dens, [1, 200, 1, 1, 1, 1, 1]
                 )
+            self.taken_spaces[Cat.all_cats[x].ID] = base_pos
 
     def update_buttons_and_text(self):
         if game.switches["saved_clan"]:

@@ -45,7 +45,7 @@ class UIImageButton(pygame_gui.elements.UIButton):
         tool_tip_text_kwargs: Optional[Dict[str, str]] = None,
         max_dynamic_width: Optional[int] = None,
     ):
-        self.mask_padding = mask_padding if mask_padding is not None else 0
+        self.mask_padding = mask_padding if mask_padding is not None else 2
         self.mask_info = [relative_rect[0:2], []]
         super().__init__(
             relative_rect,
@@ -79,26 +79,31 @@ class UIImageButton(pygame_gui.elements.UIButton):
         if not isinstance(val, pygame.Mask | pygame.Surface | None):
             return
         if val is not None:
-            if isinstance(val, pygame.Surface):
+            if isinstance(val, pygame.Mask):
+                self._mask = val
+                self.mask_padding = (val.get_size()[0] - self.rect[0]) / 2
+            else:
                 val = pygame.mask.from_surface(val, threshold=250)
 
-            inflated_mask = pygame.Mask(
-                (
-                    val.get_size()[0] + self.mask_padding * 2,
-                    val.get_size()[1] + self.mask_padding * 2,
+                inflated_mask = pygame.Mask(
+                    (
+                        val.get_size()[0] + self.mask_padding * 2,
+                        val.get_size()[1] + self.mask_padding * 2,
+                    )
                 )
-            )
-            inflated_mask.draw(val, (self.mask_padding, self.mask_padding))
-            for _ in range(self.mask_padding):
-                outline = inflated_mask.outline()
-                for point in outline:
-                    for dx in range(-1, 2):
-                        for dy in range(-1, 2):
-                            try:
-                                inflated_mask.set_at((point[0] + dx, point[1] + dy), 1)
-                            except IndexError:
-                                continue
-            self._mask = inflated_mask
+                inflated_mask.draw(val, (self.mask_padding, self.mask_padding))
+                for _ in range(self.mask_padding):
+                    outline = inflated_mask.outline()
+                    for point in outline:
+                        for dx in range(-1, 2):
+                            for dy in range(-1, 2):
+                                try:
+                                    inflated_mask.set_at(
+                                        (point[0] + dx, point[1] + dy), 1
+                                    )
+                                except IndexError:
+                                    continue
+                self._mask = inflated_mask
             self.mask_info[0] = (
                 self.rect[0] - self.mask_padding,
                 self.rect[1] - self.mask_padding,
@@ -500,8 +505,8 @@ class UISpriteButton:
             anchors=anchors,
         )
         self.image.disable()
-        # The transparent button. This a subclass that UIButton that also hold the cat_id.
 
+        # The transparent button. This a subclass that UIButton that also hold the cat_id.
         self.button = CatButton(
             relative_rect,
             "",
