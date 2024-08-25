@@ -5,11 +5,6 @@ from typing import Tuple, Optional, List, Union, Dict, Iterable, Callable
 
 import pygame
 import pygame_gui
-from pygame_gui import (
-    UI_BUTTON_PRESSED,
-    UI_BUTTON_DOUBLE_CLICKED,
-    UI_BUTTON_START_PRESS,
-)
 from pygame_gui.core import UIContainer, IContainerLikeInterface, UIElement, ObjectID
 from pygame_gui.core.gui_type_hints import RectLike, Coordinate
 from pygame_gui.core.interfaces import IUIManagerInterface
@@ -51,6 +46,7 @@ class UIImageButton(pygame_gui.elements.UIButton):
         max_dynamic_width: Optional[int] = None,
     ):
         self.mask_padding = mask_padding if mask_padding is not None else 0
+        self.mask_info = [relative_rect[0:2], []]
         super().__init__(
             relative_rect,
             text,
@@ -86,11 +82,34 @@ class UIImageButton(pygame_gui.elements.UIButton):
             if isinstance(val, pygame.Surface):
                 val = pygame.mask.from_surface(val, threshold=250)
 
-            size = val.get_size()
-            val.scale(
-                (size[0] + self.mask_padding * 2, size[1] + self.mask_padding * 2)
+            inflated_mask = pygame.Mask(
+                (
+                    val.get_size()[0] + self.mask_padding * 2,
+                    val.get_size()[1] + self.mask_padding * 2,
+                )
             )
-            self._mask = val
+            inflated_mask.draw(val, (self.mask_padding, self.mask_padding))
+            for _ in range(self.mask_padding):
+                outline = inflated_mask.outline()
+                for point in outline:
+                    for dx in range(-1, 2):
+                        for dy in range(-1, 2):
+                            try:
+                                inflated_mask.set_at((point[0] + dx, point[1] + dy), 1)
+                            except IndexError:
+                                continue
+            self._mask = inflated_mask
+            self.mask_info[0] = (
+                self.rect[0] - self.mask_padding,
+                self.rect[1] - self.mask_padding,
+            )
+            self.mask_info[1] = [
+                (
+                    x + self.mask_info[0][0],
+                    y + self.mask_info[0][1],
+                )
+                for x, y in self.mask.outline()
+            ]
         else:
             self._mask = None
 
@@ -163,34 +182,30 @@ class UIImageButton(pygame_gui.elements.UIButton):
         return changed
 
     def hover_point(self, hover_x: int, hover_y: int) -> bool:
-        # if not self.rect.collidepoint((hover_x, hover_y)):
-        #     return False
-        pos_in_mask = (
-            hover_x - self.rect.x,
-            hover_y - self.rect.y,
-        )
         if self.mask is None:
             return self.rect.collidepoint((hover_x, hover_y))
+        pos_in_mask = (hover_x - self.mask_info[0][0], hover_y - self.mask_info[0][1])
         if (
             0 <= pos_in_mask[0] < self.mask.get_size()[0]
             and 0 <= pos_in_mask[1] < self.mask.get_size()[1]
         ):
-            return (
-                bool(self.mask.get_at(pos_in_mask))
-                if self.mask is not None
-                else self.rect.collidepoint((hover_x, hover_y))
-            )
+            return bool(self.mask.get_at(pos_in_mask))
+        else:
+            return False
 
     def check_hover(self, time_delta: float, hovered_higher_element: bool) -> bool:
         hover = super().check_hover(time_delta, hovered_higher_element)
         if game.debug_settings["showbounds"] and self.mask is not None:
-            olist = self.mask.outline()
-            olist = [(x + self.rect[0], y + self.rect[1]) for x, y in olist]
             if hover:
-                pygame.draw.lines(screen, (0, 255, 0), True, olist, width=4)
-            # else:
-            #     pygame.draw.lines(screen, (255, 0, 0), True, olist, width=4)
+                pygame.draw.lines(screen, (0, 255, 0), True, self.mask_info[1], width=2)
+            else:
+                pygame.draw.lines(screen, (255, 0, 0), True, self.mask_info[1], width=2)
         return hover
+
+    def on_hovered(self):
+        super().on_hovered()
+        if self.mask is not None and self.tool_tip is not None:
+            self.tool_tip.disable()
 
 
 class UIModifiedScrollingContainer(pygame_gui.elements.UIScrollingContainer):

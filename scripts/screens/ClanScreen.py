@@ -136,25 +136,23 @@ class ClanScreen(Screens):
                 if i > self.max_sprites_displayed:
                     break
 
-                try:
-                    self.cat_buttons.append(
-                        UISpriteButton(
-                            scale(
-                                pygame.Rect(
-                                    tuple(Cat.all_cats[x].placement), (100, 100)
-                                )
-                            ),
-                            Cat.all_cats[x].sprite,
-                            cat_id=x,
-                            starting_height=i + 1,
-                            tool_tip_text=str(Cat.all_cats[x].name),
-                            mask_padding=10,
-                        )
+                # try:
+                self.cat_buttons.append(
+                    UISpriteButton(
+                        scale(
+                            pygame.Rect(tuple(Cat.all_cats[x].placement), (100, 100))
+                        ),
+                        Cat.all_cats[x].sprite,
+                        cat_id=x,
+                        starting_height=i + 1,
+                        tool_tip_text=str(Cat.all_cats[x].name),
+                        mask_padding=3,
                     )
-                except:
-                    print(
-                        f"ERROR: placing {Cat.all_cats[x].name}'s sprite on Clan page"
-                    )
+                )
+                # except:
+                #     print(
+                #         f"ERROR: placing {Cat.all_cats[x].name}'s sprite on Clan page"
+                #     )
 
         # Den Labels
         # Redo the locations, so that it uses layout on the Clan page
