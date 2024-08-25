@@ -9,8 +9,9 @@ import itertools
 import os.path
 import sys
 from random import choice, randint, sample, random, choices, getrandbits, randrange
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
+import pygame
 import ujson  # type: ignore
 
 from scripts.cat.history import History
@@ -38,6 +39,7 @@ from scripts.utility import (
     event_text_adjust,
     update_sprite,
     leader_ceremony_text_adjust,
+    update_mask,
 )
 
 
@@ -349,7 +351,8 @@ class Cat:
             )
 
         # Private Sprite
-        self._sprite = None
+        self._sprite: Optional[pygame.Surface] = None
+        self._sprite_mask: Optional[pygame.Mask] = None
 
         # SAVE CAT INTO ALL_CATS DICTIONARY IN CATS-CLASS
         self.all_cats[self.ID] = self
@@ -1494,6 +1497,7 @@ class Cat:
         if old_age != self.age:
             # Things to do if the age changes
             self.personality.facet_wobble(facet_max=2)
+            self.pelt.rebuild_sprite = True
 
         # Set personality to correct type
         self.personality.set_kit(self.is_baby())
@@ -2043,7 +2047,7 @@ class Cat:
             "GULL FEATHERS",
             "SPARROW FEATHERS",
             "CLOVER",
-            "DAISY"
+            "DAISY",
         ]:
             self.pelt.accessory = None
         if "HALFTAIL" in self.pelt.scars and self.pelt.accessory in [
@@ -2053,7 +2057,7 @@ class Cat:
             "GULL FEATHERS",
             "SPARROW FEATHERS",
             "CLOVER",
-            "DAISY"
+            "DAISY",
         ]:
             self.pelt.accessory = None
 
@@ -3329,12 +3333,23 @@ class Cat:
     @property
     def sprite(self):
         # Update the sprite
-        update_sprite(self)
+        if self.pelt.rebuild_sprite:
+            self.pelt.rebuild_sprite = False
+            update_sprite(self)
+            update_mask(self)
         return self._sprite
 
     @sprite.setter
     def sprite(self, new_sprite):
         self._sprite = new_sprite
+
+    @property
+    def sprite_mask(self):
+        return self._sprite_mask
+
+    @sprite_mask.setter
+    def sprite_mask(self, val):
+        self._sprite_mask = val
 
     # ---------------------------------------------------------------------------- #
     #                                  other                                       #

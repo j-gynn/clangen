@@ -124,42 +124,38 @@ class ClanScreen(Screens):
         i = 0
         all_positions = list(self.taken_spaces.values())
         used_positions = all_positions.copy()
-        for x in game.clan.clan_cats:
-            if (
-                not Cat.all_cats[x].dead
-                and Cat.all_cats[x].in_camp
-                and not (Cat.all_cats[x].exiled or Cat.all_cats[x].outside)
-                and (
-                    Cat.all_cats[x].status != "newborn"
-                    or game.config["fun"]["all_cats_are_newborn"]
-                    or game.config["fun"]["newborns_can_roam"]
-                )
-            ):
-                i += 1
-                if i > self.max_sprites_displayed:
-                    break
+        cat_list = [
+            Cat.all_cats[x]
+            for i, x in enumerate(game.clan.clan_cats)
+            if i < self.max_sprites_displayed
+            and not Cat.all_cats[x].dead
+            and Cat.all_cats[x].in_camp
+            and not (Cat.all_cats[x].exiled or Cat.all_cats[x].outside)
+            and (
+                Cat.all_cats[x].status != "newborn"
+                or game.config["fun"]["all_cats_are_newborn"]
+                or game.config["fun"]["newborns_can_roam"]
+            )
+        ]
+        layers = []
+        for x in cat_list:
+            layers.append(2)
+            place = self.taken_spaces[x.ID]
+            layers[-1] += all_positions.count(place) - used_positions.count(place)
+            used_positions.remove(place)
 
-                # try:
-                layer = 2
-                place = self.taken_spaces[Cat.all_cats[x].ID]
-                layer += all_positions.count(place) - used_positions.count(place)
-                used_positions.remove(place)
-
-                self.cat_buttons.append(
-                    UISpriteButton(
-                        scale(
-                            pygame.Rect(tuple(Cat.all_cats[x].placement), (100, 100))
-                        ),
-                        Cat.all_cats[x].sprite,
-                        cat_id=x,
-                        starting_height=layer,
-                        tool_tip_text=str(Cat.all_cats[x].name),
-                    )
+        for i, x in enumerate(cat_list):
+            self.cat_buttons.append(
+                UISpriteButton(
+                    scale(pygame.Rect(tuple(x.placement), (100, 100))),
+                    x.sprite,
+                    mask=x.sprite_mask,
+                    cat_id=x.ID,
+                    cat_object=x,
+                    starting_height=layers[i],
+                    tool_tip_text=str(x.name),
                 )
-                # except:
-                # print(
-                #     f"ERROR: placing {Cat.all_cats[x].name}'s sprite on Clan page"
-                # )
+            )
 
         # Den Labels
         # Redo the locations, so that it uses layout on the Clan page

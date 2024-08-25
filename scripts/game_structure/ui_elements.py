@@ -78,45 +78,44 @@ class UIImageButton(pygame_gui.elements.UIButton):
     def mask(self, val: Union[pygame.Mask, pygame.Surface, None]):
         if not isinstance(val, pygame.Mask | pygame.Surface | None):
             return
-        if val is not None:
-            if isinstance(val, pygame.Mask):
-                self._mask = val
-                self.mask_padding = (val.get_size()[0] - self.rect[0]) / 2
-            else:
-                val = pygame.mask.from_surface(val, threshold=250)
 
-                inflated_mask = pygame.Mask(
-                    (
-                        val.get_size()[0] + self.mask_padding * 2,
-                        val.get_size()[1] + self.mask_padding * 2,
-                    )
-                )
-                inflated_mask.draw(val, (self.mask_padding, self.mask_padding))
-                for _ in range(self.mask_padding):
-                    outline = inflated_mask.outline()
-                    for point in outline:
-                        for dx in range(-1, 2):
-                            for dy in range(-1, 2):
-                                try:
-                                    inflated_mask.set_at(
-                                        (point[0] + dx, point[1] + dy), 1
-                                    )
-                                except IndexError:
-                                    continue
-                self._mask = inflated_mask
-            self.mask_info[0] = (
-                self.rect[0] - self.mask_padding,
-                self.rect[1] - self.mask_padding,
-            )
-            self.mask_info[1] = [
-                (
-                    x + self.mask_info[0][0],
-                    y + self.mask_info[0][1],
-                )
-                for x, y in self.mask.outline()
-            ]
-        else:
+        if val is None:
             self._mask = None
+            return
+        if isinstance(val, pygame.Mask):
+            self._mask = val
+            self.mask_padding = (val.get_size()[0] - self.rect[2]) / 2
+        else:
+            val = pygame.mask.from_surface(val, threshold=250)
+
+            inflated_mask = pygame.Mask(
+                (
+                    self.relative_rect[2] + self.mask_padding * 2,
+                    self.relative_rect[3] + self.mask_padding * 2,
+                )
+            )
+            inflated_mask.draw(val, (self.mask_padding, self.mask_padding))
+            for _ in range(self.mask_padding):
+                outline = inflated_mask.outline()
+                for point in outline:
+                    for dx in range(-1, 2):
+                        for dy in range(-1, 2):
+                            try:
+                                inflated_mask.set_at((point[0] + dx, point[1] + dy), 1)
+                            except IndexError:
+                                continue
+            self._mask = inflated_mask
+        self.mask_info[0] = (
+            self.rect[0] - self.mask_padding,
+            self.rect[1] - self.mask_padding,
+        )
+        self.mask_info[1] = [
+            (
+                x + self.mask_info[0][0],
+                y + self.mask_info[0][1],
+            )
+            for x, y in self.mask.outline()
+        ]
 
     def _set_any_images_from_theme(self):
         changed = False
@@ -491,6 +490,7 @@ class UISpriteButton:
         object_id=None,
         tool_tip_text=None,
         anchors=None,
+        mask=None,
         mask_padding=None,
     ):
         # We have to scale the image before putting it into the image object. Otherwise, the method of upscaling that
@@ -519,7 +519,7 @@ class UISpriteButton:
             tool_tip_text=tool_tip_text,
             container=container,
             anchors=anchors,
-            mask=self.image.image,
+            mask=mask,
             mask_padding=mask_padding,
         )
 
@@ -1149,6 +1149,7 @@ class UICatListDisplay(UIContainer):
             kitty.sprite,
             cat_object=kitty,
             cat_id=kitty.ID,
+            mask=None,
             container=container,
             object_id=f"#sprite{str(i)}",
             tool_tip_text=str(kitty.name) if self.tool_tip_name else None,
