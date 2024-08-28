@@ -24,37 +24,5 @@
             "self": "himself",
             "conju": 2
         }
-    ],
-    "default_familial": [
-        {
-            "grandparent": "grandparent",
-            "parent": "parent",
-            "parents_sibling": "parent's sibling",
-            "sibling": "sibling",
-            "cousin": "cousin",
-            "kit": "kit",
-            "siblings_kit": "sibling's kit",
-            "grandkit": "grandkit"
-        },
-        {
-            "grandparent": "grandmother",
-            "parent": "mother",
-            "parents_sibling": "aunt",
-            "sibling": "sister",
-            "cousin": "cousin",
-            "kit": "daughter",
-            "siblings_kit": "niece",
-            "grandkit": "granddaughter"
-        },
-        {
-            "grandparent": "grandfather",
-            "parent": "father",
-            "parents_sibling": "uncle",
-            "sibling": "brother",
-            "cousin": "cousin",
-            "kit": "son",
-            "siblings_kit": "nephew",
-            "grandkit": "grandson"
-        }
     ]
 }

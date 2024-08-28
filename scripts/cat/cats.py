@@ -7,12 +7,14 @@ from __future__ import annotations
 import bisect
 import itertools
 import os.path
+import re
 import sys
 from random import choice, randint, sample, random, choices, getrandbits, randrange
 from typing import Dict, List, Any
 
 import ujson  # type: ignore
 
+from scripts.cat.familial_terms import familyterms
 from scripts.cat.history import History
 from scripts.cat.names import Name
 from scripts.cat.pelts import Pelt
@@ -122,6 +124,49 @@ class Cat:
             "conju": 2,
         },
     ]
+    # numbers reference familial_terms.py
+    default_familial = [
+        {
+            "grandparent": [1],
+            "parent": [2],
+            "parents_sibling": [3],
+            "mate": [19],
+            "sibling": [4],
+            "siblings_mate": [20],
+            "cousin": [5],
+            "kit": [6],
+            "kits_mate": [21],
+            "siblings_kit": [7],
+            "grandkit": [8],
+        },
+        {
+            "grandparent": [9],
+            "parent": [10],
+            "parents_sibling": [11],
+            "mate": [19],
+            "sibling": [12],
+            "siblings_mate": [20],
+            "cousin": [5],
+            "kit": [6],
+            "kits_mate": [21],
+            "siblings_kit": [13],
+            "grandkit": [8],
+        },
+        {
+            "self": [22],
+            "grandparent": [14],
+            "parent": [15],
+            "parents_sibling": [16],
+            "mate": [19],
+            "sibling": [17],
+            "siblings_mate": [20],
+            "cousin": [5],
+            "kit": [6],
+            "kits_mate": [21],
+            "siblings_kit": [18],
+            "grandkit": [8],
+        },
+    ]
 
     all_cats: Dict[str, Cat] = {}  # ID: object
     outside_cats: Dict[str, Cat] = {}  # cats outside the clan
@@ -207,6 +252,13 @@ class Cat:
         self.mate = []
         self.previous_mates = []
         self.pronouns = [self.default_pronouns[0].copy()]
+        self.familial_terms = (
+            self.default_familial[0].copy()
+            if gender is None
+            else self.default_familial[1].copy()
+            if gender == "female"
+            else self.default_familial[2].copy()
+        )
         self.placement = None
         self.example = example
         self.dead = False
@@ -444,11 +496,14 @@ class Cat:
             # Assigning pronouns based on gender
             if self.genderalign in ["female", "trans female"]:
                 self.pronouns = [self.default_pronouns[1].copy()]
+                self.familial_terms = self.default_familial[1].copy()
             elif self.genderalign in ["male", "trans male"]:
                 self.pronouns = [self.default_pronouns[2].copy()]
+                self.familial_terms = self.default_familial[2].copy()
             else:
                 self.genderalign = "nonbinary"
                 self.pronouns = [self.default_pronouns[0].copy()]
+                self.familial_terms = self.default_familial[0].copy()
 
         # APPEARANCE
         self.pelt = Pelt.generate_new_pelt(
@@ -2043,7 +2098,7 @@ class Cat:
             "GULL FEATHERS",
             "SPARROW FEATHERS",
             "CLOVER",
-            "DAISY"
+            "DAISY",
         ]:
             self.pelt.accessory = None
         if "HALFTAIL" in self.pelt.scars and self.pelt.accessory in [
@@ -2053,7 +2108,7 @@ class Cat:
             "GULL FEATHERS",
             "SPARROW FEATHERS",
             "CLOVER",
-            "DAISY"
+            "DAISY",
         ]:
             self.pelt.accessory = None
 
@@ -3367,6 +3422,7 @@ class Cat:
                 "gender": self.gender,
                 "gender_align": self.genderalign,
                 "pronouns": self.pronouns,
+                "familial_terms": self.familial_terms,
                 "birth_cooldown": self.birth_cooldown,
                 "status": self.status,
                 "backstory": self.backstory if self.backstory else None,
@@ -3427,6 +3483,35 @@ class Cat:
                 "prevent_fading": self.prevent_fading,
                 "favourite": self.favourite,
             }
+
+    def get_familial_term(self, term, intermediary_id=None):
+        """
+        Returns the desired term
+        :param term:
+        :param intermediary_id:
+        :return:
+        """
+        if term is None:
+            return "Clanmate"
+
+        if term not in self.familial_terms.keys():
+            raise KeyError(f"Invalid familial term requested: {term}")
+
+        chosen = choice(familyterms.get_term(self.familial_terms[term], True))
+
+        if intermediary_id is not None:
+            return re.sub(
+                "\{(.*?)}",
+                lambda x: Cat.fetch_cat(intermediary_id).get_familial_term(
+                    x.group(1), None
+                ),
+                chosen,
+            )
+        return re.sub(
+            "\{(.*?)}",
+            lambda x: choice(familyterms.get_term(Cat.default_familial[0][x.group(1)])),
+            chosen,
+        )
 
 
 # ---------------------------------------------------------------------------- #

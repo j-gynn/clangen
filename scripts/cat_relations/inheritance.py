@@ -7,6 +7,7 @@ easily manipulate and update the inheritance. This class will be used to check f
 while mating and for the display of the family tree screen.
 
 """
+from typing import Optional
 
 from strenum import StrEnum  # pylint: disable=no-name-in-module
 
@@ -16,7 +17,7 @@ class RelationType(StrEnum):
 
     BLOOD = ""  # direct blood related - do not need a special print
     ADOPTIVE = "adoptive"  # not blood related but close (parents, kits, siblings)
-    HALF_BLOOD = "half sibling"  # only one blood parent is the same (siblings only)
+    HALF_BLOOD = "half "  # only one blood parent is the same (siblings only)
     NOT_BLOOD = "not blood related"  # not blood related for parent siblings
     RELATED = "blood related"  # related by blood (different mates only)
 
@@ -338,7 +339,7 @@ class Inheritance:
                     self.all_involved.append(grand_id)
                     self.all_but_cousins.append(grand_id)
                 self.grand_parents[grand_id]["additional"].append(
-                    f"parent of {str(parent_cat.name)}"
+                    f"{{FAMILIAL/m_c/parent}} of {str(parent_cat.name)}"
                 )
 
     def init_kits(self, inter_id, inter_cat):
@@ -485,7 +486,9 @@ class Inheritance:
 
                     add_info = ""
                     if len(parent_cats_names) > 0:
-                        add_info = f"child of " + ", ".join(parent_cats_names)
+                        add_info = f"{{RELATIVE/m_c/kit}} of " + ", ".join(
+                            parent_cats_names
+                        )
                     self.siblings_kits[_c.ID] = {
                         "type": kit_rel_type,
                         "additional": [add_info],
@@ -526,7 +529,7 @@ class Inheritance:
                     )
                 else:
                     self.parents_siblings[inter_id]["additional"].append(
-                        f"child of {str(grand_parent_cat.name)}"
+                        f"{{RELATIVE/m_c/kit}} of {str(grand_parent_cat.name)}"
                     )
 
     def init_cousins(self, inter_id, inter_cat):
@@ -549,7 +552,9 @@ class Inheritance:
                     rel_type = RelationType.NOT_BLOOD
                 add_info = ""
                 if len(parent_cats_names) > 0:
-                    add_info = f"child of " + ", ".join(parent_cats_names)
+                    add_info = f"{{RELATIVE/m_c/kit}} of " + ", ".join(
+                        parent_cats_names
+                    )
 
                 self.cousins[inter_id] = {"type": rel_type, "additional": [add_info]}
                 self.all_involved.append(inter_id)
@@ -566,7 +571,7 @@ class Inheritance:
 
         add_info = ""
         if len(parent_cats_names) > 0:
-            add_info = f"child of " + ", ".join(parent_cats_names)
+            add_info = f"{{RELATIVE/m_c/kit}} of " + ", ".join(parent_cats_names)
 
         for inter_parent_id in inter_parent_ids:
             if inter_parent_id in self.kits.keys():
@@ -795,3 +800,26 @@ class Inheritance:
             return RelationType.RELATED
         else:
             return RelationType.NOT_BLOOD
+
+    def get_relationship(self, cat_id) -> Optional[str]:
+        """
+        Uses a priority system to pull the first valid familial relation for two cats.
+        :param cat_id: The other cat whose relationship is being compared to this one
+        :return: String representing the relationship between the cats, or None if no relation found
+        """
+        for relation, match in [
+            ["mates", "mate"],
+            ["parents", "parent"],
+            ["siblings", "sibling"],
+            ["kits", "kit"],
+            ["grand_parents", "grandparent"],
+            ["grand_kits", "grandkit"],
+            ["cousins", "cousin"],
+            ["siblings_kits", "siblings_kit"],
+            ["parents_siblings", "parents_sibling"],
+            ["siblings_mates", "siblings_mate"],
+            ["kits_mates", "kits_mate"],
+        ]:
+            if cat_id in getattr(self, relation).keys():
+                return match
+        return None

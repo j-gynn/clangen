@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pygame.transform
 import pygame_gui.elements
 
@@ -5,7 +7,7 @@ from scripts.cat.cats import Cat
 from scripts.game_structure import image_cache
 from scripts.game_structure.game_essentials import game, MANAGER
 from scripts.game_structure.ui_elements import UIImageButton, UISpriteButton
-from scripts.utility import get_text_box_theme, scale, shorten_text_to_fit
+from scripts.utility import get_text_box_theme, scale, shorten_text_to_fit, process_text
 from .Screens import Screens
 
 
@@ -48,7 +50,7 @@ class FamilyTreeScreen(Screens):
         self.back_button = None
         self.next_cat_button = None
         self.previous_cat_button = None
-        self.the_cat = None
+        self.the_cat: Optional[Cat] = None
 
         self.grandparents = []
         self.parents = []
@@ -522,8 +524,24 @@ class FamilyTreeScreen(Screens):
                 if len(rel_types) > 0:
                     info_text += "\n"
                     info_text += ", ".join(rel_types)
+
+                info_text += " " if len(rel_types) > 0 else "\n"
+
+                info_text += _kitty.get_familial_term(
+                    self.the_cat.inheritance.get_relationship(kitty),
+                    self.the_cat.ID,
+                )
                 if len(additional_info["additional"]) > 0:
-                    add_info = set(additional_info["additional"])  # remove duplicates
+                    add_info = set(
+                        [
+                            process_text(
+                                info,
+                                {"m_c": [_kitty.name, _kitty.pronouns]},
+                                {"m_c": _kitty},
+                            )
+                            for info in additional_info["additional"]
+                        ]
+                    )  # remove duplicates
                     info_text += "\n"
                     info_text += ", ".join(add_info)
 

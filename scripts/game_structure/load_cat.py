@@ -145,11 +145,15 @@ def json_load():
             )
 
             new_cat.genderalign = cat["gender_align"]
-            # new_cat.pronouns = cat["pronouns"]
             new_cat.pronouns = (
                 cat["pronouns"]
                 if "pronouns" in cat
                 else [new_cat.default_pronouns[0].copy()]
+            )
+            new_cat.familial_terms = (
+                cat["familial_terms"]
+                if "familial_terms" in cat
+                else new_cat.familial_terms
             )
             new_cat.backstory = cat["backstory"] if "backstory" in cat else None
             if new_cat.backstory in BACKSTORIES["conversion"]:

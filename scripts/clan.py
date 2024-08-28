@@ -17,6 +17,9 @@ import pygame
 import ujson
 
 from scripts.cat.cats import Cat, cat_class
+from scripts.cat.familial_terms import (
+    familyterms,
+)
 from scripts.cat.history import History
 from scripts.cat.names import names
 from scripts.cat.sprites import sprites
@@ -533,6 +536,7 @@ class Clan:
         self.save_herbs(game.clan)
         self.save_disaster(game.clan)
         self.save_pregnancy(game.clan)
+        familyterms.save_familial()
 
         self.save_clan_settings()
         if game.clan.game_mode in ["expanded", "cruel season"]:
@@ -540,7 +544,9 @@ class Clan:
 
         game.safe_save(f"{get_save_dir()}/{self.name}clan.json", clan_data)
 
-        if os.path.exists(get_save_dir() + f"/{self.name}clan.txt") & (self.name != 'current'):
+        if os.path.exists(get_save_dir() + f"/{self.name}clan.txt") & (
+            self.name != "current"
+        ):
             os.remove(get_save_dir() + f"/{self.name}clan.txt")
 
     def switch_setting(self, setting_name):
@@ -901,6 +907,7 @@ class Clan:
         self.load_pregnancy(game.clan)
         self.load_herbs(game.clan)
         self.load_disaster(game.clan)
+        familyterms.load_familial()
         if game.clan.game_mode != "classic":
             self.load_freshkill_pile(game.clan)
         game.switches["error_message"] = ""
