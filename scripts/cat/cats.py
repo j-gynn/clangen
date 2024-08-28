@@ -124,49 +124,6 @@ class Cat:
             "conju": 2,
         },
     ]
-    # numbers reference familial_terms.py
-    default_familial = [
-        {
-            "grandparent": [1],
-            "parent": [2],
-            "parents_sibling": [3],
-            "mate": [19],
-            "sibling": [4],
-            "siblings_mate": [20],
-            "cousin": [5],
-            "kit": [6],
-            "kits_mate": [21],
-            "siblings_kit": [7],
-            "grandkit": [8],
-        },
-        {
-            "grandparent": [9],
-            "parent": [10],
-            "parents_sibling": [11],
-            "mate": [19],
-            "sibling": [12],
-            "siblings_mate": [20],
-            "cousin": [5],
-            "kit": [6],
-            "kits_mate": [21],
-            "siblings_kit": [13],
-            "grandkit": [8],
-        },
-        {
-            "self": [22],
-            "grandparent": [14],
-            "parent": [15],
-            "parents_sibling": [16],
-            "mate": [19],
-            "sibling": [17],
-            "siblings_mate": [20],
-            "cousin": [5],
-            "kit": [6],
-            "kits_mate": [21],
-            "siblings_kit": [18],
-            "grandkit": [8],
-        },
-    ]
 
     all_cats: Dict[str, Cat] = {}  # ID: object
     outside_cats: Dict[str, Cat] = {}  # cats outside the clan
@@ -252,13 +209,12 @@ class Cat:
         self.mate = []
         self.previous_mates = []
         self.pronouns = [self.default_pronouns[0].copy()]
-        self.familial_terms = (
-            self.default_familial[0].copy()
-            if gender is None
-            else self.default_familial[1].copy()
-            if gender == "female"
-            else self.default_familial[2].copy()
+        self.familial_terms_template = (
+            0 if gender is None else 1 if gender == "female" else 2
         )
+        self.familial_terms = familyterms.get_template(
+            self.familial_terms_template
+        ).copy()
         self.placement = None
         self.example = example
         self.dead = False
@@ -492,18 +448,23 @@ class Cat:
         # PRONOUNS
         if theythemdefault is True:
             self.pronouns = [self.default_pronouns[0].copy()]
+            self.familial_terms_template = 0
         else:
             # Assigning pronouns based on gender
             if self.genderalign in ["female", "trans female"]:
                 self.pronouns = [self.default_pronouns[1].copy()]
-                self.familial_terms = self.default_familial[1].copy()
+                self.familial_terms_template = 1
             elif self.genderalign in ["male", "trans male"]:
                 self.pronouns = [self.default_pronouns[2].copy()]
-                self.familial_terms = self.default_familial[2].copy()
+                self.familial_terms_template = 2
             else:
                 self.genderalign = "nonbinary"
                 self.pronouns = [self.default_pronouns[0].copy()]
-                self.familial_terms = self.default_familial[0].copy()
+                self.familial_terms_template = 0
+
+        self.familial_terms = familyterms.get_template(
+            self.familial_terms_template
+        ).copy()
 
         # APPEARANCE
         self.pelt = Pelt.generate_new_pelt(
@@ -3492,7 +3453,7 @@ class Cat:
         :return:
         """
         if term is None:
-            return "Clanmate"
+            return familyterms.get_term(self.familial_terms["self"], False)
 
         if term not in self.familial_terms.keys():
             raise KeyError(f"Invalid familial term requested: {term}")
@@ -3512,6 +3473,9 @@ class Cat:
             lambda x: choice(familyterms.get_term(Cat.default_familial[0][x.group(1)])),
             chosen,
         )
+
+    def set_familial_term(self, term, new_id):
+        pass
 
 
 # ---------------------------------------------------------------------------- #

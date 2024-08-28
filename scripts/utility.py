@@ -2423,8 +2423,8 @@ def shorten_text_to_fit(
 
 
 def scale(rect):
-    rect[0] = round(rect[0] / 1600 * screen_x) if rect[0] > 0 else rect[0]
-    rect[1] = round(rect[1] / 1400 * screen_y) if rect[1] > 0 else rect[1]
+    rect[0] = round(rect[0] / 1600 * screen_x)
+    rect[1] = round(rect[1] / 1400 * screen_y)
     rect[2] = round(rect[2] / 1600 * screen_x) if rect[2] > 0 else rect[2]
     rect[3] = round(rect[3] / 1400 * screen_y) if rect[3] > 0 else rect[3]
 

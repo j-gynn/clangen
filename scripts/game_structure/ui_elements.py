@@ -101,8 +101,8 @@ class UIModifiedScrollingContainer(pygame_gui.elements.UIScrollingContainer):
         visible: int = 1,
         allow_scroll_x: bool = False,
         allow_scroll_y: bool = False,
+        anchors=None,
     ):
-
         super().__init__(
             relative_rect=relative_rect,
             manager=manager,
@@ -113,6 +113,7 @@ class UIModifiedScrollingContainer(pygame_gui.elements.UIScrollingContainer):
             allow_scroll_x=allow_scroll_x,
             allow_scroll_y=allow_scroll_y,
             should_grow_automatically=True,
+            anchors=anchors,
         )
 
         if self.allow_scroll_y:
@@ -269,7 +270,6 @@ class UIImageVerticalScrollBar(pygame_gui.elements.UIVerticalScrollBar):
         visible: int = 1,
         starting_height: int = 1,
     ):
-
         super().__init__(
             relative_rect=relative_rect,
             visible_percentage=visible_percentage,
@@ -371,7 +371,6 @@ class UISpriteButton:
         tool_tip_text=None,
         anchors=None,
     ):
-
         # We have to scale the image before putting it into the image object. Otherwise, the method of upscaling that
         # UIImage uses will make the pixel art fuzzy
         self.image = pygame_gui.elements.UIImage(
@@ -475,7 +474,7 @@ class CatButton(UIImageButton):
             tool_tip_text=tool_tip_text,
             container=container,
             anchors=anchors,
-            allow_double_clicks=True
+            allow_double_clicks=True,
         )
 
     def return_cat_id(self):
@@ -511,7 +510,6 @@ class UITextBoxTweaked(pygame_gui.elements.UITextBox):
         text_kwargs=None,
         allow_split_dashes: bool = True,
     ):
-
         self.line_spaceing = line_spacing
 
         super().__init__(
@@ -598,7 +596,6 @@ class UIRelationStatusBar:
         manager=None,
         style="bars",
     ):
-
         # Change the color of the bar depending on the value and if it's a negative or positive trait
         if percent_full > 49:
             if positive_trait:
@@ -658,7 +655,6 @@ class IDImageButton(UIImageButton):
         manager=None,
         layer_starting_height=1,
     ):
-
         if ids:
             self.ids = ids
         else:
@@ -772,7 +768,6 @@ class UICheckbox(UIImageButton):
         manager,
         check: bool = False,
     ):
-
         self.checked = check
 
         relative_rect = scale(pygame.Rect(position, (68, 68)))

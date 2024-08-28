@@ -19,6 +19,7 @@ import ujson
 from scripts.cat.cats import Cat, cat_class
 from scripts.cat.familial_terms import (
     familyterms,
+    rebuild_familial_terms,
 )
 from scripts.cat.history import History
 from scripts.cat.names import names
@@ -225,6 +226,8 @@ class Clan:
         self.add_cat(self.instructor)
         self.add_to_starclan(self.instructor)
         self.all_clans = []
+
+        rebuild_familial_terms()
 
         key_copy = tuple(Cat.all_cats.keys())
         for i in key_copy:  # Going through all currently existing cats

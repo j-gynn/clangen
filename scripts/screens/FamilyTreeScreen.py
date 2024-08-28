@@ -48,6 +48,7 @@ class FamilyTreeScreen(Screens):
         self.parents_button = None
         self.grandparents_button = None
         self.back_button = None
+        self.update_terms = None
         self.next_cat_button = None
         self.previous_cat_button = None
         self.the_cat: Optional[Cat] = None
@@ -77,6 +78,8 @@ class FamilyTreeScreen(Screens):
             if event.ui_element == self.back_button:
                 self.change_screen("profile screen")
                 game.switches["root_cat"] = None
+            elif event.ui_element == self.update_terms:
+                self.change_screen("change familial terms screen")
             elif event.ui_element == self.previous_cat_button:
                 if isinstance(Cat.fetch_cat(self.previous_cat), Cat):
                     game.switches["cat"] = self.previous_cat
@@ -187,6 +190,16 @@ class FamilyTreeScreen(Screens):
             "",
             object_id="#back_button",
             manager=MANAGER,
+        )
+
+        rect: pygame.Rect = scale(pygame.Rect((0, 0), (210, 60)))
+        rect.topright = tuple(scale(pygame.Rect((-50, 120), (0, 0)))[0:2])
+        self.update_terms = UIImageButton(
+            rect,
+            "",
+            object_id="#back_button",
+            manager=MANAGER,
+            anchors={"right": "right"},
         )
 
         # our container for the family tree, this will center itself based on visible relation group buttons
@@ -796,6 +809,8 @@ class FamilyTreeScreen(Screens):
         del self.next_cat_button
         self.back_button.kill()
         del self.back_button
+        self.update_terms.kill()
+        del self.update_terms
         self.family_tree.kill()
         del self.family_tree
         self.relation_backdrop.kill()
