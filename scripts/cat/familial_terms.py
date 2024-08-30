@@ -114,6 +114,12 @@ class FamilyTerms:
     def get_term(
         cls, indexes: List[int], can_have_intermediary: bool = False
     ) -> List[str]:
+        """
+        Returns the terms from the dictionary that correspond to the indexes.
+        :param indexes: A list of indexes for the dictionary.
+        :param can_have_intermediary:
+        :return:
+        """
         try:
             if can_have_intermediary:
                 val = [cls._dict[item].term for item in indexes]
@@ -220,9 +226,11 @@ class FamilyTerms:
         version = old_list[0].term
 
         if version == "0.0.1":
-            # make any changes needed, then move on to the next version
+            # make any changes needed between this and the next version, then move on
             version = "0.0.1"
 
+        # if version == "0.0.2":
+        # etc, etc.
         cls.save_familial(old_list)
         return old_list
 
