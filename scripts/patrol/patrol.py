@@ -5,13 +5,12 @@ from copy import deepcopy
 from itertools import repeat
 from os.path import exists as path_exists
 from random import choice, randint, choices
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import pygame
 import ujson
 
 from scripts.cat.cats import Cat
-from scripts.cat.history import History
 from scripts.clan import Clan
 from scripts.game_structure.game_essentials import game
 from scripts.patrol.patrol_event import PatrolEvent
@@ -39,8 +38,7 @@ class Patrol:
     used_patrols = []
 
     def __init__(self):
-
-        self.patrol_event: PatrolEvent = None
+        self.patrol_event: Optional[PatrolEvent] = None
 
         self.patrol_leader = None
         self.random_cat = None
@@ -247,29 +245,53 @@ class Patrol:
 
         possible_patrols = []
         # This is for debugging purposes, load-in *ALL* the possible patrols when debug_override_patrol_stat_requirements is true. (May require longer loading time)
-        if (game.config["patrol_generation"]["debug_override_patrol_stat_requirements"]):
+        if game.config["patrol_generation"]["debug_override_patrol_stat_requirements"]:
             leaves = ["greenleaf", "leaf-bare", "leaf-fall", "newleaf", "any"]
             for biome in game.clan.BIOME_TYPES:
                 for leaf in leaves:
                     biome_dir = f"{biome.lower()}/"
                     self.update_resources(biome_dir, leaf)
                     possible_patrols.extend(self.generate_patrol_events(self.HUNTING))
-                    possible_patrols.extend(self.generate_patrol_events(self.HUNTING_SZN))
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.HUNTING_SZN)
+                    )
                     possible_patrols.extend(self.generate_patrol_events(self.BORDER))
-                    possible_patrols.extend(self.generate_patrol_events(self.BORDER_SZN))
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.BORDER_SZN)
+                    )
                     possible_patrols.extend(self.generate_patrol_events(self.TRAINING))
-                    possible_patrols.extend(self.generate_patrol_events(self.TRAINING_SZN))
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.TRAINING_SZN)
+                    )
                     possible_patrols.extend(self.generate_patrol_events(self.MEDCAT))
-                    possible_patrols.extend(self.generate_patrol_events(self.MEDCAT_SZN))
-                    possible_patrols.extend(self.generate_patrol_events(self.HUNTING_GEN))
-                    possible_patrols.extend(self.generate_patrol_events(self.BORDER_GEN))
-                    possible_patrols.extend(self.generate_patrol_events(self.TRAINING_GEN))
-                    possible_patrols.extend(self.generate_patrol_events(self.MEDCAT_GEN))
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.MEDCAT_SZN)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.HUNTING_GEN)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.BORDER_GEN)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.TRAINING_GEN)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.MEDCAT_GEN)
+                    )
                     possible_patrols.extend(self.generate_patrol_events(self.DISASTER))
-                    possible_patrols.extend(self.generate_patrol_events(self.NEW_CAT_WELCOMING))
-                    possible_patrols.extend(self.generate_patrol_events(self.NEW_CAT_HOSTILE))
-                    possible_patrols.extend(self.generate_patrol_events(self.OTHER_CLAN_ALLIES))
-                    possible_patrols.extend(self.generate_patrol_events(self.OTHER_CLAN_HOSTILE))
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.NEW_CAT_WELCOMING)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.NEW_CAT_HOSTILE)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.OTHER_CLAN_ALLIES)
+                    )
+                    possible_patrols.extend(
+                        self.generate_patrol_events(self.OTHER_CLAN_HOSTILE)
+                    )
 
         # this next one is needed for Classic specifically
         patrol_type = (
@@ -371,21 +393,19 @@ class Patrol:
             possible_patrols, biome, camp, current_season, patrol_type
         )
 
-        # This is a debug option, this allows you to remove any constraints of a patrol regarding location, session, biomes, etc. 
+        # This is a debug option, this allows you to remove any constraints of a patrol regarding location, session, biomes, etc.
         if game.config["patrol_generation"]["debug_override_patrol_stat_requirements"]:
             final_patrols = final_romance_patrols = possible_patrols
             # Logging
-            print("All patrol filters regarding location, session, etc. have been removed.")
+            print(
+                "All patrol filters regarding role, location, season, etc. have been removed."
+            )
 
-
-        # This is a debug option. If the patrol_id set isn "debug_ensure_patrol" is possible,
+        # This is a debug option. If the patrol_id set in "debug_ensure_patrol" is possible,
         # make it the *only* possible patrol
         if isinstance(game.config["patrol_generation"]["debug_ensure_patrol_id"], str):
-            for _pat in possible_patrols:
-                if (
-                    _pat.patrol_id
-                    == game.config["patrol_generation"]["debug_ensure_patrol_id"]
-                ):
+            for _pat in set(final_patrols + final_romance_patrols):
+                if _pat == game.config["patrol_generation"]["debug_ensure_patrol_id"]:
                     patrol_type = choice(_pat.types) if _pat.types != [] else "general"
                     final_patrols = final_romance_patrols = [_pat]
                     print(
@@ -404,10 +424,12 @@ class Patrol:
         return final_patrols, final_romance_patrols
 
     def _check_constraints(self, patrol: PatrolEvent) -> bool:
-        if not filter_relationship_type(group=self.patrol_cats,
-                                        filter_types=patrol.relationship_constraints,
-                                        event_id=patrol.patrol_id,
-                                        patrol_leader=self.patrol_leader):
+        if not filter_relationship_type(
+            group=self.patrol_cats,
+            filter_types=patrol.relationship_constraints,
+            event_id=patrol.patrol_id,
+            patrol_leader=self.patrol_leader,
+        ):
             return False
 
         if (
@@ -574,7 +596,6 @@ class Patrol:
     def get_filtered_patrols(
         self, possible_patrols, biome, camp, current_season, patrol_type
     ):
-
         filtered_patrols, romantic_patrols = self._filter_patrols(
             possible_patrols, biome, camp, current_season, patrol_type
         )
@@ -632,7 +653,6 @@ class Patrol:
         return all_patrol_events
 
     def determine_outcome(self, antagonize=False):
-
         if self.patrol_event is None:
             return
 
@@ -669,7 +689,7 @@ class Patrol:
         # Run the chosen outcome
         return final_event.execute_outcome(self)
 
-    def calculate_success( 
+    def calculate_success(
         self, success_outcome: PatrolOutcome, fail_outcome: PatrolOutcome
     ) -> Tuple[PatrolOutcome, bool]:
         """Returns both the chosen event, and a boolian that's True if success, and False is fail."""
@@ -729,10 +749,14 @@ class Patrol:
         success = int(random.random() * 120) < success_chance
 
         # This is a debug option, this will forcefully change the outcome of a patrol
-        if isinstance(game.config["patrol_generation"]["debug_ensure_patrol_outcome"], bool):
+        if isinstance(
+            game.config["patrol_generation"]["debug_ensure_patrol_outcome"], bool
+        ):
             success = game.config["patrol_generation"]["debug_ensure_patrol_outcome"]
             # Logging
-            print(f"The outcome of {self.patrol_event.patrol_id} was altered to {success}")
+            print(
+                f"The outcome of {self.patrol_event.patrol_id} was altered to {success}"
+            )
 
         return (success_outcome if success else fail_outcome, success)
 
@@ -1080,8 +1104,9 @@ class Patrol:
             )
             text = text.replace(list_type, str(sign_list))
 
-        #TODO: check if this can be handled in event_text_adjust
+        # TODO: check if this can be handled in event_text_adjust
         return text
+
 
 # ---------------------------------------------------------------------------- #
 #                               PATROL CLASS END                               #
