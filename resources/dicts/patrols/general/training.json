@@ -347,7 +347,7 @@
             "all apprentices": [-1, -1]
         },
         "weight": 10,
-        "intro_text": "r_c feels overwhelmed trying to train by {PRONOUN/r_c/self}.",
+        "intro_text": "r_c feels {CHOICE/overwhelmed/distressed/panicked} trying to train by {PRONOUN/r_c/self}.",
         "decline_text": "{PRONOUN/r_c/subject/CAP} {VERB/r_c/join/joins} up with an outgoing hunting patrol to avoid a lonely training session.",
         "chance_of_success": 60,
         "success_outcomes": [

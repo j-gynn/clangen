@@ -874,9 +874,7 @@ def create_new_cat(
                     born_with = True
 
                 new_cat.get_permanent_condition(chosen_condition, born_with)
-                if
-                        new_cat.permanent_condition[chosen_condition]["moons_until"]
-                        == 0:
+                if new_cat.permanent_condition[chosen_condition]["moons_until"] == 0:
                     new_cat.permanent_condition[chosen_condition]["moons_until"] = -2
 
                 # assign scars
@@ -1704,7 +1702,9 @@ def name_repl(m, cat_dict):
 def attr_repl(text, text_kwargs, raise_exception=False, *, cat_count=0, patrol=False):
     values = text.group(1).split("/")
     if values[0].upper() == "PRONOUN" or values[0].upper() == "VERB":
-        return text.match  # this is a pronoun tag and should be ignored
+        return text.group()  # this is a pronoun tag and should be ignored
+    elif values[0].upper() == "CHOICE":
+        return choice(values[1:])
 
     # handling multi-type attributes
     if "_" in values[0]:
@@ -2038,7 +2038,8 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
 def event_text_adjust(
     Cat,
     text,
-    *,patrol_leader=None,
+        *,
+        patrol_leader=None,
     main_cat=None,
     random_cat=None,
     stat_cat=None,
