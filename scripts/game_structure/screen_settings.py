@@ -20,6 +20,8 @@ screen_x = 800
 screen_y = 700
 screen_scale = 1
 game_screen_size = (800, 700)
+fullscreen_size: Tuple[int, int] = (0, 0)
+windowed_size: Tuple[int, int] = (800, 700)
 MANAGER: Optional[pygame_gui.UIManager] = None
 screen: Optional[pygame.Surface] = None
 curr_variable_dict = {}
@@ -28,11 +30,20 @@ display_change_in_progress = False  # this acts as a lock to ensure we don't end
 
 
 def set_display_mode(
-    fullscreen=None,
+    fullscreen: bool = None,
     source_screen: Optional["Screens"] = None,
-    show_confirm_dialog=True,
-    ingame_switch=True,
+    show_confirm_dialog: bool = True,
+    ingame_switch: bool = True,
 ):
+    """
+    Change the display settings here. Called when the game first runs and whenever the screen size changes
+    (e.g. windowed resizing or swapping to fullscren)
+    :param fullscreen: Whether to put the game in fullscreen, default None
+    :param source_screen: The screen that called this request, default None
+    :param show_confirm_dialog: Whether to display the "are you sure you want to make these changes" dialog, default True
+    :param ingame_switch: True if we need to load in data from the game after rebuilding
+    :return: None
+    """
     global display_change_in_progress
 
     # if we're already in the process of changing the display
@@ -44,6 +55,8 @@ def set_display_mode(
     global screen_y
     global screen_scale
     global game_screen_size
+    global fullscreen_size
+    global windowed_size
     global screen
     global MANAGER
     global curr_variable_dict
@@ -62,47 +75,51 @@ def set_display_mode(
     with open("resources/screen_config.json", "r") as read_config:
         screen_config = ujson.load(read_config)
 
+    display_sizes = pygame.display.get_desktop_sizes()  # the primary display
+    screen_config["fullscreen_display"] = (
+        screen_config["fullscreen_display"]
+        if screen_config["fullscreen_display"] < len(display_sizes)
+        else 0
+    )
+    fullscreen_size = display_sizes[screen_config["fullscreen_display"]]
+    # display_size = [3840, 2160]
+
     if source_screen is not None:
         curr_variable_dict = source_screen.display_change_save()
 
+    # Getting the correct screen sizes
     if fullscreen:
-        display_sizes = pygame.display.get_desktop_sizes()  # the primary display
-        screen_config["fullscreen_display"] = (
-            screen_config["fullscreen_display"]
-            if screen_config["fullscreen_display"] < len(display_sizes)
-            else 0
-        )
-        display_size = display_sizes[screen_config["fullscreen_display"]]
+        display_size = fullscreen_size
         # display_size = [3840, 2160]
 
-        determine_screen_scale(display_size[0], display_size[1])
+        if ingame_switch:
+            # set the windowed size to whatever it was before we fullscreened
+            windowed_size = screen.get_size()
+
+        determine_screen_scale(display_size)
 
         screen = pygame.display.set_mode(
-            display_size, pygame.FULLSCREEN, display=screen_config["fullscreen_display"]
+            display_size,
+            flags=pygame.FULLSCREEN,
+            display=screen_config["fullscreen_display"],
         )
-        offset = (
-            floor((display_size[0] - screen_x) / 2),
-            floor((display_size[1] - screen_y) / 2),
-        )
-        game_screen_size = (screen_x, screen_y)
     else:
-        offset = (0, 0)
-        screen_x = 800
-        screen_y = 700
-        screen_scale = 1
-        game_screen_size = (800, 700)
-        screen = pygame.display.set_mode((screen_x, screen_y))
-    game_screen_size = (screen_x, screen_y)
+        if screen is not None and not bool(screen.get_flags() & pygame.FULLSCREEN):
+            windowed_size = screen.get_size()
+        determine_screen_scale(windowed_size)
+        screen = pygame.display.set_mode((screen_x, screen_y), flags=pygame.RESIZABLE)
 
+    # BUILD THE MANAGER (or modify it appropriately)
     if source_screen is None:
         MANAGER = load_manager((screen_x, screen_y), offset, scale=screen_scale)
-    else:
+    elif old_scale != screen_scale:
         # generate new theme
         origin = "resources/theme/master_screen_scale.json"
         theme_location = "resources/theme/generated/screen_scale.json"
         generate_screen_scale(origin, theme_location, screen_scale)
         MANAGER.get_theme().load_theme(theme_location)
 
+    # HANDLE IN-GAME SCREEN SWITCHING
     if source_screen is not None:
         import scripts.screens.screens_core.screens_core
 
@@ -142,6 +159,8 @@ def set_display_mode(
             new_screen.screen_switches()
             if ingame_switch:
                 new_screen.display_change_load(curr_variable_dict)
+
+    # REPOPULATE THE GAME
     if curr_variable_dict is not None and show_confirm_dialog:
         from scripts.screens.all_screens import AllScreens
 
@@ -201,9 +220,15 @@ def set_display_mode(
         ConfirmDisplayChanges(source_screen=source_screen)
 
 
-def determine_screen_scale(x, y):
+def determine_screen_scale(xy: Tuple[int, int]):
+    """
+    Determines how big to render contents.
+    :param xy: The screen size
+    :return: None
+    """
     global screen_scale, screen_x, screen_y, offset, game_screen_size
     # this means screen scales in multiples of 200 x 175 which has a reasonable tradeoff for crunch
+    x, y = xy
     scalex = x // 200
     scaley = y // 175
     screen_scale = min(scalex, scaley) / 4
