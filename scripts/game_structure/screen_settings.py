@@ -220,20 +220,39 @@ def set_display_mode(
         ConfirmDisplayChanges(source_screen=source_screen)
 
 
-def determine_screen_scale(xy: Tuple[int, int]):
+def determine_screen_scale(xy: Tuple[int, int], ingame_switch):
     """
     Determines how big to render contents.
     :param xy: The screen size
     :return: None
     """
     global screen_scale, screen_x, screen_y, offset, game_screen_size
-    # this means screen scales in multiples of 200 x 175 which has a reasonable tradeoff for crunch
+
     x, y = xy
-    scalex = x // 200
-    scaley = y // 175
-    screen_scale = min(scalex, scaley) / 4
-    screen_x = 800 * screen_scale
-    screen_y = 700 * screen_scale
+
+    if ingame_switch:
+        from scripts.game_structure.game_essentials import game
+
+        screen_config = game.settings
+    else:
+        with open("saves/settings.json", "r") as read_config:
+            screen_config = ujson.load(read_config)
+
+    if "fullscreen scaling" in screen_config and screen_config["fullscreen scaling"]:
+        scalex = (x - 20) // 80
+        scaley = (y - 20) // 70
+
+        screen_scale = min(scalex, scaley) / 10
+
+        screen_x = 800 * screen_scale
+        screen_y = 700 * screen_scale
+    else:
+        # this means screen scales in multiples of 200 x 175 which has a reasonable tradeoff for crunch
+        scalex = x // 200
+        scaley = y // 175
+        screen_scale = min(scalex, scaley) / 4
+        screen_x = 800 * screen_scale
+        screen_y = 700 * screen_scale
 
     offset = (
         floor((x - screen_x) / 2),
