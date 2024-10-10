@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Dict
 
 import pygame
 import pygame_gui
@@ -18,27 +18,27 @@ from scripts.utility import (
     ui_scale,
     ui_scale_offset,
     ui_scale_dimensions,
-    ui_scale_blit,
     get_text_box_theme,
-    ui_scale_value,
 )
 
-game_frame: Optional[pygame.Surface] = None
 core_vignette = pygame.image.load("resources/images/vignette.png")
 vignette: Optional[pygame.Surface] = None
 dropshadow: Optional[pygame.Surface] = None
 fade: Optional[pygame.Surface] = None
+blur_bg_offset = (0, 0)
 
 menu_buttons = dict()
 
-default_game_bgs = None
+default_game_bgs = {"light": None, "dark": None}
 default_fullscreen_bgs = None
+game_frame = None
+bg_shade_layer: Dict[str, Optional[pygame.Surface]] = {"light": None, "dark": None}
 
 version_number = None
 dev_watermark = None
 
 
-def rebuild_core(*, should_rebuild_bgs=True):
+def rebuild_core(*, should_rebuild_bgs=True, scale_change=True):
     global menu_buttons
     global default_game_bgs
     global default_fullscreen_bgs
@@ -287,47 +287,25 @@ def rebuild_core(*, should_rebuild_bgs=True):
     if should_rebuild_bgs:
         rebuild_bgs()
 
+    if scale_change:
+        rebuild_game_frame(theme_changed=True)
 
-def rebuild_bgs():
+
+def rebuild_bgs(theme_changed=True):
     global default_fullscreen_bgs
     global default_game_bgs
-    global game_frame
-    global vignette
-    global dropshadow
-    global fade
+    global bg_shade_layer
+    global vignette, dropshadow, fade
+    global blur_bg_offset
 
     if (
         vignette is None
         or scripts.game_structure.screen_settings.screen.get_size()
         != vignette.get_size()
     ):
-        game_frame = get_box(
-            BoxStyles.FRAME,
-            (820, 720),
-        )
+        rebuild_game_frame(theme_changed)
 
-        vignette = pygame.transform.scale(
-            core_vignette, scripts.game_structure.screen_settings.screen.get_size()
-        ).convert_alpha()
-
-        dropshadow = pygame.Surface(
-            scripts.game_structure.screen_settings.screen.get_size(),
-            flags=pygame.SRCALPHA,
-        )
-
-        fade = pygame.Surface(scripts.game_structure.screen_settings.screen.get_size())
-        fade.fill(pygame.Color(113, 113, 111))  # middle grey
-
-        game_box = pygame.Surface(
-            (
-                scripts.game_structure.screen_settings.screen_x + ui_scale_value(30),
-                scripts.game_structure.screen_settings.screen_y + ui_scale_value(30),
-            ),
-            pygame.SRCALPHA,
-        )
-        feather_surface(game_box, 15)
-        dropshadow.blit(game_box, ui_scale_blit((-15, -15)))
-        del game_box
+        # determine window offset for BGs
 
     bg = pygame.Surface(scripts.game_structure.screen_settings.game_screen_size)
     bg.fill(game.config["theme"]["light_mode_background"])
@@ -339,7 +317,7 @@ def rebuild_bgs():
         "dark": {"default": bg_dark},
     }
 
-    temp_screen_size = scripts.game_structure.screen_settings.screen.get_size()
+    temp_screen_size = scripts.game_structure.screen_settings.fullscreen_size
 
     default_fullscreen_bgs = {
         "light": {
@@ -392,29 +370,26 @@ def rebuild_bgs():
                 "starclan",
             ]:
                 default_fullscreen_bgs[theme][name] = process_blur_bg(
-                    default_fullscreen_bgs[theme][name], theme=theme
+                    default_fullscreen_bgs[theme][name]
                 )
             elif name == "default":
                 default_fullscreen_bgs[theme][name] = process_blur_bg(
-                    default_fullscreen_bgs[theme][name],
-                    theme=theme,
-                    vignette_strength=0,
-                    fade_color=None,
+                    default_fullscreen_bgs[theme][name]
                 )
             elif name in ["mainmenu_bg", "darkforest", "unknown_residence"]:
                 default_fullscreen_bgs[theme][name] = process_blur_bg(
-                    default_fullscreen_bgs[theme][name], theme=theme, blur_radius=10
+                    default_fullscreen_bgs[theme][name], blur_radius=10
                 )
             elif name == "starclan":
                 default_fullscreen_bgs[theme][name] = process_blur_bg(
-                    default_fullscreen_bgs[theme][name], theme=theme, blur_radius=2
+                    default_fullscreen_bgs[theme][name], blur_radius=2
                 )
 
     camp_bgs = get_camp_bgs()
 
     for theme in ["light", "dark"]:
         for name, camp_bg in camp_bgs[theme].items():
-            default_fullscreen_bgs[theme][name] = process_blur_bg(camp_bg, theme=theme)
+            default_fullscreen_bgs[theme][name] = process_blur_bg(camp_bg)
 
 
 def get_camp_bgs():
@@ -477,45 +452,12 @@ def get_camp_bgs():
     }
 
 
-def process_blur_bg(
-    bg,
-    theme: str = None,
-    blur_radius: Optional[int] = 5,
-    vignette_strength: Optional[int] = None,
-    fade_color: Optional[Tuple[int, int, int]] = None,
-) -> pygame.Surface:
-    global vignette
-    global fade
-    global dropshadow
-    if theme is None:
-        theme = "dark" if game.settings["dark mode"] else "light"
-
-    fade.fill(game.config["theme"]["fullscreen_background"][theme]["fade_color"])
-    vignette.set_alpha(
-        game.config["theme"]["fullscreen_background"][theme]["vignette_alpha"]
-    )
-    dropshadow.set_alpha(
-        game.config["theme"]["fullscreen_background"][theme]["dropshadow_alpha"]
-    )
-
-    if vignette_strength is not None:
-        vignette.set_alpha(vignette_strength)
-
+def process_blur_bg(bg, blur_radius: Optional[int] = 5) -> pygame.Surface:
     bg = pygame.transform.scale(
-        bg, scripts.game_structure.screen_settings.screen.get_size()
-    ).convert_alpha()
-
+        bg, scripts.game_structure.screen_settings.fullscreen_size
+    )
     if blur_radius is not None:
         bg = pygame.transform.box_blur(bg, blur_radius)
-
-    bg.blits(
-        (
-            (fade, (0, 0), None, pygame.BLEND_MULT),
-            (vignette, (0, 0), None),
-            (dropshadow, (0, 0), None),
-            (game_frame, ui_scale_blit((-10, -10))),
-        )
-    )
 
     return bg
 
@@ -534,6 +476,57 @@ def feather_surface(surface, feather_width):
             if distance < feather_width:
                 alpha = int(255 * (distance / feather_width))
                 surface.set_at((x, y), (0, 0, 0, alpha))
+
+
+def rebuild_game_frame(theme_changed=True):
+    global game_frame, bg_shade_layer, vignette, dropshadow, fade
+    game_frame = get_box(
+        BoxStyles.FRAME,
+        (820, 720),
+    )
+    global default_game_bgs
+
+    bg = pygame.Surface(scripts.game_structure.screen_settings.game_screen_size)
+    bg.fill(game.config["theme"]["light_mode_background"])
+    bg_dark = pygame.Surface(scripts.game_structure.screen_settings.game_screen_size)
+    bg_dark.fill(game.config["theme"]["dark_mode_background"])
+
+    default_game_bgs["light"] = {"default": bg}
+    default_game_bgs["dark"] = {"default": bg_dark}
+
+    if theme_changed:
+        vignette = pygame.transform.scale(
+            core_vignette, scripts.game_structure.screen_settings.screen.get_size()
+        ).convert_alpha()
+
+        dropshadow = pygame.Surface(
+            scripts.game_structure.screen_settings.screen.get_size(),
+            flags=pygame.SRCALPHA,
+        )
+
+        fade = pygame.Surface(scripts.game_structure.screen_settings.screen.get_size())
+
+    for theme in ["dark", "light"]:
+        # fade.fill(game.config["theme"]["fullscreen_background"][theme]["fade_color"])
+        vignette.set_alpha(
+            game.config["theme"]["fullscreen_background"][theme]["vignette_alpha"]
+        )
+        dropshadow.set_alpha(
+            game.config["theme"]["fullscreen_background"][theme]["dropshadow_alpha"]
+        )
+        bg_shade_layer[theme] = pygame.Surface(
+            scripts.game_structure.screen_settings.screen.get_size()
+        ).convert_alpha()
+        bg_shade_layer[theme].blits(
+            (
+                # (fade.convert_alpha(), (0, 0)),
+                (vignette.convert_alpha(), (0, 0)),
+            )
+        )
+
+        bg_shade_layer[theme].set_alpha(
+            game.config["theme"]["fullscreen_background"][theme]["vignette_alpha"]
+        )
 
 
 rebuild_core()

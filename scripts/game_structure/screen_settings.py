@@ -34,6 +34,7 @@ def set_display_mode(
     source_screen: Optional["Screens"] = None,
     show_confirm_dialog: bool = True,
     ingame_switch: bool = True,
+    override_screen_size=None,
 ):
     """
     Change the display settings here. Called when the game first runs and whenever the screen size changes
@@ -42,6 +43,7 @@ def set_display_mode(
     :param source_screen: The screen that called this request, default None
     :param show_confirm_dialog: Whether to display the "are you sure you want to make these changes" dialog, default True
     :param ingame_switch: True if we need to load in data from the game after rebuilding
+    :param override_screen_size: Used exclusively to handle minimum size banding
     :return: None
     """
     global display_change_in_progress
@@ -96,7 +98,7 @@ def set_display_mode(
             # set the windowed size to whatever it was before we fullscreened
             windowed_size = screen.get_size()
 
-        determine_screen_scale(display_size)
+        determine_screen_scale(display_size, ingame_switch)
 
         screen = pygame.display.set_mode(
             display_size,
@@ -105,9 +107,28 @@ def set_display_mode(
         )
     else:
         if screen is not None and not bool(screen.get_flags() & pygame.FULLSCREEN):
-            windowed_size = screen.get_size()
-        determine_screen_scale(windowed_size)
-        screen = pygame.display.set_mode((screen_x, screen_y), flags=pygame.RESIZABLE)
+            windowed_size = (
+                override_screen_size
+                if override_screen_size is not None
+                else screen.get_size()
+            )
+        determine_screen_scale(windowed_size, ingame_switch)
+        screen = pygame.display.set_mode(
+            windowed_size, flags=pygame.RESIZABLE | pygame.DOUBLEBUF
+        )
+
+    try:
+        source_screen.show_bg(blur_only=True)
+        pygame.display.flip()
+    except AttributeError:
+        screen.fill(
+            game.config["theme"][
+                "dark_mode_background"
+                if game.settings["dark mode"]
+                else "light_mode_background"
+            ]
+        )
+        pygame.display.flip()
 
     # BUILD THE MANAGER (or modify it appropriately)
     if source_screen is None:
@@ -121,37 +142,28 @@ def set_display_mode(
 
     # HANDLE IN-GAME SCREEN SWITCHING
     if source_screen is not None:
-        import scripts.screens.screens_core.screens_core
-
         MANAGER.set_window_resolution(game_screen_size)
         MANAGER.set_offset(offset)
-        scripts.screens.screens_core.screens_core.rebuild_bgs()
         if old_scale != screen_scale:
             from scripts.screens.all_screens import AllScreens
             import scripts.screens.screens_core.screens_core
             import scripts.debug_menu
 
             game.save_settings(currentscreen=source_screen)
-            source_screen.exit_screen()
-
-            if fullscreen:
-                mouse_pos = (mouse_pos[0] * screen_scale) + offset[0], mouse_pos[
-                    1
-                ] * screen_scale + offset[1]
-            else:
-                mouse_pos = (
-                    (mouse_pos[0] - old_offset[0]) / old_scale,
-                    (mouse_pos[1] - old_offset[1]) / old_scale,
-                )
+            try:
+                source_screen.exit_screen()
+            except AttributeError:
+                pass
 
             MANAGER.clear_and_reset()
             MANAGER.set_window_resolution(game_screen_size)
             MANAGER.set_offset(offset)
-            pygame.mouse.set_pos(mouse_pos)
 
             AllScreens.rebuild_all_screens()
 
-            scripts.screens.screens_core.screens_core.rebuild_core()
+            scripts.screens.screens_core.screens_core.rebuild_core(
+                should_rebuild_bgs=False
+            )
             scripts.debug_menu.debugmode.rebuild_console()
 
             screen_name = source_screen.name.replace(" ", "_")
@@ -159,6 +171,7 @@ def set_display_mode(
             new_screen.screen_switches()
             if ingame_switch:
                 new_screen.display_change_load(curr_variable_dict)
+                new_screen.show_bg()
 
     # REPOPULATE THE GAME
     if curr_variable_dict is not None and show_confirm_dialog:
@@ -239,10 +252,15 @@ def determine_screen_scale(xy: Tuple[int, int], ingame_switch):
             screen_config = ujson.load(read_config)
 
     if "fullscreen scaling" in screen_config and screen_config["fullscreen scaling"]:
-        scalex = (x - 20) // 80
-        scaley = (y - 20) // 70
+        if not (screen_config["fullscreen"] or x // 8 == y // 7):
+            # if scaling is dynamic, we can say that the border can be omitted if we're the perfect size
+            scalex = (x - 20) // 8
+            scaley = (y - 20) // 7
+        else:
+            scalex = x // 8
+            scaley = y // 7
 
-        screen_scale = min(scalex, scaley) / 10
+        screen_scale = min(scalex, scaley) / 100
 
         screen_x = 800 * screen_scale
         screen_y = 700 * screen_scale

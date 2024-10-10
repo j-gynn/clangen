@@ -141,6 +141,7 @@ class StartScreen(Screens):
         TODO: DOCS
         """
         # Button murder time.
+        super().exit_screen()
         self.continue_button.kill()
         self.switch_clan_button.kill()
         self.new_clan_button.kill()

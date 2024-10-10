@@ -38,7 +38,7 @@ class Screens:
     # scripts/ui/screen_core/screen_core.py
 
     menu_buttons = scripts.screens.screens_core.screens_core.menu_buttons
-    game_frame = scripts.screens.screens_core.screens_core.game_frame
+    game_frame = scripts.screens.screens_core.screens_core.bg_shade_layer
 
     active_bg: Optional[str] = None
 
@@ -164,7 +164,7 @@ class Screens:
         Screens.hide_mute_buttons()
         Screens.hide_menu_buttons()
         Screens.menu_buttons = scripts.screens.screens_core.screens_core.menu_buttons
-        Screens.game_frame = scripts.screens.screens_core.screens_core.game_frame
+        Screens.game_frame = scripts.screens.screens_core.screens_core.bg_shade_layer
         try:
             Screens.update_heading_text(game.clan.name + "Clan")
         except AttributeError:
@@ -529,16 +529,6 @@ class Screens:
         :return: None
         """
 
-        # intialise the vignette strength
-        vignette = scripts.screens.screens_core.screens_core.vignette
-        if vignette_alpha is None:
-            vignette_alpha = game.config["theme"]["fullscreen_background"][
-                "dark" if game.settings["dark mode"] else "light"
-            ]["vignette_alpha"]
-        if not (0 <= vignette_alpha <= 255):
-            raise Exception("Vignette alpha out of range. Permitted values: 0-255.")
-        vignette.set_alpha(vignette_alpha)
-
         # add the bg to the game bgs.
         for name, bg in bgs.items():
             self.game_bgs[name] = pygame.transform.scale(
@@ -555,16 +545,15 @@ class Screens:
                 self.fullscreen_bgs[
                     name
                 ] = scripts.screens.screens_core.screens_core.process_blur_bg(
-                    blur_bgs[name], blur_radius=0, vignette_strength=vignette_alpha
+                    blur_bgs[name]
                 )
                 continue
 
             # no blur_bg, so blur the input bg to become the fullscreen backing
-            # also blit the vignette & game frame over the top of that for performance
             self.fullscreen_bgs[
                 name
             ] = scripts.screens.screens_core.screens_core.process_blur_bg(
-                bg, blur_radius=radius, vignette_strength=vignette_alpha
+                bg, blur_radius=radius
             )
 
     def set_bg(self, bg: Optional[str] = None, blur_bg: Optional[str] = None):
@@ -604,7 +593,7 @@ class Screens:
         # enable the transition to get that sweet, sweet fullscreen fade.
         self.bg_transition = True
 
-    def show_bg(self, theme=None):
+    def show_bg(self, theme=None, blur_only=False):
         """Blit the currently selected blur_bg and bg. Must be called somewhere in on_use.
         :param theme: Allows overriding the displayed theme (dark/light mode).
         """
@@ -671,39 +660,75 @@ class Screens:
                 f"Selected fullscreen background not recognised! '{self.active_blur_bg}' not in default or custom bgs"
             )
 
-        if (
-            self.previous_season != season
-            and self.active_blur_bg == "default"
-            or self.active_blur_bg == season
+        if self.previous_season != season and (
+            self.active_blur_bg == "default" or self.active_blur_bg == season
         ):
             self.bg_transition_time = 10  # doubled transition time for the Vibes
             self.previous_season = season
         # onto the actual blitting
+
         # handle the blur bg
         if (
             scripts.game_structure.screen_settings.game_screen_size
             != scripts.game_structure.screen_settings.screen.get_size()
-        ):
+        ) or blur_only:
             # enable the transition if required
-            if self.bg_transition:
-                # this determines how many frames the fade can show for
-                # in order to remove visual artifacts
-                self.bg_transition_time = 5
-                self.bg_transition = False
+            if not blur_only:
+                if self.bg_transition:
+                    # this determines how many frames the fade can show for
+                    # in order to remove visual artifacts
+                    self.bg_transition_time = 5
+                    self.bg_transition = False
 
-            # actually run the transition
-            if self.bg_transition_time > 0:
-                temp = blur_bg.copy()
-                temp.set_alpha(
-                    255 // self.bg_transition_time
-                )  # this determines the actual fade rate
-                scripts.game_structure.screen_settings.screen.blit(temp, (0, 0))
-                self.bg_transition_time -= 1
+                # actually run the transition
+                if self.bg_transition_time > 0:
+                    temp = blur_bg.copy()
+                    temp.set_alpha(
+                        255 // self.bg_transition_time
+                    )  # this determines the actual fade rate
+                    temp.blits(
+                        (
+                            (
+                                scripts.screens.screens_core.screens_core.bg_shade_layer[
+                                    theme
+                                ],
+                                (0, 0),
+                            ),
+                            (
+                                scripts.screens.screens_core.screens_core.game_frame,
+                                ui_scale_blit((-10, -10)),
+                            ),
+                        )
+                    )
+                    scripts.game_structure.screen_settings.screen.blit(temp, (0, 0))
+                    self.bg_transition_time -= 1
             else:
                 # if we've done the transition, just blit the full-alpha version on top to remove artifacts.
-                scripts.game_structure.screen_settings.screen.blit(blur_bg, (0, 0))
+                scripts.game_structure.screen_settings.screen.blits(
+                    (
+                        (
+                            blur_bg,
+                            (0, 0),
+                        ),
+                        (
+                            scripts.screens.screens_core.screens_core.bg_shade_layer[
+                                theme
+                            ],
+                            (0, 0),
+                        ),
+                    )
+                )
+                if not blur_only:
+                    scripts.game_structure.screen_settings.screen.blit(
+                        scripts.screens.screens_core.screens_core.game_frame,
+                        ui_scale_blit((-10, -10)),
+                    )
+
         # now blit the foreground.
-        scripts.game_structure.screen_settings.screen.blit(bg, ui_scale_blit((0, 0)))
+        if not blur_only:
+            scripts.game_structure.screen_settings.screen.blit(
+                bg, ui_scale_blit((0, 0))
+            )
 
     def set_cat_location_bg(self, cat, bg: str = "default"):
         if cat.dead and not cat.faded:

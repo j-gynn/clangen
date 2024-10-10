@@ -184,6 +184,7 @@ game.rpc.start_rpc.set()
 
 # LOAD cats & clan
 finished_loading = False
+resized = False
 
 
 def load_data():
@@ -213,7 +214,7 @@ def load_data():
 
 
 def loading_animation(scale: float = 1):
-    global finished_loading
+    global finished_loading, resized
 
     # Load images, adjust color
     color = pygame.Surface((200 * scale, 210 * scale))
@@ -259,6 +260,9 @@ def loading_animation(scale: float = 1):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit(savesettings=False)
+            elif event.type == pygame.VIDEORESIZE:
+                resized = True
+                x, y = event.w / 2, event.h / 2
 
         pygame.display.update()
 
@@ -271,6 +275,7 @@ loading_animation(screen_scale)
 # The loading thread should be done by now. This line
 # is just for safety. Plus some cleanup.
 loading_thread.join()
+
 del loading_thread
 del finished_loading
 del loading_animation
@@ -285,6 +290,14 @@ AllScreens.start_screen.screen_switches()
 cursor_img = pygame.image.load("resources/images/cursor.png").convert_alpha()
 cursor = pygame.cursors.Cursor((9, 0), cursor_img)
 disabled_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+if resized:
+    scripts.game_structure.screen_settings.set_display_mode(
+        game.settings["fullscreen"],
+        getattr(AllScreens, game.switches["cur_screen"].replace(" ", "_")),
+        show_confirm_dialog=False,
+        ingame_switch=True,
+    )
 
 while 1:
     time_delta = clock.tick(game.switches["fps"]) / 1000.0
@@ -319,6 +332,22 @@ while 1:
             else:
                 SaveCheck(game.switches["cur_screen"], False, None)
 
+        if event.type == pygame.VIDEORESIZE:
+            print("ooh")
+            w = event.w
+            h = event.h
+            if event.w < 800:
+                w = 800
+            if event.h < 700:
+                h = 700
+
+            scripts.game_structure.screen_settings.set_display_mode(
+                game.settings["fullscreen"],
+                getattr(AllScreens, game.switches["cur_screen"].replace(" ", "_")),
+                show_confirm_dialog=False,
+                ingame_switch=True,
+                override_screen_size=(w, h),
+            )
         # MOUSE CLICK
         if event.type == pygame.MOUSEBUTTONDOWN:
             game.clicked = True
