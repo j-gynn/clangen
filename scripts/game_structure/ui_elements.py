@@ -543,7 +543,11 @@ class UIImageVerticalScrollBar(pygame_gui.elements.UIVerticalScrollBar):
         self.sliding_button.change_layer(starting_height)
         self.button_height = 16
         self.arrow_button_height = self.button_height
-        self.top_button.kill()
+        try:
+            self.top_button.kill()
+            self.bottom_button.kill()
+        except AttributeError:
+            pass
         self.top_button = UIImageButton(
             ui_scale(pygame.Rect((0, 0), (16, 16))),
             text="",
@@ -557,7 +561,6 @@ class UIImageVerticalScrollBar(pygame_gui.elements.UIVerticalScrollBar):
             },
         )
 
-        self.bottom_button.kill()
         bottom_button_rect = ui_scale(pygame.Rect((0, 0), (16, 16)))
         bottom_button_rect.bottomleft = (0, 0)
         self.bottom_button = UIImageButton(

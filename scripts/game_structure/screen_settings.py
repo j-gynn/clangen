@@ -142,11 +142,13 @@ def set_display_mode(
 
     # HANDLE IN-GAME SCREEN SWITCHING
     if source_screen is not None:
+        import scripts.screens.screens_core.screens_core
+
         MANAGER.set_window_resolution(game_screen_size)
         MANAGER.set_offset(offset)
+        scripts.screens.screens_core.screens_core.rebuild_core(should_rebuild_bgs=False)
         if old_scale != screen_scale:
             from scripts.screens.all_screens import AllScreens
-            import scripts.screens.screens_core.screens_core
             import scripts.debug_menu
 
             game.save_settings(currentscreen=source_screen)
@@ -252,15 +254,15 @@ def determine_screen_scale(xy: Tuple[int, int], ingame_switch):
             screen_config = ujson.load(read_config)
 
     if "fullscreen scaling" in screen_config and screen_config["fullscreen scaling"]:
-        if not (screen_config["fullscreen"] or x // 8 == y // 7):
-            # if scaling is dynamic, we can say that the border can be omitted if we're the perfect size
-            scalex = (x - 20) // 8
-            scaley = (y - 20) // 7
-        else:
-            scalex = x // 8
-            scaley = y // 7
+        scalex = (x - 20) // 80
+        scaley = (y - 20) // 70
 
-        screen_scale = min(scalex, scaley) / 100
+        if screen_config["fullscreen"] or x // 8 == y // 7:
+            # if scaling is dynamic, we can say that the border can be omitted if we're the perfect size
+            scalex = x // 80
+            scaley = y // 70
+
+        screen_scale = min(scalex, scaley) / 10
 
         screen_x = 800 * screen_scale
         screen_y = 700 * screen_scale

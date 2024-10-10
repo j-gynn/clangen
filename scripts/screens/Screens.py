@@ -596,6 +596,7 @@ class Screens:
     def show_bg(self, theme=None, blur_only=False):
         """Blit the currently selected blur_bg and bg. Must be called somewhere in on_use.
         :param theme: Allows overriding the displayed theme (dark/light mode).
+        :param blur_only: Used when changing screen size to display something instead of a black box
         """
 
         if theme is None:
@@ -668,10 +669,7 @@ class Screens:
         # onto the actual blitting
 
         # handle the blur bg
-        if (
-            scripts.game_structure.screen_settings.game_screen_size
-            != scripts.game_structure.screen_settings.screen.get_size()
-        ) or blur_only:
+        if (scripts.game_structure.screen_settings.offset != (0, 0)) or blur_only:
             # enable the transition if required
             if not blur_only:
                 if self.bg_transition:
@@ -702,22 +700,22 @@ class Screens:
                     )
                     scripts.game_structure.screen_settings.screen.blit(temp, (0, 0))
                     self.bg_transition_time -= 1
-            else:
-                # if we've done the transition, just blit the full-alpha version on top to remove artifacts.
-                scripts.game_structure.screen_settings.screen.blits(
-                    (
+                else:
+                    # if we've done the transition, just blit the full-alpha version on top to remove artifacts.
+                    scripts.game_structure.screen_settings.screen.blits(
                         (
-                            blur_bg,
-                            (0, 0),
-                        ),
-                        (
-                            scripts.screens.screens_core.screens_core.bg_shade_layer[
-                                theme
-                            ],
-                            (0, 0),
-                        ),
+                            (
+                                blur_bg,
+                                (0, 0),
+                            ),
+                            (
+                                scripts.screens.screens_core.screens_core.bg_shade_layer[
+                                    theme
+                                ],
+                                (0, 0),
+                            ),
+                        )
                     )
-                )
                 if not blur_only:
                     scripts.game_structure.screen_settings.screen.blit(
                         scripts.screens.screens_core.screens_core.game_frame,

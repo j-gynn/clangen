@@ -333,7 +333,6 @@ while 1:
                 SaveCheck(game.switches["cur_screen"], False, None)
 
         if event.type == pygame.VIDEORESIZE:
-            print("ooh")
             w = event.w
             h = event.h
             if event.w < 800:
