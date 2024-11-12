@@ -18,6 +18,8 @@ import pygame
 import ujson
 from pygame_gui.core import ObjectID
 
+from scripts.cat.catregistry import registry
+
 logger = logging.getLogger(__name__)
 from scripts.game_structure import image_cache
 from scripts.cat.history import History
@@ -33,7 +35,8 @@ import scripts.game_structure.screen_settings  # must be done like this to get u
 # ---------------------------------------------------------------------------- #
 
 
-def get_alive_clan_queens(living_cats):
+def get_alive_clan_queens():
+    living_cats = registry.living_cats_list
     living_kits = [
         cat
         for cat in living_cats
@@ -76,19 +79,19 @@ def get_alive_clan_queens(living_cats):
 
 
 def get_alive_status_cats(
-    Cat, get_status: list, working: bool = False, sort: bool = False
+    get_status: list, working: bool = False, sort: bool = False
 ) -> list:
     """
-    returns a list of cat objects for all living cats of get_status in Clan
-    :param Cat Cat: Cat class
-    :param list get_status: list of statuses searching for
-    :param bool working: default False, set to True if you would like the list to only include working cats
-    :param bool sort: default False, set to True if you would like list sorted by descending moon age
+        returns a list of cat objects for all living cats of get_status in Clan
+    st of statuses searching for
+        :param get_status:
+        :param bool working: default False, set to True if you would like the list to only include working cats
+        :param bool sort: default False, set to True if you would like list sorted by descending moon age
     """
 
     alive_cats = [
         i
-        for i in Cat.all_cats.values()
+        for i in registry.all_cats_list
         if i.status in get_status and not i.dead and not i.outside
     ]
 
@@ -101,41 +104,21 @@ def get_alive_status_cats(
     return alive_cats
 
 
-def get_living_cat_count(Cat):
+def get_living_cat_count():
     """
     Returns the int of all living cats, both in and out of the Clan
-    :param Cat: Cat class
     """
-    count = 0
-    for the_cat in Cat.all_cats.values():
-        if the_cat.dead:
-            continue
-        count += 1
-    return count
+    return len([1 for cat in registry.all_cats_list if not cat.dead])
 
 
-def get_living_clan_cat_count(Cat):
-    """
-    Returns the int of all living cats within the Clan
-    :param Cat: Cat class
-    """
-    count = 0
-    for the_cat in Cat.all_cats.values():
-        if the_cat.dead or the_cat.exiled or the_cat.outside:
-            continue
-        count += 1
-    return count
-
-
-def get_cats_same_age(Cat, cat, age_range=10):
+def get_cats_same_age(cat: "Cat", age_range=10):
     """
     Look for all cats in the Clan and returns a list of cats which are in the same age range as the given cat.
-    :param Cat: Cat class
     :param cat: the given cat
     :param int age_range: The allowed age difference between the two cats, default 10
     """
     cats = []
-    for inter_cat in Cat.all_cats.values():
+    for inter_cat in registry.all_cats.values():
         if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
             continue
         if inter_cat.ID == cat.ID:
@@ -159,7 +142,7 @@ def get_cats_same_age(Cat, cat, age_range=10):
 def get_free_possible_mates(cat):
     """Returns a list of available cats, which are possible mates for the given cat."""
     cats = []
-    for inter_cat in cat.all_cats.values():
+    for inter_cat in registry.all_cats.values():
         if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
             continue
         if inter_cat.ID == cat.ID:
@@ -197,7 +180,7 @@ def get_random_moon_cat(
             and not c.exiled
             and not c.outside
             and (c.ID != main_cat.ID),
-            Cat.all_cats.values(),
+            registry.all_cats.values(),
         )
     )
 
@@ -341,13 +324,13 @@ def create_new_cat_block(
             else:
                 parent2 = event.new_cats[index][0]
 
-        adoptive_indexes = [int(index) if index.isdigit() else index for index in adoptive_indexes]
+        adoptive_indexes = [
+            int(index) if index.isdigit() else index for index in adoptive_indexes
+        ]
         for index in adoptive_indexes:
             if in_event_cats[index].ID not in adoptive_parents:
                 adoptive_parents.append(in_event_cats[index].ID)
                 adoptive_parents.extend(in_event_cats[index].mate)
-
-
 
     # gather mates
     give_mates = []
@@ -532,7 +515,7 @@ def create_new_cat_block(
     chosen_cat = None
     if "exists" in attribute_list:
         existing_outsiders = [
-            i for i in Cat.all_cats.values() if i.outside and not i.dead
+            i for i in registry.all_cats.values() if i.outside and not i.dead
         ]
         possible_outsiders = []
         for cat in existing_outsiders:
@@ -603,7 +586,7 @@ def create_new_cat_block(
             outside=outside,
             parent1=parent1.ID if parent1 else None,
             parent2=parent2.ID if parent2 else None,
-            adoptive_parents=adoptive_parents if adoptive_parents else None
+            adoptive_parents=adoptive_parents if adoptive_parents else None,
         )
 
         # NEXT
@@ -711,7 +694,7 @@ def create_new_cat(
     outside: bool = False,
     parent1: str = None,
     parent2: str = None,
-    adoptive_parents: list = None
+    adoptive_parents: list = None,
 ) -> list:
     """
     This function creates new cats and then returns a list of those cats
@@ -798,7 +781,7 @@ def create_new_cat(
                 backstory=backstory,
                 parent1=parent1,
                 parent2=parent2,
-                adoptive_parents=adoptive_parents if adoptive_parents else []
+                adoptive_parents=adoptive_parents if adoptive_parents else [],
             )
         else:
             # grab starting names and accs for loners/kittypets
@@ -806,8 +789,8 @@ def create_new_cat(
                 name = choice(names.names_dict["loner_names"])
                 if bool(getrandbits(1)):
                     accessory = choice(Pelt.collars)
-            elif (
-                loner and bool(getrandbits(1))
+            elif loner and bool(
+                getrandbits(1)
             ):  # try to give name from full loner name list
                 name = choice(names.names_dict["loner_names"])
             else:
@@ -833,7 +816,7 @@ def create_new_cat(
                         backstory=backstory,
                         parent1=parent1,
                         parent2=parent2,
-                        adoptive_parents=adoptive_parents if adoptive_parents else []
+                        adoptive_parents=adoptive_parents if adoptive_parents else [],
                     )
                 else:  # completely new name
                     new_cat = Cat(
@@ -843,7 +826,7 @@ def create_new_cat(
                         backstory=backstory,
                         parent1=parent1,
                         parent2=parent2,
-                        adoptive_parents=adoptive_parents if adoptive_parents else []
+                        adoptive_parents=adoptive_parents if adoptive_parents else [],
                     )
             # these cats keep their old names
             else:
@@ -856,7 +839,7 @@ def create_new_cat(
                     backstory=backstory,
                     parent1=parent1,
                     parent2=parent2,
-                    adoptive_parents=adoptive_parents if adoptive_parents else []
+                    adoptive_parents=adoptive_parents if adoptive_parents else [],
                 )
 
         # give em a collar if they got one
@@ -1053,7 +1036,7 @@ def get_personality_compatibility(cat1, cat2):
 def get_cats_of_romantic_interest(cat):
     """Returns a list of cats, those cats are love interest of the given cat"""
     cats = []
-    for inter_cat in cat.all_cats.values():
+    for inter_cat in registry.all_cats.values():
         if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
             continue
         if inter_cat.ID == cat.ID:
@@ -1388,11 +1371,17 @@ def gather_cat_objects(
             out_set.add(event.patrol_apprentices[1])
         elif abbr == "clan":
             out_set.update(
-                [x for x in Cat.all_cats_list if not (x.dead or x.outside or x.exiled)]
+                [
+                    x
+                    for x in registry.all_cats_list
+                    if not (x.dead or x.outside or x.exiled)
+                ]
             )
         elif abbr == "some_clan":  # 1 / 8 of clan cats are affected
             clan_cats = [
-                x for x in Cat.all_cats_list if not (x.dead or x.outside or x.exiled)
+                x
+                for x in registry.all_cats_list
+                if not (x.dead or x.outside or x.exiled)
             ]
             out_set.update(
                 sample(clan_cats, randint(1, max(1, round(len(clan_cats) / 8))))
@@ -1984,7 +1973,7 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
         kitty = Cat.fetch_cat(game.clan.deputy)
         cat_dict["dep_name"] = (str(kitty.name), choice(kitty.pronouns))
     if "med_name" in text:
-        kitty = choice(get_alive_status_cats(Cat, ["medicine cat"], working=True))
+        kitty = choice(get_alive_status_cats(["medicine cat"], working=True))
         cat_dict["med_name"] = (str(kitty.name), choice(kitty.pronouns))
 
     if cat_dict:
@@ -2135,7 +2124,7 @@ def event_text_adjust(
 
     # med_name
     if "med_name" in text:
-        med = choice(get_alive_status_cats(Cat, ["medicine cat"], working=True))
+        med = choice(get_alive_status_cats(["medicine cat"], working=True))
         replace_dict["med_name"] = (str(med.name), choice(med.pronouns))
 
     # assign all names and pronouns
@@ -2202,8 +2191,6 @@ def event_text_adjust(
 
     # prey lists
     text = adjust_prey_abbr(text)
-
-
 
     # acc_plural (only works for main_cat's acc)
     if "acc_plural" in text:
@@ -2507,7 +2494,7 @@ def update_sprite(cat):
     # apply
     cat.sprite = generate_sprite(cat)
     # update class dictionary
-    cat.all_cats[cat.ID] = cat
+    registry.all_cats[cat.ID] = cat
 
 
 def clan_symbol_sprite(clan, return_string=False, force_light=False):

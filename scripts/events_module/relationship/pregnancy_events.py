@@ -3,6 +3,7 @@ from random import choice, randint
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
 from scripts.cat.names import names, Name
@@ -33,7 +34,7 @@ class Pregnancy_Events:
     def set_biggest_family():
         """Gets the biggest family of the clan."""
         biggest_family = None
-        for cat in Cat.all_cats.values():
+        for cat in registry.all_cats.values():
             ancestors = cat.get_relatives()
             if not biggest_family:
                 biggest_family = ancestors
@@ -48,7 +49,11 @@ class Pregnancy_Events:
         """Returns if the current biggest family is big enough to 'activates' additional inbreeding counters."""
 
         living_cats = len(
-            [i for i in Cat.all_cats.values() if not (i.dead or i.outside or i.exiled)]
+            [
+                i
+                for i in registry.all_cats.values()
+                if not (i.dead or i.outside or i.exiled)
+            ]
         )
         return len(Pregnancy_Events.biggest_family) > (living_cats / 10)
 
@@ -359,7 +364,7 @@ class Pregnancy_Events:
         ):  # safety check, sometimes pregnancies were ending up with 0 due to save rollbacks
             kits_amount = 1
         other_cat_id = clan.pregnancy_data[cat.ID]["second_parent"]
-        other_cat = Cat.all_cats.get(other_cat_id)
+        other_cat = registry.all_cats.get(other_cat_id)
 
         kits = Pregnancy_Events.get_kits(kits_amount, cat, other_cat, clan)
         kits_amount = len(kits)
@@ -440,7 +445,7 @@ class Pregnancy_Events:
             possible_events = events["birth"]["death"]
             # just makin sure meds aren't mentioned if they aren't around or if they are a parent
             meds = get_alive_status_cats(
-                Cat, ["medicine cat", "medicine cat apprentice"], sort=True
+                ["medicine cat", "medicine cat apprentice"], sort=True
             )
             mate_is_med = [mate_id for mate_id in cat.mate if mate_id in meds]
             if not meds or cat in meds or len(mate_is_med) > 0:
@@ -473,7 +478,7 @@ class Pregnancy_Events:
                 possible_events = events["birth"]["difficult_birth"]
                 # just makin sure meds aren't mentioned if they aren't around or if they are a parent
                 meds = get_alive_status_cats(
-                    Cat, ["medicine cat", "medicine cat apprentice"]
+                    ["medicine cat", "medicine cat apprentice"]
                 )
                 mate_is_med = [mate_id for mate_id in cat.mate if mate_id in meds]
                 if not meds or cat in meds or len(mate_is_med) > 0:
@@ -529,7 +534,7 @@ class Pregnancy_Events:
         # check for mate
         if len(cat.mate) > 0:
             for mate_id in cat.mate:
-                if mate_id not in cat.all_cats:
+                if mate_id not in registry.all_cats:
                     print(
                         f"WARNING: {cat.name}  has an invalid mate # {mate_id}. This has been unset."
                     )
@@ -645,7 +650,7 @@ class Pregnancy_Events:
         if not int(random.random() * chance):
             possible_affair_partners = [
                 i
-                for i in Cat.all_cats_list
+                for i in registry.all_cats_list
                 if i.is_potential_mate(cat, for_love_interest=True)
                 and (samesex or i.gender != cat.gender)
                 and i.ID not in cat.mate
@@ -825,7 +830,7 @@ class Pregnancy_Events:
             for cat_id in clan.clan_cats:
                 if cat_id == kit.ID:
                     continue
-                the_cat = Cat.all_cats.get(cat_id)
+                the_cat = registry.all_cats.get(cat_id)
                 if the_cat.dead or the_cat.outside:
                     continue
                 if the_cat.ID in kit.get_parents():
@@ -1061,7 +1066,11 @@ class Pregnancy_Events:
         # CURRENT CAT AMOUNT
         # - increase the inverse chance if the clan is bigger
         living_cats = len(
-            [i for i in Cat.all_cats.values() if not (i.dead or i.outside or i.exiled)]
+            [
+                i
+                for i in registry.all_cats.values()
+                if not (i.dead or i.outside or i.exiled)
+            ]
         )
         if living_cats < 10:
             inverse_chance = int(inverse_chance * 0.5)
@@ -1127,7 +1136,9 @@ class Pregnancy_Events:
 
         # AGE
         # - decrease the inverse chance if the whole clan is really old
-        avg_age = int(sum([cat.moons for cat in Cat.all_cats.values()]) / living_cats)
+        avg_age = int(
+            sum([cat.moons for cat in registry.all_cats.values()]) / living_cats
+        )
         if avg_age > 80:
             inverse_chance = int(inverse_chance * 0.8)
 

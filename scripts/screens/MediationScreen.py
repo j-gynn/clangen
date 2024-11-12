@@ -20,6 +20,7 @@ from scripts.utility import (
     ui_scale_dimensions,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import get_box, BoxStyles
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -129,7 +130,7 @@ class MediationScreen(Screens):
         self.show_mute_buttons()
         # Gather the mediators:
         self.mediators = []
-        for cat in Cat.all_cats_list:
+        for cat in registry.all_cats_list:
             if cat.status in ["mediator", "mediator apprentice"] and not (
                 cat.dead or cat.outside
             ):
@@ -367,7 +368,7 @@ class MediationScreen(Screens):
     def update_list_cats(self):
         self.all_cats_list = [
             i
-            for i in Cat.all_cats_list
+            for i in registry.all_cats_list
             if (i.ID != self.mediators[self.selected_mediator].ID)
             and not (i.dead or i.outside)
         ]

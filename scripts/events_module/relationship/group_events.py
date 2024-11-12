@@ -4,6 +4,7 @@ from random import choice, shuffle
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
 from scripts.cat_relations.interaction import (
@@ -17,7 +18,6 @@ from scripts.utility import change_relationship_values, process_text
 
 
 class GroupEvents:
-
     # ---------------------------------------------------------------------------- #
     #                   build master dictionary for interactions                   #
     # ---------------------------------------------------------------------------- #
@@ -34,23 +34,23 @@ class GroupEvents:
         GROUP_INTERACTION_MASTER_DICT[cat_amount] = {}
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["neutral"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "neutral"
+            ] = create_group_interaction(welcome_list)
 
         file_path = os.path.join(base_path, cat_amount, "positive.json")
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["positive"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "positive"
+            ] = create_group_interaction(welcome_list)
 
         file_path = os.path.join(base_path, cat_amount, "negative.json")
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["negative"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "negative"
+            ] = create_group_interaction(welcome_list)
 
     del base_path
 
@@ -180,7 +180,7 @@ class GroupEvents:
         filtered_interactions = []
         allowed_season = [season, "Any", "any"]
         allowed_biome = [biome, "Any", "any"]
-        main_cat = Cat.all_cats[abbreviations_cat_id["m_c"]]
+        main_cat = registry.all_cats[abbreviations_cat_id["m_c"]]
         for interact in interactions:
             in_tags = [i for i in interact.biome if i in allowed_biome]
             if len(in_tags) < 1:
@@ -245,10 +245,11 @@ class GroupEvents:
 
         """
         # first handle the abbreviations possibilities for the cats
-        abbr_per_interaction, cat_abbreviations_counter = (
-            GroupEvents.get_abbreviations_possibilities(
-                interactions, int(amount), interact_cats
-            )
+        (
+            abbr_per_interaction,
+            cat_abbreviations_counter,
+        ) = GroupEvents.get_abbreviations_possibilities(
+            interactions, int(amount), interact_cats
         )
         abbr_per_interaction = GroupEvents.remove_abbreviations_missing_cats(
             abbr_per_interaction
@@ -279,10 +280,8 @@ class GroupEvents:
                 continue
 
             # now check for relationship constraints
-            relationship_allow_interaction = (
-                GroupEvents.relationship_allow_interaction(
-                    interact, abbreviations_cat_id
-                )
+            relationship_allow_interaction = GroupEvents.relationship_allow_interaction(
+                interact, abbreviations_cat_id
             )
             if not relationship_allow_interaction:
                 continue
@@ -452,8 +451,8 @@ class GroupEvents:
 
             cat_from_id = abbreviations_cat_id[abbre_from]
             cat_to_id = abbreviations_cat_id[abbre_to]
-            cat_from = Cat.all_cats[cat_from_id]
-            cat_to = Cat.all_cats[cat_to_id]
+            cat_from = registry.all_cats[cat_from_id]
+            cat_to = registry.all_cats[cat_to_id]
 
             if cat_to_id not in cat_from.relationships:
                 cat_from.create_one_relationship(cat_to)
@@ -482,7 +481,7 @@ class GroupEvents:
             if abbr == "m_c":
                 continue
             # check if the current abbreviations cat fulfill the constraint
-            relevant_cat = Cat.all_cats[abbreviations_cat_id[abbr]]
+            relevant_cat = registry.all_cats[abbreviations_cat_id[abbr]]
             if relevant_cat.status not in constraint:
                 all_fulfilled = False
         if not all_fulfilled:
@@ -495,7 +494,7 @@ class GroupEvents:
             if abbr == "m_c":
                 continue
             # check if the current abbreviations cat fulfill the constraint
-            relevant_cat = Cat.all_cats[abbreviations_cat_id[abbr]]
+            relevant_cat = registry.all_cats[abbreviations_cat_id[abbr]]
             if not relevant_cat.skills.check_skill_requirement_list(constraint):
                 all_fulfilled = False
         if not all_fulfilled:
@@ -508,7 +507,7 @@ class GroupEvents:
             if abbr == "m_c":
                 continue
             # check if the current abbreviations cat fulfill the constraint
-            relevant_cat = Cat.all_cats[abbreviations_cat_id[abbr]]
+            relevant_cat = registry.all_cats[abbreviations_cat_id[abbr]]
             if relevant_cat.personality.trait not in constraint:
                 all_fulfilled = False
         if not all_fulfilled:
@@ -521,7 +520,7 @@ class GroupEvents:
             if abbr == "m_c":
                 continue
             # check if the current abbreviations cat fulfill the constraint
-            relevant_cat = Cat.all_cats[abbreviations_cat_id[abbr]]
+            relevant_cat = registry.all_cats[abbreviations_cat_id[abbr]]
             if relevant_cat.backstory not in constraint:
                 all_fulfilled = False
         if not all_fulfilled:
@@ -534,7 +533,7 @@ class GroupEvents:
             if abbr == "m_c":
                 continue
             # check if the current abbreviations cat fulfill the constraint
-            relevant_cat = Cat.all_cats[abbreviations_cat_id[abbr]]
+            relevant_cat = registry.all_cats[abbreviations_cat_id[abbr]]
             injuries_in_needed = list(
                 filter(lambda inj: inj in constraint, relevant_cat.injuries.keys())
             )
@@ -614,8 +613,8 @@ class GroupEvents:
 
             cat_from_id = abbreviations_cat_id[abbre_from]
             cat_to_id = abbreviations_cat_id[abbre_to]
-            cat_from = Cat.all_cats[cat_from_id]
-            cat_to = Cat.all_cats[cat_to_id]
+            cat_from = registry.all_cats[cat_from_id]
+            cat_to = registry.all_cats[cat_to_id]
 
             # set all values to influence the relationship
             romantic = 0
@@ -676,7 +675,7 @@ class GroupEvents:
                     f"ERROR: there are no injury names in the chosen interaction {chosen_interaction.id}."
                 )
                 continue
-            injured_cat = Cat.all_cats[abbreviations_cat_id[abbreviations]]
+            injured_cat = registry.all_cats[abbreviations_cat_id[abbreviations]]
 
             injuries = []
             for inj in injury_dict["injury_names"]:
@@ -684,9 +683,7 @@ class GroupEvents:
                 injuries.append(inj)
 
             possible_scar = (
-                GroupEvents.prepare_text(
-                    injury_dict["scar_text"], abbreviations_cat_id
-                )
+                GroupEvents.prepare_text(injury_dict["scar_text"], abbreviations_cat_id)
                 if "scar_text" in injury_dict
                 else None
             )
@@ -722,8 +719,8 @@ class GroupEvents:
         replace_dict = {}
         for abbr, cat_id in abbreviations_cat_id.items():
             replace_dict[abbr] = (
-                str(Cat.all_cats[cat_id].name),
-                choice(Cat.all_cats[cat_id].pronouns),
+                str(registry.all_cats[cat_id].name),
+                choice(registry.all_cats[cat_id].pronouns),
             )
 
         return process_text(text, replace_dict)

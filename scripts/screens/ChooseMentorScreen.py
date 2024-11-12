@@ -20,6 +20,7 @@ from scripts.utility import (
     shorten_text_to_fit,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import get_box, BoxStyles
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -123,7 +124,7 @@ class ChooseMentorScreen(Screens):
     def screen_switches(self):
         super().screen_switches()
         self.show_mute_buttons()
-        self.the_cat = Cat.all_cats[game.switches["cat"]]
+        self.the_cat = registry.all_cats[game.switches["cat"]]
         self.mentor = Cat.fetch_cat(self.the_cat.mentor)
 
         self.heading = pygame_gui.elements.UITextBox(
@@ -399,7 +400,7 @@ class ChooseMentorScreen(Screens):
             self.apprentice_details[ele].kill()
         self.apprentice_details = {}
 
-        self.the_cat = Cat.all_cats[game.switches["cat"]]
+        self.the_cat = registry.all_cats[game.switches["cat"]]
         self.current_page = 1
         self.selected_mentor = Cat.fetch_cat(self.the_cat.mentor)
         self.mentor = Cat.fetch_cat(self.the_cat.mentor)
@@ -648,7 +649,7 @@ class ChooseMentorScreen(Screens):
     def get_valid_mentors(self):
         potential_warrior_mentors = [
             cat
-            for cat in Cat.all_cats_list
+            for cat in registry.all_cats_list
             if not (cat.dead or cat.outside)
             and cat.status in ["warrior", "deputy", "leader"]
         ]
@@ -656,14 +657,14 @@ class ChooseMentorScreen(Screens):
         invalid_warrior_mentors = []
         potential_medcat_mentors = [
             cat
-            for cat in Cat.all_cats_list
+            for cat in registry.all_cats_list
             if not (cat.dead or cat.outside) and cat.status == "medicine cat"
         ]
         valid_medcat_mentors = []
         invalid_medcat_mentors = []
         potential_mediator_mentors = [
             cat
-            for cat in Cat.all_cats_list
+            for cat in registry.all_cats_list
             if not (cat.dead or cat.outside) and cat.status == "mediator"
         ]
         valid_mediator_mentors = []

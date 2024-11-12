@@ -3,6 +3,7 @@ from typing import Dict
 import pygame
 import pygame_gui
 
+from scripts.cat.catregistry import CatRegistry
 from scripts.cat.cats import Cat
 from scripts.event_class import Single_Event
 from scripts.events import events_class
@@ -25,7 +26,6 @@ from scripts.utility import (
     clan_symbol_sprite,
     get_text_box_theme,
     shorten_text_to_fit,
-    get_living_clan_cat_count,
     ui_scale_dimensions,
     ui_scale_value,
     ui_scale_offset,
@@ -722,7 +722,7 @@ class EventsScreen(Screens):
 
         game.switches["saved_scroll_positions"] = {}
 
-        if get_living_clan_cat_count(Cat) == 0:
+        if CatRegistry.get_living_clan_cat_count == 0:
             GameOver("events screen")
 
         self.update_display_events_lists()

@@ -4,6 +4,7 @@ from random import choice
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
 from scripts.cat_relations.relationship import (
@@ -343,7 +344,7 @@ class Romantic_Events:
     def handle_moving_on(cat):
         """Handles moving on from dead or outside mates"""
         for mate_id in cat.mate:
-            if mate_id not in Cat.all_cats:
+            if mate_id not in registry.all_cats:
                 print(f"WARNING: Cat #{cat} has a invalid mate. It will be removed.")
                 cat.mate.remove(mate_id)
                 continue
@@ -892,7 +893,9 @@ class Romantic_Events:
                 insert = "mates"
             mate_string = mate_string.replace("(r_c_mate/mates)", insert)
 
-        mate_string = event_text_adjust(Cat, mate_string, main_cat=cat_from, random_cat=cat_to)
+        mate_string = event_text_adjust(
+            Cat, mate_string, main_cat=cat_from, random_cat=cat_to
+        )
         return mate_string
 
     @staticmethod

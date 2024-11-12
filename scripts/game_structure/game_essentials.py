@@ -210,7 +210,6 @@ class Game:
         self.clicked = False
         self.keyspressed = []
 
-
     @staticmethod
     def safe_save(path: str, write_data, check_integrity=False, max_attempts: int = 15):
         """If write_data is not a string, assumes you want this
@@ -425,7 +424,7 @@ class Game:
         self.save_faded_cats(clanname)  # Fades cat and saves them, if needed
 
         clan_cats = []
-        for inter_cat in self.cat_class.all_cats.values():
+        for inter_cat in registry.all_cats.values():
             cat_data = inter_cat.get_save_dict()
             clan_cats.append(cat_data)
 
@@ -449,7 +448,7 @@ class Game:
 
         copy_of_info = ""
         for cat in game.cat_to_fade:
-            inter_cat = self.cat_class.all_cats[cat]
+            inter_cat = registry.all_cats[cat]
 
             # Add ID to list of faded cats.
             self.clan.faded_ids.append(cat)
@@ -457,13 +456,13 @@ class Game:
             # If they have a mate, break it up
             if inter_cat.mate:
                 for mate_id in inter_cat.mate:
-                    if mate_id in self.cat_class.all_cats:
-                        self.cat_class.all_cats[mate_id].unset_mate(inter_cat)
+                    if mate_id in registry.all_cats:
+                        registry.all_cats[mate_id].unset_mate(inter_cat)
 
             # If they have parents, add them to their parents "faded offspring" list:
             for x in inter_cat.get_parents():
-                if x in self.cat_class.all_cats:
-                    self.cat_class.all_cats[x].faded_offspring.append(cat)
+                if x in registry.all_cats:
+                    registry.all_cats[x].faded_offspring.append(cat)
                 else:
                     parent_faded = self.add_faded_offspring_to_faded_cat(x, cat)
                     if not parent_faded:

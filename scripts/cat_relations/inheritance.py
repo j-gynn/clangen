@@ -10,6 +10,8 @@ while mating and for the display of the family tree screen.
 
 from strenum import StrEnum  # pylint: disable=no-name-in-module
 
+from scripts.cat.catregistry import registry
+
 
 class RelationType(StrEnum):
     """An enum representing the possible relationships of a cat"""
@@ -87,7 +89,7 @@ class Inheritance:
         # mates
         self.init_mates()
 
-        for inter_id, inter_cat in self.cat.all_cats.items():
+        for inter_id, inter_cat in registry.all_cats.items():
             if inter_id == self.cat.ID:
                 continue
 
@@ -104,7 +106,7 @@ class Inheritance:
             self.init_cousins(inter_id, inter_cat)
 
         # since grand kits depending on kits, ALL KITS HAVE TO BE SET FIRST!
-        for inter_id, inter_cat in self.cat.all_cats.items():
+        for inter_id, inter_cat in registry.all_cats.items():
             if inter_id == self.cat.ID:
                 continue
 
@@ -483,7 +485,7 @@ class Inheritance:
                 self.other_mates.append(mate_id)
 
             # iterate over all cats, to get the children of the sibling
-            for _c in self.cat.all_cats.values():
+            for _c in registry.all_cats.values():
                 _c_parents = self.get_parents(_c)
                 _c_adoptive = self.get_adoptive_parents(_c)
                 if inter_id in _c_parents:

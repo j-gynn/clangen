@@ -13,6 +13,7 @@ from typing import Dict, List, Any
 
 import ujson  # type: ignore
 
+from scripts.cat.catregistry import CatRegistry, registry
 from scripts.cat.history import History
 from scripts.cat.names import Name
 from scripts.cat.pelts import Pelt
@@ -174,8 +175,22 @@ class Cat:
         :param kwargs: TODO what are the possible args here? ["biome", ]
         """
 
-        self.history = None
+        # setting ID
+        if ID is None:
+            potential_id = str(next(Cat.id_iter))
 
+            if game.clan:
+                faded_cats = game.clan.faded_ids
+            else:
+                faded_cats = []
+
+            while potential_id in registry.all_cats or potential_id in faded_cats:
+                potential_id = str(next(Cat.id_iter))
+            self.ID = potential_id
+        else:
+            self.ID = ID
+
+        self.history = None
         if (
             faded
         ):  # This must be at the top. It's a smaller list of things to init, which is only for faded cats
@@ -249,21 +264,6 @@ class Cat:
         self.inheritance = None
 
         self.history = None
-
-        # setting ID
-        if ID is None:
-            potential_id = str(next(Cat.id_iter))
-
-            if game.clan:
-                faded_cats = game.clan.faded_ids
-            else:
-                faded_cats = []
-
-            while potential_id in self.all_cats or potential_id in faded_cats:
-                potential_id = str(next(Cat.id_iter))
-            self.ID = potential_id
-        else:
-            self.ID = ID
 
         # age and status
         if status is None and moons is None:
@@ -354,11 +354,11 @@ class Cat:
         # Private Sprite
         self._sprite = None
 
-        # SAVE CAT INTO ALL_CATS DICTIONARY IN CATS-CLASS
-        self.all_cats[self.ID] = self
-
-        if self.ID not in ["0", None]:
-            Cat.insert_cat(self)
+    def __setattr__(self, name, value):
+        super().__setattr__(name, value)  # Set the attribute normally
+        if name != "ID":  # Avoid re-adding the cat based on its ID
+            registry = CatRegistry()
+            registry.add_cat(self)
 
     def init_faded(self, ID, status, prefix, suffix, moons, **kwargs):
         """Perform faded-specific initialisation
@@ -503,7 +503,7 @@ class Cat:
 
     def __eq__(self, other):
         return self.ID == other.ID if isinstance(other, Cat) else False
-    
+
     def __hash__(self):
         return hash(self.ID)
 
@@ -639,7 +639,7 @@ class Cat:
         text = None
 
         # apply grief to cats with high positive relationships to dead cat
-        for cat in Cat.all_cats.values():
+        for cat in registry.all_cats.values():
             if cat.dead or cat.outside or cat.moons < 1:
                 continue
 
@@ -856,7 +856,7 @@ class Cat:
         children = self.get_children()
         ids = []
         for child_id in children:
-            child = Cat.all_cats[child_id]
+            child = registry.all_cats[child_id]
             if (
                 child.outside
                 and not child.exiled
@@ -928,9 +928,6 @@ class Cat:
 
         elif self.status == "mediator apprentice":
             pass
-
-        # update class dictionary
-        self.all_cats[self.ID] = self
 
         # If we have it sorted by rank, we also need to re-sort
         if game.sort_type == "rank" and resort:
@@ -1527,8 +1524,8 @@ class Cat:
 
     def thoughts(self):
         """Generates a thought for the cat, which displays on their profile."""
-        all_cats = self.all_cats
-        other_cat = choice(list(all_cats.keys()))
+        all_cats = registry.all_cats
+        other_cat = choice(list(registry.all_cats.keys()))
         game_mode = game.switches["game_mode"]
         biome = game.switches["biome"]
         camp = game.switches["camp_bg"]
@@ -1606,7 +1603,7 @@ class Cat:
         """Randomly choose a cat of the Clan and have an interaction with them."""
         cats_to_choose = [
             iter_cat
-            for iter_cat in Cat.all_cats.values()
+            for iter_cat in registry.all_cats.values()
             if iter_cat.ID != self.ID
             and not iter_cat.outside
             and not iter_cat.exiled
@@ -1858,7 +1855,7 @@ class Cat:
 
         amount_per_med = get_amount_cat_for_one_medic(game.clan)
 
-        if medical_cats_condition_fulfilled(Cat.all_cats.values(), amount_per_med):
+        if medical_cats_condition_fulfilled(registry.all_cats.values(), amount_per_med):
             duration = med_duration
         if severity != "minor":
             duration += randrange(-1, 1)
@@ -1927,7 +1924,7 @@ class Cat:
 
         injury_severity = injury["severity"] if severity == "default" else severity
         if medical_cats_condition_fulfilled(
-            Cat.all_cats.values(), get_amount_cat_for_one_medic(game.clan)
+            registry.all_cats.values(), get_amount_cat_for_one_medic(game.clan)
         ):
             duration = med_duration
         if severity != "minor":
@@ -1973,7 +1970,7 @@ class Cat:
             avoided = False
             if (
                 "blood loss" in new_injury.also_got
-                and len(get_alive_status_cats(Cat, ["medicine cat"], working=True)) != 0
+                and len(get_alive_status_cats(["medicine cat"], working=True)) != 0
             ):
                 clan_herbs = set()
                 needed_herbs = {"horsetail", "raspberry", "marigold", "cobwebs"}
@@ -2362,7 +2359,7 @@ class Cat:
         if not self.mentor:
             potential_mentors = []
             priority_mentors = []
-            for cat in self.all_cats.values():
+            for cat in registry.all_cats.values():
                 if self.is_valid_mentor(cat):
                     potential_mentors.append(cat)
                     if not cat.apprentice and not cat.not_working():
@@ -2571,7 +2568,7 @@ class Cat:
 
     def create_relationships_new_cat(self):
         """Create relationships for a new generated cat."""
-        for inter_cat in Cat.all_cats.values():
+        for inter_cat in registry.all_cats.values():
             # the inter_cat is the same as the current cat
             if inter_cat.ID == self.ID:
                 continue
@@ -2594,8 +2591,8 @@ class Cat:
 
     def init_all_relationships(self):
         """Create Relationships to all current Clancats."""
-        for ID in self.all_cats:
-            the_cat = self.all_cats.get(ID)
+        for ID in registry.all_cats:
+            the_cat = registry.all_cats.get(ID)
             if the_cat.ID is not self.ID:
                 mates = the_cat.ID in self.mate
                 are_parents = False
@@ -2630,7 +2627,10 @@ class Cat:
                 trust = 0
                 if game.settings["random relation"]:
                     if game.clan:
-                        if the_cat == game.clan.instructor and game.clan.instructor.dead_for >= self.moons:
+                        if (
+                            the_cat == game.clan.instructor
+                            and game.clan.instructor.dead_for >= self.moons
+                        ):
                             pass
                         elif randint(1, 20) == 1 and romantic_love < 1:
                             dislike = randint(10, 25)
@@ -2728,14 +2728,14 @@ class Cat:
         if os.path.exists(relation_directory):
             if not os.path.exists(relation_cat_directory):
                 self.init_all_relationships()
-                for cat in Cat.all_cats.values():
+                for cat in registry.all_cats.values():
                     cat.create_one_relationship(self)
                 return
             try:
                 with open(relation_cat_directory, "r", encoding="utf-8") as read_file:
                     rel_data = ujson.loads(read_file.read())
                     for rel in rel_data:
-                        cat_to = self.all_cats.get(rel["cat_to_id"])
+                        cat_to = registry.all_cats.get(rel["cat_to_id"])
                         if cat_to is None or rel["cat_to_id"] == self.ID:
                             continue
                         new_rel = Relationship(
@@ -2743,12 +2743,8 @@ class Cat:
                             cat_to=cat_to,
                             mates=rel["mates"] or False,
                             family=rel["family"] or False,
-                            romantic_love=(
-                                rel["romantic_love"] or 0
-                            ),
-                            platonic_like=(
-                                rel["platonic_like"] or 0
-                            ),
+                            romantic_love=(rel["romantic_love"] or 0),
+                            platonic_like=(rel["platonic_like"] or 0),
                             dislike=rel["dislike"] or 0,
                             admiration=rel["admiration"] or 0,
                             comfortable=rel["comfortable"] or 0,
@@ -3101,8 +3097,8 @@ class Cat:
             return ID
         elif not isinstance(ID, str):  # Invalid type
             return None
-        if ID in Cat.all_cats:
-            return Cat.all_cats[ID]
+        if ID in registry.all_cats:
+            return registry.all_cats[ID]
         else:
             return ob if (ob := Cat.load_faded_cat(ID)) else None
 
@@ -3178,7 +3174,7 @@ class Cat:
         if given_list is None:
             given_list = []
         if not given_list:
-            given_list = Cat.all_cats_list
+            given_list = registry.all_cats_list
         if game.sort_type == "age":
             given_list.sort(key=lambda x: Cat.get_adjusted_age(x))
         elif game.sort_type == "reverse_age":
@@ -3203,15 +3199,17 @@ class Cat:
         try:
             if game.sort_type == "age":
                 bisect.insort(
-                    Cat.all_cats_list, c, key=lambda x: Cat.get_adjusted_age(x)
+                    registry.all_cats_list, c, key=lambda x: Cat.get_adjusted_age(x)
                 )
             elif game.sort_type == "reverse_age":
                 bisect.insort(
-                    Cat.all_cats_list, c, key=lambda x: -1 * Cat.get_adjusted_age(x)
+                    registry.all_cats_list,
+                    c,
+                    key=lambda x: -1 * Cat.get_adjusted_age(x),
                 )
             elif game.sort_type == "rank":
                 bisect.insort(
-                    Cat.all_cats_list,
+                    registry.all_cats_list,
                     c,
                     key=lambda x: (
                         -1 * Cat.rank_order(x),
@@ -3219,17 +3217,19 @@ class Cat:
                     ),
                 )
             elif game.sort_type == "exp":
-                bisect.insort(Cat.all_cats_list, c, key=lambda x: x.experience)
+                bisect.insort(registry.all_cats_list, c, key=lambda x: x.experience)
             elif game.sort_type == "id":
-                bisect.insort(Cat.all_cats_list, c, key=lambda x: int(x.ID))
+                bisect.insort(registry.all_cats_list, c, key=lambda x: int(x.ID))
             elif game.sort_type == "reverse_id":
-                bisect.insort(Cat.all_cats_list, c, key=lambda x: -1 * int(x.ID))
+                bisect.insort(registry.all_cats_list, c, key=lambda x: -1 * int(x.ID))
             elif game.sort_type == "death":
-                bisect.insort(Cat.all_cats_list, c, key=lambda x: -1 * int(x.dead_for))
+                bisect.insort(
+                    registry.all_cats_list, c, key=lambda x: -1 * int(x.dead_for)
+                )
         except (TypeError, NameError):
             # If you are using python 3.8, key is not a supported parameter into insort. Therefore, we'll need to
             # do the slower option of adding the cat, then resorting
-            Cat.all_cats_list.append(c)
+            registry.all_cats_list.append(c)
             Cat.sort_cats()
 
     @staticmethod
@@ -3357,9 +3357,7 @@ class Cat:
                 "former_mentor": (
                     list(self.former_mentor) if self.former_mentor else []
                 ),
-                "patrol_with_mentor": (
-                    self.patrol_with_mentor or 0
-                ),
+                "patrol_with_mentor": (self.patrol_with_mentor or 0),
                 "mate": self.mate,
                 "previous_mates": self.previous_mates,
                 "dead": self.dead,
@@ -3378,9 +3376,7 @@ class Cat:
                 "sprite_senior": self.pelt.cat_sprites["senior"],
                 "sprite_para_adult": self.pelt.cat_sprites["para_adult"],
                 "eye_colour": self.pelt.eye_colour,
-                "eye_colour2": (
-                    self.pelt.eye_colour2 or None
-                ),
+                "eye_colour2": (self.pelt.eye_colour2 or None),
                 "reverse": self.pelt.reverse,
                 "white_patches": self.pelt.white_patches,
                 "vitiligo": self.pelt.vitiligo,
@@ -3414,7 +3410,7 @@ class Cat:
         """
         sorted_specific_list = [
             check_cat
-            for check_cat in Cat.all_cats_list
+            for check_cat in registry.all_cats_list
             if check_cat.dead == self.dead
             and check_cat.outside == self.outside
             and check_cat.df == self.df

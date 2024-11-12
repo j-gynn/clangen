@@ -4,6 +4,7 @@ from random import choice, randint
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.events_module.relationship.group_events import GroupEvents
 from scripts.events_module.relationship.romantic_events import Romantic_Events
@@ -126,9 +127,10 @@ class Relation_Events:
         # relations with current mates
         if use_mate or cat.no_mates:
             cat_to_choose_from = [
-                cat.all_cats[mate_id]
+                registry.all_cats[mate_id]
                 for mate_id in cat.mate
-                if not cat.all_cats[mate_id].dead and not cat.all_cats[mate_id].outside
+                if not registry.all_cats[mate_id].dead
+                and not registry.all_cats[mate_id].outside
             ]
 
         if not cat_to_choose_from:
@@ -148,7 +150,7 @@ class Relation_Events:
         if not Relation_Events.can_trigger_events(cat):
             return
 
-        same_age_cats = get_cats_same_age(Cat, cat, game.config["mates"]["age_range"])
+        same_age_cats = get_cats_same_age(cat, game.config["mates"]["age_range"])
         if len(same_age_cats) > 0:
             random_cat = choice(same_age_cats)
             if (
@@ -183,7 +185,7 @@ class Relation_Events:
         possible_interaction_cats = list(
             filter(
                 lambda cat: (not cat.dead and not cat.outside and not cat.exiled),
-                Cat.all_cats.values(),
+                registry.all_cats.values(),
             )
         )
         if cat in possible_interaction_cats:
@@ -200,7 +202,7 @@ class Relation_Events:
             cat, possible_interaction_cats
         )
         for id in interacted_cat_ids:
-            inter_cat = Cat.all_cats[id]
+            inter_cat = registry.all_cats[id]
             Relation_Events.trigger_event(inter_cat)
 
     @staticmethod
@@ -225,9 +227,9 @@ class Relation_Events:
             return
 
         for new_cat in new_cats:
-            same_age_cats = get_cats_same_age(Cat, new_cat)
+            same_age_cats = get_cats_same_age(new_cat)
             alive_cats = [
-                i for i in new_cat.all_cats.values() if not i.dead and not i.outside
+                i for i in registry.all_cats.values() if not i.dead and not i.outside
             ]
             number = game.config["new_cat"]["cat_amount_welcoming"]
 
@@ -272,7 +274,7 @@ class Relation_Events:
         cat_list = list(
             filter(
                 lambda cat: (not cat.dead and not cat.outside and not cat.exiled),
-                Cat.all_cats.values(),
+                registry.all_cats.values(),
             )
         )
         cat_list.remove(main_cat)

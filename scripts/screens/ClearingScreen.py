@@ -4,7 +4,6 @@ import pygame
 import pygame_gui
 import ujson
 
-from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import (
     UISpriteButton,
@@ -19,6 +18,7 @@ from scripts.utility import (
     ui_scale_dimensions,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..events_module.condition_events import Condition_Events
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import BoxStyles, get_box
@@ -197,7 +197,7 @@ class ClearingScreen(Screens):
             for cat_id, nutrient in nutrition_info.items()
             if nutrient.percentage <= 99
         ]
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if not the_cat.dead and not the_cat.outside:
                 if the_cat.ID in low_nutrition_cats:
                     self.hungry_cats.append(the_cat)

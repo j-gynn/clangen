@@ -21,6 +21,7 @@ from scripts.utility import (
     ui_scale_offset,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import BoxStyles, get_box
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -666,7 +667,7 @@ class ChooseAdoptiveParentScreen(Screens):
     def update_current_cat_info(self, reset_selected_cat=True):
         """Updates all elements with the current cat, as well as the selected cat.
         Called when the screen switched, and whenever the focused cat is switched"""
-        self.the_cat = Cat.all_cats[game.switches["cat"]]
+        self.the_cat = registry.all_cats[game.switches["cat"]]
 
         (
             self.next_cat,
@@ -906,15 +907,13 @@ class ChooseAdoptiveParentScreen(Screens):
     def on_use(self):
         super().on_use()
 
-        self.loading_screen_on_use(
-            self.work_thread, self.update_after_change
-        )
+        self.loading_screen_on_use(self.work_thread, self.update_after_change)
 
     def get_valid_adoptive_parents(self):
         """Get a list of valid parents for the current cat"""
         valid_parents = [
             inter_cat
-            for inter_cat in Cat.all_cats_list
+            for inter_cat in registry.all_cats_list
             if not (
                 inter_cat.dead or inter_cat.outside or inter_cat.exiled
             )  # Adoptive parents cant be dead or outside

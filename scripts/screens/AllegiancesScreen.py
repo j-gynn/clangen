@@ -11,6 +11,7 @@ from scripts.utility import (
     ui_scale_offset,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 
 
 class AllegiancesScreen(Screens):
@@ -130,7 +131,9 @@ class AllegiancesScreen(Screens):
     def get_allegiances_text(self):
         """Determine Text. Ouputs list of tuples."""
 
-        living_cats = [i for i in Cat.all_cats.values() if not (i.dead or i.outside)]
+        living_cats = [
+            i for i in registry.all_cats.values() if not (i.dead or i.outside)
+        ]
         living_meds = []
         living_mediators = []
         living_warriors = []
@@ -156,7 +159,7 @@ class AllegiancesScreen(Screens):
                 living_elders.append(cat)
 
         # Find Queens:
-        queen_dict, living_kits = get_alive_clan_queens(living_cats)
+        queen_dict, living_kits = get_alive_clan_queens()
 
         # Remove queens from warrior or elder lists, if they are there.  Let them stay on any other lists.
         for q in queen_dict:

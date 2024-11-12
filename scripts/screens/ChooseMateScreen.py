@@ -22,6 +22,7 @@ from scripts.utility import (
     shorten_text_to_fit,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import BoxStyles, get_box
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -794,7 +795,7 @@ class ChooseMateScreen(Screens):
     def update_current_cat_info(self, reset_selected_cat=True):
         """Updates all elements with the current cat, as well as the selected cat.
         Called when the screen switched, and whenever the focused cat is switched"""
-        self.the_cat = Cat.all_cats[game.switches["cat"]]
+        self.the_cat = registry.all_cats[game.switches["cat"]]
         if not self.the_cat.inheritance:
             self.the_cat.create_inheritance_new_cat()
 
@@ -1174,9 +1175,7 @@ class ChooseMateScreen(Screens):
     def on_use(self):
         super().on_use()
 
-        self.loading_screen_on_use(
-            self.work_thread, self.update_both
-        )
+        self.loading_screen_on_use(self.work_thread, self.update_both)
 
     def get_valid_mates(self):
         """Get a list of valid mates for the current cat"""
@@ -1184,7 +1183,7 @@ class ChooseMateScreen(Screens):
         # Behold! The uglest list comprehension ever created!
         valid_mates = [
             i
-            for i in Cat.all_cats_list
+            for i in registry.all_cats_list
             if not i.faded
             and self.the_cat.is_potential_mate(
                 i, for_love_interest=False, age_restriction=False, ignore_no_mates=True

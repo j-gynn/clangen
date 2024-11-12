@@ -4,6 +4,7 @@ import pygame
 import pygame_gui
 from pygame_gui.core import UIContainer
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.clan import OtherClan
 from scripts.game_structure.game_essentials import game
@@ -26,7 +27,6 @@ from scripts.utility import (
     clan_symbol_sprite,
     shorten_text_to_fit,
     get_alive_status_cats,
-    get_living_clan_cat_count,
     ui_scale_dimensions,
 )
 
@@ -193,7 +193,6 @@ class LeaderDenScreen(Screens):
                     self.helper_cat = game.clan.deputy  # if lead is sick, dep helps
             if not self.helper_cat:  # if dep is sick, med cat helps
                 meds = get_alive_status_cats(
-                    Cat,
                     get_status=["medicine cat", "medicine cat apprentice"],
                     working=True,
                     sort=True,
@@ -203,7 +202,7 @@ class LeaderDenScreen(Screens):
                 else:  # if no meds, mediator helps
                     mediators = [
                         i
-                        for i in Cat.all_cats.values()
+                        for i in registry.all_cats.values()
                         if not i.dead
                         and not i.exiled
                         and not i.outside
@@ -219,7 +218,7 @@ class LeaderDenScreen(Screens):
             ):  # if no meds or mediators available, literally anyone please anyone help
                 adults = [
                     i
-                    for i in Cat.all_cats.values()
+                    for i in registry.all_cats.values()
                     if not i.dead
                     and not i.exiled
                     and not i.outside
@@ -270,7 +269,7 @@ class LeaderDenScreen(Screens):
         )
 
         # if no one is alive, give a special notice
-        if not get_living_clan_cat_count(Cat):
+        if not registry.get_living_clan_cat_count:
             self.no_leader = True
             self.screen_elements["clan_notice_text"].set_text(
                 " No one is left to attend a Gathering. "
@@ -943,7 +942,7 @@ class LeaderDenScreen(Screens):
         # get cats for list
         outsiders = [
             i
-            for i in Cat.all_cats.values()
+            for i in registry.all_cats.values()
             if i.outside and not i.dead and not i.driven_out
         ]
 

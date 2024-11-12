@@ -19,6 +19,7 @@ from scripts.utility import (
     ui_scale_dimensions,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure import image_cache
 from ..game_structure.propagating_thread import PropagatingThread
 from ..game_structure.screen_settings import MANAGER
@@ -924,7 +925,7 @@ class PatrolScreen(Screens):
         self.able_cats = []
 
         # ASSIGN TO ABLE CATS
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if (
                 not the_cat.dead
                 and the_cat.in_camp

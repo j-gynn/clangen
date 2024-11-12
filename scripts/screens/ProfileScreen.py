@@ -31,6 +31,7 @@ from scripts.utility import (
     adjust_list_text,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..cat.history import History
 from ..game_structure.screen_settings import MANAGER
 from ..game_structure.windows import ChangeCatName, KillCat, ChangeCatToggles
@@ -437,7 +438,7 @@ class ProfileScreen(Screens):
 
     def screen_switches(self):
         super().screen_switches()
-        self.the_cat = Cat.all_cats.get(game.switches["cat"])
+        self.the_cat = registry.all_cats.get(game.switches["cat"])
 
         # Set up the menu buttons, which appear on all cat profile images.
         self.next_cat_button = UISurfaceImageButton(
@@ -574,7 +575,7 @@ class ProfileScreen(Screens):
     def build_profile(self):
         """Rebuild builds the cat profile. Run when you switch cats
         or for changes in the profile."""
-        self.the_cat = Cat.all_cats.get(game.switches["cat"])
+        self.the_cat = registry.all_cats.get(game.switches["cat"])
 
         # use these attributes to create differing profiles for StarClan cats etc.
         is_sc_instructor = False
@@ -2471,7 +2472,7 @@ class ProfileScreen(Screens):
     #                               cat platforms                                  #
     # ---------------------------------------------------------------------------- #
     def get_platform(self):
-        the_cat = Cat.all_cats.get(game.switches["cat"], game.clan.instructor)
+        the_cat = registry.all_cats.get(game.switches["cat"], game.clan.instructor)
 
         light_dark = "light"
         if game.settings["dark mode"]:

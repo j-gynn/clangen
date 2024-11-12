@@ -3,12 +3,12 @@
 import pygame
 import pygame_gui
 
-from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import UISurfaceImageButton
 from scripts.utility import get_text_box_theme
 from scripts.utility import ui_scale
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..cat.history import History
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_button import ButtonStyles, get_button_dict
@@ -30,7 +30,7 @@ class CeremonyScreen(Screens):
         self.hide_menu_buttons()
         self.show_mute_buttons()
 
-        self.the_cat = Cat.all_cats.get(game.switches["cat"])
+        self.the_cat = registry.all_cats.get(game.switches["cat"])
         if self.the_cat.status == "leader":
             self.header = pygame_gui.elements.UITextBox(
                 str(self.the_cat.name) + "'s Leadership Ceremony",

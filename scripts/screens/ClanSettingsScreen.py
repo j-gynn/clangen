@@ -9,7 +9,6 @@ import pygame
 import pygame_gui
 import ujson
 
-from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import UIImageButton, UISurfaceImageButton
 from scripts.utility import (
@@ -398,7 +397,7 @@ class ClanSettingsScreen(Screens):
         starclan = 0
         df = 0
         ur = 0
-        for cat in Cat.all_cats_list:
+        for cat in registry.all_cats_list:
             if cat.faded:
                 faded_cats += 1
                 continue

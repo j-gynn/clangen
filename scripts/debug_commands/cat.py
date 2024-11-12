@@ -1,5 +1,6 @@
 from typing import List
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.debug_commands.command import Command
 from scripts.debug_commands.utils import add_output_line_to_log
@@ -27,7 +28,7 @@ class RemoveCatCommand(Command):
         if len(args) == 0:
             add_output_line_to_log("Please specify a cat name or ID")
             return
-        for cat in Cat.all_cats_list:
+        for cat in registry.all_cats_list:
             if str(cat.name).lower() == args[0].lower() or cat.ID == args[0]:
                 game.clan.remove_cat(cat.ID)
                 add_output_line_to_log(f"Removed {cat.name} with ID {cat.ID}")
@@ -41,8 +42,10 @@ class ListCatsCommand(Command):
     aliases = ["l"]
 
     def callback(self, args: List[str]):
-        for cat in Cat.all_cats_list:
-            add_output_line_to_log(f"{cat.ID} - {cat.name}, {cat.status}, {cat.moons} moons old")
+        for cat in registry.all_cats_list:
+            add_output_line_to_log(
+                f"{cat.ID} - {cat.name}, {cat.status}, {cat.moons} moons old"
+            )
 
 
 class AgeCatsCommand(Command):
@@ -54,7 +57,7 @@ class AgeCatsCommand(Command):
         if len(args) == 0:
             add_output_line_to_log("Please specify a cat name or ID")
             return
-        for cat in Cat.all_cats_list:
+        for cat in registry.all_cats_list:
             if str(cat.name).lower() == args[0].lower() or cat.ID == args[0]:
                 if len(args) == 1:
                     add_output_line_to_log(f"{cat.name} is {cat.moons} moons old")
@@ -78,7 +81,7 @@ class CatsCommand(Command):
         AddCatCommand(),
         RemoveCatCommand(),
         ListCatsCommand(),
-        AgeCatsCommand()
+        AgeCatsCommand(),
     ]
 
     def callback(self, args: List[str]):

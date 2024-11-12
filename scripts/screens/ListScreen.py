@@ -5,6 +5,7 @@ import pygame
 import pygame_gui
 from pygame_gui.core import ObjectID
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.screen_settings import game_screen_size, MANAGER
@@ -622,9 +623,9 @@ class ListScreen(Screens):
         """
         self.current_listed_cats = []
 
-        # make sure cat list is the same every where else in the game.
+        # make sure cat list is the same everywhere else in the game.
         Cat.sort_cats(self.full_cat_list)
-        Cat.sort_cats(Cat.all_cats_list)
+        Cat.sort_cats(registry.all_cats_list)
 
         # adding in the guide if necessary, this ensures the guide isn't affected by sorting as we always want them to
         # be the first cat on the list
@@ -771,7 +772,7 @@ class ListScreen(Screens):
         self.current_group = "clan"
         self.death_status = "living"
         self.full_cat_list = [
-            cat for cat in Cat.all_cats_list if not cat.dead and not cat.outside
+            cat for cat in registry.all_cats_list if not cat.dead and not cat.outside
         ]
 
     def get_cotc_cats(self):
@@ -781,7 +782,7 @@ class ListScreen(Screens):
         self.current_group = "cotc"
         self.death_status = "living"
         self.full_cat_list = []
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if not the_cat.dead and the_cat.outside and not the_cat.driven_out:
                 self.full_cat_list.append(the_cat)
 
@@ -792,7 +793,7 @@ class ListScreen(Screens):
         self.current_group = "sc"
         self.death_status = "dead"
         self.full_cat_list = []
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if (
                 the_cat.dead
                 and the_cat.ID != game.clan.instructor.ID
@@ -810,7 +811,7 @@ class ListScreen(Screens):
         self.death_status = "dead"
         self.full_cat_list = []
 
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if (
                 the_cat.dead
                 and the_cat.ID != game.clan.instructor.ID
@@ -826,7 +827,7 @@ class ListScreen(Screens):
         self.current_group = "ur"
         self.death_status = "dead"
         self.full_cat_list = []
-        for the_cat in Cat.all_cats_list:
+        for the_cat in registry.all_cats_list:
             if (
                 the_cat.ID in game.clan.unknown_cats
                 and not the_cat.faded

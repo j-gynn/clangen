@@ -1,6 +1,7 @@
 import random
 from typing import List
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
 from scripts.cat.pelts import Pelt
@@ -25,7 +26,6 @@ from scripts.utility import (
     create_new_cat_block,
     get_leader_life_notice,
     get_alive_status_cats,
-    get_living_clan_cat_count,
     adjust_list_text,
 )
 
@@ -212,7 +212,7 @@ class HandleShortEvents:
 
         # used in some murder events, this kind of sucks tho it would be nice to change how this sort of thing is handled
         if "kit_manipulated" in self.chosen_event.tags:
-            kit = Cat.fetch_cat(random.choice(get_alive_status_cats(Cat, ["kitten"])))
+            kit = Cat.fetch_cat(random.choice(get_alive_status_cats(["kitten"])))
             self.involved_cats.append(kit.ID)
             change_relationship_values(
                 [self.random_cat],
@@ -442,7 +442,7 @@ class HandleShortEvents:
         # gather living clan cats except leader bc leader lives would be frustrating to handle in these
         alive_cats = [
             i
-            for i in Cat.all_cats.values()
+            for i in registry.all_cats.values()
             if not i.dead and not i.outside and not i.exiled
         ]
 
@@ -598,9 +598,7 @@ class HandleShortEvents:
                         self.current_lives -= 1
                         if self.current_lives != game.clan.leader_lives:
                             while self.current_lives > game.clan.leader_lives:
-                                History.add_death(
-                                    cat, "multi_lives"
-                                )
+                                History.add_death(cat, "multi_lives")
                                 self.current_lives -= 1
                     History.add_death(cat, death_history)
 
@@ -760,7 +758,7 @@ class HandleShortEvents:
         supply_type = block["type"]
         trigger = block["trigger"]
 
-        clan_size = get_living_clan_cat_count(Cat)
+        clan_size = registry.get_living_clan_cat_count
         needed_amount = int(clan_size * 3)
 
         self.herb_notice = "Lost "

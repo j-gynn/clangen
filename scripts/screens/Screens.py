@@ -8,7 +8,7 @@ from pygame_gui.core import ObjectID
 
 import scripts.game_structure.screen_settings
 import scripts.screens.screens_core.screens_core
-from scripts.cat.cats import Cat
+from scripts.cat.catregistry import registry
 from scripts.game_structure import image_cache
 from scripts.game_structure.audio import music_manager
 from scripts.game_structure.game_essentials import game
@@ -752,5 +752,5 @@ def cat_profiles():
     """Updates every cat's sprites"""
     game.choose_cats.clear()
 
-    for x in Cat.all_cats:
-        update_sprite(Cat.all_cats[x])
+    for x in registry.all_cats:
+        update_sprite(registry.all_cats[x])

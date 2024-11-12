@@ -22,6 +22,7 @@ from scripts.utility import (
     ui_scale_offset,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER, screen
 from ..ui.generate_box import get_box, BoxStyles
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -387,7 +388,7 @@ class RelationshipScreen(Screens):
             self.focus_cat_elements[ele].kill()
         self.focus_cat_elements = {}
 
-        self.the_cat = Cat.all_cats.get(game.switches["cat"], game.clan.instructor)
+        self.the_cat = registry.all_cats.get(game.switches["cat"], game.clan.instructor)
 
         self.current_page = 1
         self.inspect_cat = None

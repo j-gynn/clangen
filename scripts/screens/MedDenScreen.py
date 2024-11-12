@@ -1,7 +1,6 @@
 import pygame
 import pygame_gui
 
-from scripts.cat.cats import Cat
 from scripts.clan import HERBS
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import (
@@ -15,9 +14,9 @@ from scripts.utility import (
     ui_scale,
     get_alive_status_cats,
     shorten_text_to_fit,
-    get_living_clan_cat_count,
 )
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..conditions import get_amount_cat_for_one_medic, medical_cats_condition_fulfilled
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import BoxStyles, get_box
@@ -241,7 +240,7 @@ class MedDenScreen(Screens):
             self.out_den_cats = []
             self.minor_cats = []
             self.injured_and_sick_cats = []
-            for the_cat in Cat.all_cats_list:
+            for the_cat in registry.all_cats_list:
                 if (
                     not the_cat.dead
                     and not the_cat.outside
@@ -332,7 +331,9 @@ class MedDenScreen(Screens):
 
             amount_per_med = get_amount_cat_for_one_medic(game.clan)
             number = medical_cats_condition_fulfilled(
-                Cat.all_cats.values(), amount_per_med, give_clanmembers_covered=True
+                registry.all_cats.values(),
+                amount_per_med,
+                give_clanmembers_covered=True,
             )
             if len(self.meds) == 1:
                 insert = "medicine cat"
@@ -346,7 +347,7 @@ class MedDenScreen(Screens):
                 meds_cover = f"You have no medicine cats who are able to work. Your Clan will be at a higher risk of death and disease."
 
             herb_amount = sum(game.clan.herbs.values())
-            needed_amount = int(get_living_clan_cat_count(Cat) * 4)
+            needed_amount = registry.get_living_clan_cat_count * 4
             med_concern = f"This should not appear."
             if herb_amount == 0:
                 med_concern = (
@@ -427,7 +428,7 @@ class MedDenScreen(Screens):
 
         # get the med cats
         self.meds = get_alive_status_cats(
-            Cat, ["medicine cat", "medicine cat apprentice"], sort=True
+            ["medicine cat", "medicine cat apprentice"], sort=True
         )
 
         if not self.meds:
