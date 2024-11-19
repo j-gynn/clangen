@@ -109,13 +109,13 @@ class ChooseAdoptiveParentScreen(Screens):
                 )
 
             elif event.ui_element == self.previous_cat_button:
-                if isinstance(Cat.fetch_cat(self.previous_cat), Cat):
+                if isinstance(registry.fetch_cat(self.previous_cat), Cat):
                     game.switches["cat"] = self.previous_cat
                     self.update_current_cat_info()
                 else:
                     print("invalid previous cat", self.previous_cat)
             elif event.ui_element == self.next_cat_button:
-                if isinstance(Cat.fetch_cat(self.next_cat), Cat):
+                if isinstance(registry.fetch_cat(self.next_cat), Cat):
                     game.switches["cat"] = self.next_cat
                     self.update_current_cat_info()
                 else:
@@ -382,9 +382,9 @@ class ChooseAdoptiveParentScreen(Screens):
         self.birth_parents_buttons = {}
 
         birth_parents = [
-            Cat.fetch_cat(i)
+            registry.fetch_cat(i)
             for i in [self.the_cat.parent1, self.the_cat.parent2]
-            if isinstance(Cat.fetch_cat(i), Cat)
+            if isinstance(registry.fetch_cat(i), Cat)
         ]
 
         if len(birth_parents) == 1:
@@ -424,7 +424,7 @@ class ChooseAdoptiveParentScreen(Screens):
 
         self.all_adoptive_parents = self.chunks(
             [
-                Cat.fetch_cat(i)
+                registry.fetch_cat(i)
                 for i in self.the_cat.adoptive_parents
                 if isinstance(Cat.fetch_cat(i), Cat)
             ],

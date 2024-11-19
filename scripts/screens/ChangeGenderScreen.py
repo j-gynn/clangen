@@ -24,6 +24,7 @@ from scripts.utility import (
 )
 from scripts.utility import ui_scale
 from .Screens import Screens
+from ..cat.catregistry import registry
 from ..game_structure.screen_settings import MANAGER
 from ..game_structure.windows import PronounCreation
 from ..ui.generate_button import get_button_dict, ButtonStyles
@@ -80,11 +81,11 @@ class ChangeGenderScreen(Screens):
             if event.ui_element == self.back_button:
                 self.change_screen("profile screen")
             elif event.ui_element == self.next_cat_button:
-                if isinstance(Cat.fetch_cat(self.next_cat), Cat):
+                if isinstance(registry.fetch_cat(self.next_cat), Cat):
                     game.switches["cat"] = self.next_cat
                     self.update_selected_cat()
             elif event.ui_element == self.previous_cat_button:
-                if isinstance(Cat.fetch_cat(self.previous_cat), Cat):
+                if isinstance(registry.fetch_cat(self.previous_cat), Cat):
                     game.switches["cat"] = self.previous_cat
                     self.update_selected_cat()
             elif event.ui_element == self.buttons["save"]:
@@ -222,7 +223,7 @@ class ChangeGenderScreen(Screens):
     def update_selected_cat(self):
         self.reset_buttons_and_boxes()
 
-        self.the_cat = Cat.fetch_cat(game.switches["cat"])
+        self.the_cat = registry.fetch_cat(game.switches["cat"])
         if not self.the_cat:
             return
 

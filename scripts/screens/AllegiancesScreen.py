@@ -1,7 +1,6 @@
 import pygame
 import pygame_gui
 
-from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.screen_settings import MANAGER
 from scripts.utility import (
@@ -120,9 +119,9 @@ class AllegiancesScreen(Screens):
         )
         output += ", ".join(
             [
-                str(Cat.fetch_cat(i).name).upper()
+                registry.fetch_cat(i).name.upper()
                 for i in cat.apprentice
-                if Cat.fetch_cat(i)
+                if registry.fetch_cat(i)
             ]
         )
 
@@ -163,7 +162,7 @@ class AllegiancesScreen(Screens):
 
         # Remove queens from warrior or elder lists, if they are there.  Let them stay on any other lists.
         for q in queen_dict:
-            queen = Cat.fetch_cat(q)
+            queen = registry.fetch_cat(q)
             if not queen:
                 continue
             if queen in living_warriors:
@@ -239,7 +238,7 @@ class AllegiancesScreen(Screens):
             # This one is a bit different.  First all the queens, and the kits they are caring for.
             all_entries = []
             for q in queen_dict:
-                queen = Cat.fetch_cat(q)
+                queen = registry.fetch_cat(q)
                 if not queen:
                     continue
                 kittens = []
