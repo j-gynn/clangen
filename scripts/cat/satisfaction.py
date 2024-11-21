@@ -16,16 +16,34 @@ class Satisfaction:
     @property
     def political(self):
         personality = Cat.fetch_cat(self.cat_id).personality
-        lead_personality = Cat.fetch_cat(game.clan.leader).personality
-        dep_personality = Cat.fetch_cat(game.clan.deputy).personality
+        lead_personality = game.clan.leader.personality
+        dep_personality = game.clan.deputy.personality
 
-        return personality.similarity_score(
+        old_score = personality.similarity_score(
             lead_personality
         ) + personality.similarity_score(dep_personality)
+        score = old_score
+
+        # consider the cat's personality rq if they're leader or deputy
+        if self.cat_id in [game.clan.leader.ID, game.clan.deputy.ID]:
+            # alter score bcs of self-perception - by at most ~20%
+
+            # increase it for high aggress
+            aggress = (personality.aggression - 8) / 50
+            if aggress > 0:
+                score = (old_score * aggress) + score
+
+            # decrease it for low social
+            social = (personality.sociability - 8) / 50
+            if social < 0:
+                score = score + (old_score * aggress)
+
+        return score
 
     @property
     def hunger(self):
-        hunger = 100
+        hunger_old = 100
+        hunger = hunger_old
         if (
             game.clan.game_mode not in ["expanded", "cruel season"]
             or self.cat_id not in game.clan.freshkill_pile.nutrition_info
@@ -49,8 +67,20 @@ class Satisfaction:
         hunger -= game.clan.freshkill_pile.starv_percent / 10
         hunger -= game.clan.freshkill_pile.mal_percent / 10
 
+        # now we add buffs & nerfs for traits
+        p = Cat.fetch_cat(self.cat_id).personality
+
+        # the higher the stability, the less the cat is affected by hunger
+        stability = (p.stability - 8) / 100
+        if stability > 0:
+            hunger = (hunger_old * stability) + hunger
+
+        # constrain to 1-100 for legibility
         if hunger < 0:
             hunger = 0
+        if hunger > 100:
+            hunger = 100
+
         return hunger
 
     @property
