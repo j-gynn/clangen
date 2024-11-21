@@ -249,7 +249,9 @@ class FreshkillPile:
     #                                    tactics                                   #
     # ---------------------------------------------------------------------------- #
 
-    def tactic_status(self, living_cats: List[Cat], additional_food_round=False) -> None:
+    def tactic_status(
+        self, living_cats: List[Cat], additional_food_round=False
+    ) -> None:
         """Feed cats in order of status, resolving ties with age.
 
         :param list living_cats: Cats to feed
@@ -424,7 +426,9 @@ class FreshkillPile:
         sorted_cats = sorted(living_cats, key=lambda x: x.experience, reverse=True)
         self.feed_group(sorted_cats, additional_food_round)
 
-    def tactic_hunter_first(self, living_cats: List[Cat], additional_food_round=False) -> None:
+    def tactic_hunter_first(
+        self, living_cats: List[Cat], additional_food_round=False
+    ) -> None:
         """Feed cats with the hunter skill first, then everyone else according to status.
 
         :param list living_cats: Cats to feed
@@ -679,6 +683,30 @@ class FreshkillPile:
             nutrition.current_score = nutrition.max_score
 
         self.nutrition_info[cat.ID] = nutrition
+
+    @property
+    def starv_percent(self):
+        return (
+            sum(
+                1
+                for value in self.nutrition_info.values()
+                if value.percentage < STARV_PERCENTAGE
+            )
+            / len(self.nutrition_info)
+            * 100
+        )
+
+    @property
+    def mal_percent(self):
+        return (
+            sum(
+                1
+                for value in self.nutrition_info.values()
+                if value.percentage < MAL_PERCENTAGE
+            )
+            / len(self.nutrition_info)
+            * 100
+        )
 
 
 # ---------------------------------------------------------------------------- #

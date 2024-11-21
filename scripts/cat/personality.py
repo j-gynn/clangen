@@ -12,18 +12,18 @@ class Personality:
     facet_range = [0, 16]
 
     with open(
-            "resources/dicts/traits/trait_ranges.json", "r", encoding="utf-8"
+        "resources/dicts/traits/trait_ranges.json", "r", encoding="utf-8"
     ) as read_file:
         trait_ranges = ujson.loads(read_file.read())
 
     def __init__(
-            self,
-            trait: str = None,
-            kit_trait: bool = False,
-            lawful: int = None,
-            social: int = None,
-            aggress: int = None,
-            stable: int = None,
+        self,
+        trait: str = None,
+        kit_trait: bool = False,
+        lawful: int = None,
+        social: int = None,
+        aggress: int = None,
+        stable: int = None,
     ):
         """If trait is given, it will randomize facets within the range of the trait. It will ignore any facets given.
         If facets are given and no trait, it will find a trait that matches the facets. NOTE: you can give
@@ -199,25 +199,25 @@ class Personality:
         trait_range = trait_type_dict[self.trait]
 
         if not (
-                trait_range["lawfulness"][0]
-                <= self.lawfulness
-                <= trait_range["lawfulness"][1]
+            trait_range["lawfulness"][0]
+            <= self.lawfulness
+            <= trait_range["lawfulness"][1]
         ):
             return False
         if not (
-                trait_range["sociability"][0]
-                <= self.sociability
-                <= trait_range["sociability"][1]
+            trait_range["sociability"][0]
+            <= self.sociability
+            <= trait_range["sociability"][1]
         ):
             return False
         if not (
-                trait_range["aggression"][0]
-                <= self.aggression
-                <= trait_range["aggression"][1]
+            trait_range["aggression"][0]
+            <= self.aggression
+            <= trait_range["aggression"][1]
         ):
             return False
         if not (
-                trait_range["stability"][0] <= self.stability <= trait_range["stability"][1]
+            trait_range["stability"][0] <= self.stability <= trait_range["stability"][1]
         ):
             return False
 
@@ -287,3 +287,25 @@ class Personality:
         else:
             # This will only trigger if they have the same personality.
             return None
+
+    def similarity_score(self, other_personality: Personality):
+        """
+        Calculates a similarity score between two Personality instances.
+        Higher scores indicate more similarity.
+        """
+        # Calculate absolute differences for each trait
+        differences = [
+            abs(self.lawfulness - other_personality.lawfulness),
+            abs(self.sociability - other_personality.sociability),
+            abs(self.aggression - other_personality.aggression),
+            abs(self.stability - other_personality.stability),
+        ]
+
+        # Normalize differences (range: 0-1) and calculate average penalty
+        max_diff = 16
+        normalized_penalties = [1 - (diff / max_diff) for diff in differences]
+        average_penalty = sum(normalized_penalties) / len(normalized_penalties)
+
+        # Map the similarity score to a 0-100 scale, centered at 50
+        similarity = 25 + (average_penalty - 0.5) * 100
+        return similarity

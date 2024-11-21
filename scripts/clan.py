@@ -12,6 +12,7 @@ import os
 import random
 import statistics
 from random import choice, randint
+from typing import Optional
 
 import pygame
 import ujson
@@ -19,6 +20,7 @@ import ujson
 from scripts.cat.cats import Cat, cat_class
 from scripts.cat.history import History
 from scripts.cat.names import names
+from scripts.cat.satisfaction import Satisfaction
 from scripts.cat.sprites import sprites
 from scripts.clan_resources.freshkill import FreshkillPile, Nutrition
 from scripts.events_module.generate_events import OngoingEvent
@@ -101,6 +103,7 @@ class Clan:
         starting_season="Newleaf",
         self_run_init_functions=True,
     ):
+        self.satisfaction = {}
         self.history = History()
         if name == "":
             return
@@ -160,10 +163,9 @@ class Clan:
         self._reputation = 80
 
         self.starting_members = starting_members
-        if game_mode in ["expanded", "cruel season"]:
-            self.freshkill_pile = FreshkillPile()
-        else:
-            self.freshkill_pile = None
+        self.freshkill_pile: Optional[FreshkillPile] = (
+            FreshkillPile() if game_mode in ["expanded", "cruel season"] else None
+        )
         self.primary_disaster = None
         self.secondary_disaster = None
         self.war = {
@@ -253,9 +255,14 @@ class Clan:
         number_other_clans = randint(3, 5)
         for _ in range(number_other_clans):
             other_clan_names = [str(i.name) for i in self.all_clans] + [game.clan.name]
-            other_clan_name = choice(names.names_dict["normal_prefixes"] + names.names_dict["clan_prefixes"])
+            other_clan_name = choice(
+                names.names_dict["normal_prefixes"] + names.names_dict["clan_prefixes"]
+            )
             while other_clan_name in other_clan_names:
-                other_clan_name = choice(names.names_dict["normal_prefixes"] + names.names_dict["clan_prefixes"])
+                other_clan_name = choice(
+                    names.names_dict["normal_prefixes"]
+                    + names.names_dict["clan_prefixes"]
+                )
             other_clan = OtherClan(name=other_clan_name)
             self.all_clans.append(other_clan)
         self.save_clan()
@@ -540,7 +547,9 @@ class Clan:
 
         game.safe_save(f"{get_save_dir()}/{self.name}clan.json", clan_data)
 
-        if os.path.exists(get_save_dir() + f"/{self.name}clan.txt") & (self.name != 'current'):
+        if os.path.exists(get_save_dir() + f"/{self.name}clan.txt") & (
+            self.name != "current"
+        ):
             os.remove(get_save_dir() + f"/{self.name}clan.txt")
 
     def switch_setting(self, setting_name):
@@ -870,6 +879,7 @@ class Clan:
 
         for cat in clan_data["clan_cats"].split(","):
             if cat in Cat.all_cats:
+                game.clan.satisfaction[cat] = Satisfaction(cat)
                 game.clan.add_cat(Cat.all_cats[cat])
                 game.clan.add_to_starclan(Cat.all_cats[cat])
                 game.clan.add_to_darkforest(Cat.all_cats[cat])
