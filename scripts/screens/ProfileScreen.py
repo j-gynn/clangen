@@ -875,6 +875,10 @@ class ProfileScreen(Screens):
         """Generate the right column information"""
         output = ""
 
+        # SATISFACTION
+        if self.the_cat.ID in game.clan.satisfaction.keys():
+            output += str(game.clan.satisfaction[self.the_cat.ID]) + "\n"
+
         # STATUS
         if (
             the_cat.outside
@@ -920,7 +924,6 @@ class ProfileScreen(Screens):
                         if Cat.fetch_cat(i)
                     ]
                 )
-
             # NEWLINE ----------
             output += "\n"
 

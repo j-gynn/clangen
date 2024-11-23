@@ -16,11 +16,11 @@ from typing import Optional
 
 import pygame
 import ujson
+from scripts.cat.satisfaction import CatSatisfaction
 
 from scripts.cat.cats import Cat, cat_class
 from scripts.cat.history import History
 from scripts.cat.names import names
-from scripts.cat.satisfaction import Satisfaction
 from scripts.cat.sprites import sprites
 from scripts.clan_resources.freshkill import FreshkillPile, Nutrition
 from scripts.events_module.generate_events import OngoingEvent
@@ -105,8 +105,8 @@ class Clan:
     ):
         self.satisfaction = {}
         self.history = History()
-        if name == "":
-            return
+        # if name == "":
+        #     return
 
         self.name = name
         self.leader = leader
@@ -879,7 +879,7 @@ class Clan:
 
         for cat in clan_data["clan_cats"].split(","):
             if cat in Cat.all_cats:
-                game.clan.satisfaction[cat] = Satisfaction(cat)
+                game.clan.satisfaction[cat] = CatSatisfaction(cat)
                 game.clan.add_cat(Cat.all_cats[cat])
                 game.clan.add_to_starclan(Cat.all_cats[cat])
                 game.clan.add_to_darkforest(Cat.all_cats[cat])
