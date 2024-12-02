@@ -104,6 +104,8 @@ class ChooseAdoptiveParentScreen(Screens):
                 self.selected_mate_index = 0
                 self.change_screen("profile screen")
             elif event.ui_element == self.toggle_adoptive_parent:
+                if self.work_thread is not None and self.work_thread.is_alive():
+                    return
                 self.work_thread = self.loading_screen_start_work(
                     self.change_adoptive_parent
                 )
@@ -352,18 +354,14 @@ class ChooseAdoptiveParentScreen(Screens):
 
     def change_adoptive_parent(self):
         """Make adoptive parent changes"""
-
         if not self.selected_cat:
             return
 
         if self.selected_cat.ID not in self.the_cat.adoptive_parents:
-            self.the_cat.adoptive_parents.append(self.selected_cat.ID)
-            self.the_cat.create_inheritance_new_cat()
+            self.the_cat.set_adoptive_parent(self.selected_cat)
 
         else:
-            self.the_cat.adoptive_parents.remove(self.selected_cat.ID)
-            self.the_cat.create_inheritance_new_cat()
-            self.selected_cat.create_inheritance_new_cat()
+            self.the_cat.unset_adoptive_parent(self.selected_cat)
 
     def update_after_change(self):
         """Updates that need to be run after setting an adoptive parent"""

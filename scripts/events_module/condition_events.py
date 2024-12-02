@@ -182,7 +182,7 @@ class Condition_Events:
             event = event_text_adjust(Cat, event.strip(), main_cat=cat)
 
             if cat.status == "leader":
-                history_event = history_event.replace("m_c ", "")
+                history_event = history_event.replace("m_c ", "").replace(".", "")
                 History.add_death(
                     cat, condition="starving", death_text=history_event.strip()
                 )
@@ -570,7 +570,7 @@ class Condition_Events:
 
                 if cat.status == "leader":
                     event = event + " " + get_leader_life_notice()
-                    history_event = history_event.replace("m_c ", "")
+                    history_event = history_event.replace("m_c ", "").replace(".", "")
                     History.add_death(
                         cat, condition=illness, death_text=history_event.strip()
                     )
@@ -675,7 +675,7 @@ class Condition_Events:
 
                 if cat.status == "leader":
                     event = event + " " + get_leader_life_notice()
-                    history_text = history_text.replace("m_c", " ")
+                    history_text = history_text.replace("m_c", " ").replace(".", "")
                     History.add_death(
                         cat, condition=injury, death_text=history_text.strip()
                     )
@@ -735,10 +735,7 @@ class Condition_Events:
                             f"condition '{condition_got}'. Using default."
                         )
                         possible_string_list = [
-                            (
-                                f"After m_c's {injury} healed, {{PRONOUN/m_c/subject}} now {{VERB/m_c/have/has}} "
-                                f"{condition_got}. [Please report this if you see it!]",
-                            )
+                            f"After m_c's {injury} healed, {{PRONOUN/m_c/subject}} now {{VERB/m_c/have/has}} {condition_got}. [Please report this if you see it!]",
                         ]
                     # choose event string and ensure Clan's med cat number aligns with event text
                     random_index = random.randrange(0, len(possible_string_list))

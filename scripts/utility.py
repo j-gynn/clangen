@@ -487,9 +487,7 @@ def create_new_cat_block(
             stor = [
                 x for x in match.group(1).split(",") if x in BACKSTORIES["backstories"]
             ]
-            if not stor:
-                bs_override = True
-                continue
+            bs_override = True
             chosen_backstory = choice(stor)
             break
 
@@ -504,6 +502,8 @@ def create_new_cat_block(
         status = cat_type
         new_name = False
         thought = "Is wondering about those new cats"
+        if age is not None and age <= 6 and not bs_override:
+            chosen_backstory = "outsider1"
 
     # IS THE CAT DEAD?
     alive = True
@@ -1342,8 +1342,8 @@ def gather_cat_objects(
     """
     gathers cat objects from list of abbreviations used within an event format block
     :param Cat Cat: Cat class
-    :param list[str] abbr_list: The list of abbreviations, supports "m_c", "r_c", "p_l", "s_c", "app1", "app2", "clan",
-    "some_clan", "patrol", "multi", "n_c{index}"
+    :param list[str] abbr_list: The list of abbreviations, supports "m_c", "r_c", "p_l", "s_c", "app1" through "app6",
+    "clan", "some_clan", "patrol", "multi", "n_c{index}"
     :param event: the controlling class of the event (e.g. Patrol, HandleShortEvents), default None
     :param Cat stat_cat: if passing the Patrol class, must include stat_cat separately
     :param Cat extra_cat: if not passing an event class, include the single affected cat object here. If you are not
@@ -1359,7 +1359,7 @@ def gather_cat_objects(
                 out_set.add(extra_cat)
             else:
                 out_set.add(event.main_cat)
-        if abbr == "r_c":
+        elif abbr == "r_c":
             out_set.add(event.random_cat)
         elif abbr == "p_l":
             out_set.add(event.patrol_leader)
@@ -1369,6 +1369,14 @@ def gather_cat_objects(
             out_set.add(event.patrol_apprentices[0])
         elif abbr == "app2" and len(event.patrol_apprentices) >= 2:
             out_set.add(event.patrol_apprentices[1])
+        elif abbr == "app3" and len(event.patrol_apprentices) >= 3:
+            out_set.add(event.patrol_apprentices[2])
+        elif abbr == "app4" and len(event.patrol_apprentices) >= 4:
+            out_set.add(event.patrol_apprentices[3])
+        elif abbr == "app5" and len(event.patrol_apprentices) >= 5:
+            out_set.add(event.patrol_apprentices[4])
+        elif abbr == "app6" and len(event.patrol_apprentices) >= 6:
+            out_set.add(event.patrol_apprentices[5])
         elif abbr == "clan":
             out_set.update(
                 [
@@ -1396,6 +1404,8 @@ def gather_cat_objects(
             index = int(index)
             if index < len(event.new_cats):
                 out_set.update(event.new_cats[index])
+        else:
+            print(f"WARNING: Unsupported abbreviation {abbr}")
 
     return list(out_set)
 
