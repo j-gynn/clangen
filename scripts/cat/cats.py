@@ -500,6 +500,7 @@ class Cat:
 
     def __eq__(self, other):
         return False if not isinstance(other, Cat) else self.ID == other.ID
+
     def __hash__(self):
         return hash(self.ID)
 
