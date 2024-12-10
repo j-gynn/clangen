@@ -411,7 +411,10 @@ class HandleShortEvents:
             elif new_gender == "trans male":
                 self.main_cat.pronouns = [self.main_cat.default_pronouns[2].copy()]
             else:
-                print("No pronouns found for new_gender, keeping original pronouns.", new_gender)
+                print(
+                    "No pronouns found for new_gender, keeping original pronouns.",
+                    new_gender,
+                )
 
     def handle_death(self):
         """
@@ -621,9 +624,7 @@ class HandleShortEvents:
                         self.current_lives -= 1
                         if self.current_lives != game.clan.leader_lives:
                             while self.current_lives > game.clan.leader_lives:
-                                History.add_death(
-                                    cat, "multi_lives"
-                                )
+                                History.add_death(cat, "multi_lives")
                                 self.current_lives -= 1
                     History.add_death(cat, death_history)
 

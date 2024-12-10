@@ -4,7 +4,6 @@ import ujson
 
 
 class SingleInteraction:
-
     def __init__(
         self,
         interact_id,
@@ -66,7 +65,6 @@ class SingleInteraction:
 
 
 class GroupInteraction:
-
     def __init__(
         self,
         interact_id,

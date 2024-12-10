@@ -95,7 +95,9 @@ class PatrolScreen(Screens):
             if self.able_cats:
                 self.selected_cat = choice(self.able_cats)
             else:
-                print('WARNING: attempted to select random cat for patrol from empty list of able cats')
+                print(
+                    "WARNING: attempted to select random cat for patrol from empty list of able cats"
+                )
             self.update_selected_cat()
             self.update_button()
         # Check is a cat is clicked
@@ -134,7 +136,9 @@ class PatrolScreen(Screens):
                     if self.able_cats:
                         self.selected_cat = choice(self.able_cats)
                     else:
-                        print('WARNING: attempted to select random cat for patrol from empty list of able cats')
+                        print(
+                            "WARNING: attempted to select random cat for patrol from empty list of able cats"
+                        )
                 self.update_selected_cat()
                 self.current_patrol.append(self.selected_cat)
             self.update_cat_images_buttons()

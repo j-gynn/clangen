@@ -82,7 +82,6 @@ class TestEncoding(unittest.TestCase):
 
 
 def fix():
-
     skipped = True
 
     # files = ['./resources/buttons_small.json']

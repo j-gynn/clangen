@@ -175,7 +175,6 @@ if "patrol ids" in task.casefold():
         print("All patrol IDs are unique. \n\n")
 
 if "patrol sprite" in task.casefold():
-
     explicit_art = []
     has_patrol_sprite = []
     needs_patrol_sprite = []

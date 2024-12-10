@@ -17,7 +17,6 @@ from scripts.utility import change_relationship_values, process_text
 
 
 class GroupEvents:
-
     # ---------------------------------------------------------------------------- #
     #                   build master dictionary for interactions                   #
     # ---------------------------------------------------------------------------- #
@@ -34,23 +33,23 @@ class GroupEvents:
         GROUP_INTERACTION_MASTER_DICT[cat_amount] = {}
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["neutral"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "neutral"
+            ] = create_group_interaction(welcome_list)
 
         file_path = os.path.join(base_path, cat_amount, "positive.json")
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["positive"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "positive"
+            ] = create_group_interaction(welcome_list)
 
         file_path = os.path.join(base_path, cat_amount, "negative.json")
         with open(file_path, "r") as read_file:
             welcome_list = ujson.load(read_file)
-            GROUP_INTERACTION_MASTER_DICT[cat_amount]["negative"] = (
-                create_group_interaction(welcome_list)
-            )
+            GROUP_INTERACTION_MASTER_DICT[cat_amount][
+                "negative"
+            ] = create_group_interaction(welcome_list)
 
     del base_path
 
@@ -245,10 +244,11 @@ class GroupEvents:
 
         """
         # first handle the abbreviations possibilities for the cats
-        abbr_per_interaction, cat_abbreviations_counter = (
-            GroupEvents.get_abbreviations_possibilities(
-                interactions, int(amount), interact_cats
-            )
+        (
+            abbr_per_interaction,
+            cat_abbreviations_counter,
+        ) = GroupEvents.get_abbreviations_possibilities(
+            interactions, int(amount), interact_cats
         )
         abbr_per_interaction = GroupEvents.remove_abbreviations_missing_cats(
             abbr_per_interaction
@@ -279,10 +279,8 @@ class GroupEvents:
                 continue
 
             # now check for relationship constraints
-            relationship_allow_interaction = (
-                GroupEvents.relationship_allow_interaction(
-                    interact, abbreviations_cat_id
-                )
+            relationship_allow_interaction = GroupEvents.relationship_allow_interaction(
+                interact, abbreviations_cat_id
             )
             if not relationship_allow_interaction:
                 continue
@@ -684,9 +682,7 @@ class GroupEvents:
                 injuries.append(inj)
 
             possible_scar = (
-                GroupEvents.prepare_text(
-                    injury_dict["scar_text"], abbreviations_cat_id
-                )
+                GroupEvents.prepare_text(injury_dict["scar_text"], abbreviations_cat_id)
                 if "scar_text" in injury_dict
                 else None
             )

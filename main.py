@@ -166,6 +166,7 @@ from scripts.clan import clan_class
 from scripts.utility import (
     quit,
 )  # pylint: disable=redefined-builtin
+
 # from scripts.debug_menu import debugmode
 from scripts.debug_console import debug_mode
 import pygame
@@ -300,7 +301,11 @@ while 1:
     game.all_screens[game.current_screen].on_use()
     # EVENTS
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN and game.settings["keybinds"] and debug_mode.debug_menu.visible:
+        if (
+            event.type == pygame.KEYDOWN
+            and game.settings["keybinds"]
+            and debug_mode.debug_menu.visible
+        ):
             pass
         else:
             game.all_screens[game.current_screen].handle_event(event)
@@ -341,7 +346,7 @@ while 1:
                 MANAGER.print_layer_debug()
             elif event.key == pygame.K_F3:
                 debug_mode.toggle_debug_mode()
-                #debugmode.toggle_console()
+                # debugmode.toggle_console()
             elif event.key == pygame.K_F11:
                 scripts.game_structure.screen_settings.toggle_fullscreen(
                     source_screen=getattr(

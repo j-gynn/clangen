@@ -16,15 +16,17 @@ class TestHandleAccessories(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Mock classes
-        cls.event_class = type('EventClass', (), dict(
-            new_accessory = []
-        ))
-        cls.pelt_class = type('PeltClass', (), dict(
-            wild_accessories=["WILD1", "WILD2"],
-            plant_accessories=["PLANT1", "PLANT2"],
-            collars=["COLLAR1", "COLLAR2"],
-            tail_accessories=["TAIL1", "TAIL2"]
-        ))
+        cls.event_class = type("EventClass", (), dict(new_accessory=[]))
+        cls.pelt_class = type(
+            "PeltClass",
+            (),
+            dict(
+                wild_accessories=["WILD1", "WILD2"],
+                plant_accessories=["PLANT1", "PLANT2"],
+                collars=["COLLAR1", "COLLAR2"],
+                tail_accessories=["TAIL1", "TAIL2"],
+            ),
+        )
 
     def setUp(self):
         self.test = HandleShortEvents()
@@ -109,26 +111,30 @@ class TestReset(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Mock class
-        cls.handle = type('HandleShortEventsClass', (), dict(
-            herb_notice=None,
-            types=[],
-            sub_types=[],
-            text=None,
-            involved_cats=[],
-            main_cat=None,
-            random_cat=None,
-            new_cat_objects=[],
-            new_cats=[],
-            victim_cat=None,
-            murder_index=None,
-            multi_cat=[],
-            dead_cats=[],
-            chosen_herb=None,
-            other_clan=None,
-            other_clan_name=None,
-            chosen_event=None,
-            additional_event_text=""
-        ))
+        cls.handle = type(
+            "HandleShortEventsClass",
+            (),
+            dict(
+                herb_notice=None,
+                types=[],
+                sub_types=[],
+                text=None,
+                involved_cats=[],
+                main_cat=None,
+                random_cat=None,
+                new_cat_objects=[],
+                new_cats=[],
+                victim_cat=None,
+                murder_index=None,
+                multi_cat=[],
+                dead_cats=[],
+                chosen_herb=None,
+                other_clan=None,
+                other_clan_name=None,
+                chosen_event=None,
+                additional_event_text="",
+            ),
+        )
 
     def test_reset_resets_all_attributes_to_default_values(self):
         default = self.handle()
