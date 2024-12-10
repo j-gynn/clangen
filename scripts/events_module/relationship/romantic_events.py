@@ -892,7 +892,9 @@ class Romantic_Events:
                 insert = "mates"
             mate_string = mate_string.replace("(r_c_mate/mates)", insert)
 
-        mate_string = event_text_adjust(Cat, mate_string, main_cat=cat_from, random_cat=cat_to)
+        mate_string = event_text_adjust(
+            Cat, mate_string, main_cat=cat_from, random_cat=cat_to
+        )
         return mate_string
 
     @staticmethod

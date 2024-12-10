@@ -438,7 +438,11 @@ class Relationship:
                 types.remove("romantic")
 
         # if cats have no romantic relationship already, don't allow romantic decrease
-        if not positive and "romantic" in types and not self.cat_from.relationships[self.cat_to.ID].romantic_love:
+        if (
+            not positive
+            and "romantic" in types
+            and not self.cat_from.relationships[self.cat_to.ID].romantic_love
+        ):
             types.remove("romantic")
 
         rel_type = choice(types)

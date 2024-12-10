@@ -176,7 +176,6 @@ class Skill:
     }
 
     def __init__(self, path: SkillPath, points: int = 0, interest_only: bool = False):
-
         self.path = path
         self.interest_only = interest_only
         if points > self.point_range[1]:
@@ -336,7 +335,6 @@ class CatSkills:
         hidden_skill: HiddenSkillEnum = None,
         interest_only=False,
     ):
-
         if skill_dict:
             self.primary = Skill.generate_from_save_string(skill_dict["primary"])
             self.secondary = Skill.generate_from_save_string(skill_dict["secondary"])

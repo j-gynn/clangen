@@ -13,7 +13,7 @@ commandList: List[Command] = [
     GetCommand(),
     EvalCommand(),
     FpsCommand(),
-    CatsCommand()
+    CatsCommand(),
 ]
 
 helpCommand = HelpCommand(commandList)

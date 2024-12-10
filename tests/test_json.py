@@ -19,7 +19,7 @@ def test():
     """Iterate through all files in 'resources'
     and verify all json files are valid"""
     failed = False
-    for (root, _, files) in os.walk("."):
+    for root, _, files in os.walk("."):
         for file in files:
             if file.endswith(".json"):
                 path = os.path.join(root, file)
@@ -31,7 +31,7 @@ def test():
                         print(e)
                         failed = True
                         continue
-                
+
                 try:
                     _ = ujson.loads(contents)
                 except ujson.JSONDecodeError as e:
@@ -39,7 +39,7 @@ def test():
                     print(e)
                     failed = True
                     pass
-    
+
     if failed:
         sys.exit(1)
     sys.exit(0)

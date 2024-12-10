@@ -493,10 +493,10 @@ class EventsScreen(Screens):
                         object_id="#events_cat_profile_button",
                         starting_height=1,
                         manager=MANAGER,
-                        anchors=anchor
+                        anchors=anchor,
                     )
                     self.cat_profile_buttons.append(cat_profile_button)
-                anchor = { "left_target": cat_profile_button }
+                anchor = {"left_target": cat_profile_button}
         else:
             anchor = {"right": "right"}
             rect = ui_scale(pygame.Rect((0, 0), (120, 34)))
@@ -519,7 +519,7 @@ class EventsScreen(Screens):
                         anchors=anchor,
                     )
                     self.cat_profile_buttons.append(cat_profile_button)
-                anchor = { "left_target": cat_profile_button }
+                anchor = {"left_target": cat_profile_button}
         del rect
         self.involved_cat_container.set_view_container_dimensions(
             (
@@ -605,9 +605,11 @@ class EventsScreen(Screens):
 
         anchor = {"top": "top"}
 
-        alternate_color = (pygame.Color(87, 76, 55)
-                    if game.settings["dark mode"]
-                    else pygame.Color(167, 148, 111))
+        alternate_color = (
+            pygame.Color(87, 76, 55)
+            if game.settings["dark mode"]
+            else pygame.Color(167, 148, 111)
+        )
 
         for i, event_object in enumerate(self.display_events):
             if not isinstance(event_object.text, str):

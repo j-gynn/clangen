@@ -140,7 +140,7 @@ class GenerateEvents:
                         outsider=event["outsider"] if "outsider" in event else {},
                         other_clan=event["other_clan"] if "other_clan" in event else {},
                         supplies=event["supplies"] if "supplies" in event else [],
-                        new_gender=event["new_gender"] if "new_gender" in event else []
+                        new_gender=event["new_gender"] if "new_gender" in event else [],
                     )
                     event_list.append(event)
 
@@ -399,10 +399,7 @@ class GenerateEvents:
                     continue
 
             # check if already trans
-            if (
-                "transition" in event.sub_type
-                and cat.gender != cat.genderalign
-            ):
+            if "transition" in event.sub_type and cat.gender != cat.genderalign:
                 continue
 
             if event.m_c:
@@ -491,7 +488,6 @@ class GenerateEvents:
                         and "any" not in event.m_c["gender"]
                     ):
                         continue
-
 
             # check that a random_cat is available to use for r_c
             if event.r_c and random_cat:
@@ -995,7 +991,8 @@ class GenerateEvents:
                         if "lost" not in cat_info["status"]:
                             continue
                     elif (
-                        cat.status.casefold() not in [x.casefold() for x in cat_info["status"]]
+                        cat.status.casefold()
+                        not in [x.casefold() for x in cat_info["status"]]
                         and "any" not in cat_info["status"]
                     ):
                         continue
@@ -1058,7 +1055,7 @@ class ShortEvent:
         outsider=None,
         other_clan=None,
         supplies=None,
-        new_gender=None
+        new_gender=None,
     ):
         if not event_id:
             print("WARNING: moon event has no event_id")
