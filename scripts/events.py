@@ -38,7 +38,6 @@ from scripts.events_module.patrol.patrol import Patrol
 from scripts.utility import (
     change_clan_relations,
     change_clan_reputation,
-    get_alive_status_cats,
     get_random_moon_cat,
     ceremony_text_adjust,
     get_current_season,
@@ -587,9 +586,10 @@ class Events:
             game.clan.herbs = {herb_owned: herb_amount}
         else:
             event_list = []
-            meds_available = get_alive_status_cats(
-                ["medicine cat", "medicine cat apprentice"], working=True, sort=True
-            ,
+            meds_available = registry.get_alive_status_cats(
+                ["medicine cat", "medicine cat apprentice"],
+                working=True,
+                sort=True,
             )
             for med in meds_available:
                 if game.clan.current_season in ["Newleaf", "Greenleaf"]:
@@ -812,7 +812,10 @@ class Events:
             if herb_amount > 0:
                 herb_counter = Counter(herbs_found)
                 herbs = adjust_list_text(
-                    i18n.t(f"conditions.herbs.{herb}", count=2) for herb in herbs_found
+                    [
+                        i18n.t(f"conditions.herbs.{herb}", count=2)
+                        for herb in herbs_found
+                    ]
                 )
                 game.clan.herbs.update(herb_counter)
                 log_text = i18n.t("hardcoded.focus_herbs_log", herbs=herbs)
@@ -2310,7 +2313,7 @@ class Events:
         if already_sick_count >= alive_count * 0.25:
             return
 
-        meds = get_alive_status_cats(
+        meds = registry.get_alive_status_cats(
             ["medicine cat", "medicine cat apprentice"], working=True, sort=True
         )
 
@@ -2474,8 +2477,8 @@ class Events:
             or game.clan.deputy.outside
             or game.clan.deputy.status == "elder"
         ):
-            if notgame.clan.clan_settings.get("deputy"):
-    game.cur_events_list.insert(0, Single_Event("defaults.warn_no_deputy"))
+            if not game.clan.clan_settings.get("deputy"):
+                game.cur_events_list.insert(0, Single_Event("defaults.warn_no_deputy"))
                 return
             # This determines all the cats who are eligible to be deputy.
             possible_deputies = list(
@@ -2510,9 +2513,9 @@ class Events:
                 else:
                     deputy_status = "not_here"
 
-                    if leader_status == "here" and deputy_status == "not_here":
-                        if random_cat.personality.trait == "bloodthirsty":
-                            text = i18n.t("hardcoded.ceremony_deputy_bloodthirsty")
+                if leader_status == "here" and deputy_status == "not_here":
+                    if random_cat.personality.trait == "bloodthirsty":
+                        text = i18n.t("hardcoded.ceremony_deputy_bloodthirsty")
                         # No additional involved cats
                     else:
                         if game.clan.deputy:
@@ -2549,7 +2552,7 @@ class Events:
                         lambda x: not x.dead
                         and not x.outside
                         and x.status == "warrior",
-                        registry.all_cats_list,
+                        Cat.all_cats_list,
                     )
                 )
                 if all_warriors:

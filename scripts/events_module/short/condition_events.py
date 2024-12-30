@@ -24,7 +24,6 @@ from scripts.events_module.short.scar_events import Scar_Events
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
     event_text_adjust,
-    get_alive_status_cats,
     get_leader_life_notice,
 )
 from scripts.game_structure.localization import load_lang_resource
@@ -798,7 +797,7 @@ class Condition_Events:
                     # choose event string and ensure Clan's med cat number aligns with event text
                     random_index = random.randrange(0, len(possible_string_list))
 
-                    med_list = get_alive_status_cats(
+                    med_list = registry.get_alive_status_cats(
                         ["medicine cat", "medicine cat apprentice"], working=True
                     )
                     # If the cat is a med cat, don't consider them as one for the event.
@@ -920,7 +919,7 @@ class Condition_Events:
 
                 # choose event string and ensure Clan's med cat number aligns with event text
                 random_index = int(random.random() * len(possible_string_list))
-                med_list = get_alive_status_cats(
+                med_list = registry.get_alive_status_cats(
                     ["medicine cat", "medicine cat apprentice"], working=True, sort=True
                 )
                 med_cat = None
@@ -1185,7 +1184,7 @@ class Condition_Events:
 
                     # choose event string and ensure Clan's med cat number aligns with event text
                     random_index = int(random.random() * len(possible_string_list))
-                    med_list = get_alive_status_cats(
+                    med_list = registry.get_alive_status_cats(
                         ["medicine cat", "medicine cat apprentice"],
                         working=True,
                         sort=True,

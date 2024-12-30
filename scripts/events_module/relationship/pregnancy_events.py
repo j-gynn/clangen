@@ -19,7 +19,6 @@ from scripts.utility import (
     event_text_adjust,
     get_personality_compatibility,
     change_relationship_values,
-    get_alive_status_cats,
     adjust_list_text,
 )
 from scripts.game_structure.localization import load_lang_resource
@@ -473,7 +472,7 @@ class Pregnancy_Events:
         ):  # chance for a cat to die during childbirth
             possible_events = events["birth"]["death"]
             # just makin sure meds aren't mentioned if they aren't around or if they are a parent
-            meds = get_alive_status_cats(
+            meds = registry.get_alive_status_cats(
                 ["medicine cat", "medicine cat apprentice"], sort=True
             )
             mate_is_med = [mate_id for mate_id in cat.mate if mate_id in meds]
@@ -512,7 +511,7 @@ class Pregnancy_Events:
                 History.add_possible_history(cat, "blood loss", death_text=death_event)
                 possible_events = events["birth"]["difficult_birth"]
                 # just makin sure meds aren't mentioned if they aren't around or if they are a parent
-                meds = get_alive_status_cats(
+                meds = registry.get_alive_status_cats(
                     ["medicine cat", "medicine cat apprentice"]
                 )
                 mate_is_med = [mate_id for mate_id in cat.mate if mate_id in meds]

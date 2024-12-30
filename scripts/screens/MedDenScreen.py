@@ -13,14 +13,13 @@ from scripts.game_structure.ui_elements import (
 from scripts.utility import (
     get_text_box_theme,
     ui_scale,
-    get_alive_status_cats,
     shorten_text_to_fit,
-    get_living_clan_cat_count,
     event_text_adjust,
     ui_scale_offset,
 )
 from .Screens import Screens
 from ..cat.catregistry import registry
+from scripts.cat.cats import Cat
 from ..conditions import get_amount_cat_for_one_medic, medical_cats_condition_fulfilled
 from ..game_structure.screen_settings import MANAGER
 from ..ui.generate_box import BoxStyles, get_box
@@ -427,7 +426,7 @@ class MedDenScreen(Screens):
             self.med_name.kill()
 
         # get the med cats
-        self.meds = get_alive_status_cats(
+        self.meds = registry.get_alive_status_cats(
             ["medicine cat", "medicine cat apprentice"], sort=True
         )
 

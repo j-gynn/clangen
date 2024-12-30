@@ -2,11 +2,12 @@ import re
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
-    get_alive_status_cats,
     filter_relationship_type,
 )
+
 
 def event_for_location(locations: list) -> bool:
     """
@@ -32,8 +33,8 @@ def event_for_location(locations: list) -> bool:
 
 def event_for_season(seasons: list) -> bool:
     """
-        checks if the clan is within the given seasons
-        """
+    checks if the clan is within the given seasons
+    """
     if "any" in seasons or game.clan.current_season.lower() in seasons:
         return True
 
@@ -42,8 +43,8 @@ def event_for_season(seasons: list) -> bool:
 
 def event_for_tags(tags: list, cat, other_cat=None) -> bool:
     """
-        checks if current tags disqualify the event
-        """
+    checks if current tags disqualify the event
+    """
     if not tags:
         return True
 
@@ -63,7 +64,7 @@ def event_for_tags(tags: list, cat, other_cat=None) -> bool:
             "lives_remain": 2,
             "high_lives": 7,
             "mid_lives": 4,
-            "low_lives": 1
+            "low_lives": 1,
         }
 
         for _con, _val in life_lookup.items():
@@ -79,17 +80,19 @@ def event_for_tags(tags: list, cat, other_cat=None) -> bool:
 
         for rank in ranks:
             if rank == "apps":
-                if not get_alive_status_cats(
-                        cat,
-                        ["apprentice", "medicine cat apprentice", "mediator apprentice"]):
+                if not registry.get_alive_status_cats(
+                    ["apprentice", "medicine cat apprentice", "mediator apprentice"]
+                ):
                     return False
                 else:
                     continue
 
-            if rank in ["leader", "deputy"] and not get_alive_status_cats(cat, [rank]):
+            if rank in ["leader", "deputy"] and not registry.get_alive_status_cats(
+                [rank]
+            ):
                 return False
 
-            if not len(get_alive_status_cats(cat, [rank])) >= 2:
+            if not len(registry.get_alive_status_cats([rank])) >= 2:
                 return False
 
     # check if main cat will allow for adoption
@@ -109,8 +112,8 @@ def event_for_tags(tags: list, cat, other_cat=None) -> bool:
 
 def event_for_reputation(required_rep: list) -> bool:
     """
-        checks if the clan has reputation matching required_rep
-        """
+    checks if the clan has reputation matching required_rep
+    """
     if "any" in required_rep:
         return True
 
@@ -128,8 +131,8 @@ def event_for_reputation(required_rep: list) -> bool:
 
 def event_for_clan_relations(required_rel: list, other_clan) -> bool:
     """
-        checks if the clan has clan relations matching required_rel
-        """
+    checks if the clan has clan relations matching required_rel
+    """
     if "any" in required_rel:
         return True
 
@@ -147,8 +150,8 @@ def event_for_clan_relations(required_rel: list, other_clan) -> bool:
 
 def event_for_freshkill_supply(pile, trigger, factor, clan_size) -> bool:
     """
-        checks if clan has the correct amount of freshkill for event
-        """
+    checks if clan has the correct amount of freshkill for event
+    """
     if game.clan.game_mode == "classic":
         return False
 
@@ -166,9 +169,7 @@ def event_for_freshkill_supply(pile, trigger, factor, clan_size) -> bool:
     # find how much is too much freshkill
     # it would probably be good to move this section of finding trigger_value to the freshkill class
     divider = 35 if game.clan.game_mode == "expanded" else 20
-    factor = factor - round(
-        pow((clan_size / divider), 2)
-    )
+    factor = factor - round(pow((clan_size / divider), 2))
     if factor < 2 and game.clan.game_mode == "expanded":
         factor = 2
 
@@ -205,28 +206,63 @@ def event_for_herb_supply(trigger, supply_type, clan_size) -> bool:
     half_amount = needed_amount / 2
 
     if supply_type == "all_herb":
-        if "low" in trigger and len([x for x in herb_supply if herb_supply[x] < half_amount]) == num_of_herbs:
+        if (
+            "low" in trigger
+            and len([x for x in herb_supply if herb_supply[x] < half_amount])
+            == num_of_herbs
+        ):
             return True
-        elif "adequate" in trigger and len(
-                [x for x in herb_supply if half_amount < herb_supply[x] <= needed_amount]) == num_of_herbs:
+        elif (
+            "adequate" in trigger
+            and len(
+                [
+                    x
+                    for x in herb_supply
+                    if half_amount < herb_supply[x] <= needed_amount
+                ]
+            )
+            == num_of_herbs
+        ):
             return True
-        elif "full" in trigger and len(
-                [x for x in herb_supply if needed_amount < herb_supply[x] <= needed_amount * 2]) == num_of_herbs:
+        elif (
+            "full" in trigger
+            and len(
+                [
+                    x
+                    for x in herb_supply
+                    if needed_amount < herb_supply[x] <= needed_amount * 2
+                ]
+            )
+            == num_of_herbs
+        ):
             return True
-        elif "excess" in trigger and len(
-                [x for x in herb_supply if needed_amount * 2 < herb_supply[x]]) == num_of_herbs:
+        elif (
+            "excess" in trigger
+            and len([x for x in herb_supply if needed_amount * 2 < herb_supply[x]])
+            == num_of_herbs
+        ):
             return True
 
         return False
 
     if supply_type == "any_herb":
-        if "low" in trigger and [x for x in herb_supply if herb_supply[x] < half_amount]:
+        if "low" in trigger and [
+            x for x in herb_supply if herb_supply[x] < half_amount
+        ]:
             return True
-        elif "adequate" in trigger and [x for x in herb_supply if half_amount < herb_supply[x] <= needed_amount]:
+        elif "adequate" in trigger and [
+            x for x in herb_supply if half_amount < herb_supply[x] <= needed_amount
+        ]:
             return True
-        elif "full" in trigger and [x for x in herb_supply if needed_amount < herb_supply[x] <= needed_amount * 2]:
+        elif "full" in trigger and [
+            x
+            for x in herb_supply
+            if needed_amount < herb_supply[x] <= needed_amount * 2
+        ]:
             return True
-        elif "excess" in trigger and [x for x in herb_supply if needed_amount * 2 < herb_supply[x]]:
+        elif "excess" in trigger and [
+            x for x in herb_supply if needed_amount * 2 < herb_supply[x]
+        ]:
             return True
 
         return False
@@ -238,9 +274,15 @@ def event_for_herb_supply(trigger, supply_type, clan_size) -> bool:
             return False
         if "low" in trigger and herb_supply[chosen_herb] < half_amount:
             return True
-        elif "adequate" in trigger and half_amount < herb_supply[chosen_herb] <= needed_amount:
+        elif (
+            "adequate" in trigger
+            and half_amount < herb_supply[chosen_herb] <= needed_amount
+        ):
             return True
-        elif "full" in trigger and needed_amount < herb_supply[chosen_herb] <= needed_amount * 2:
+        elif (
+            "full" in trigger
+            and needed_amount < herb_supply[chosen_herb] <= needed_amount * 2
+        ):
             return True
         elif "excess" in trigger and needed_amount * 2 < herb_supply[chosen_herb]:
             return True
@@ -248,23 +290,29 @@ def event_for_herb_supply(trigger, supply_type, clan_size) -> bool:
         return False
 
 
-def event_for_cat(cat_info: dict, cat, cat_group: list = None, event_id: str = None, p_l=None) -> bool:
+def event_for_cat(
+    cat_info: dict, cat, cat_group: list = None, event_id: str = None, p_l=None
+) -> bool:
     """
-        checks if a cat is suitable for the event
-        :param cat_info: cat's dict of constraints
-        :param cat: the cat object of the cat being checked
-        :param cat_group: the group of cats being included within the event
-        :param event_id: if event comes with an id, include it here
-        :param p_l: if event is a patrol, include patrol leader object here
-        """
+    checks if a cat is suitable for the event
+    :param cat_info: cat's dict of constraints
+    :param cat: the cat object of the cat being checked
+    :param cat_group: the group of cats being included within the event
+    :param event_id: if event comes with an id, include it here
+    :param p_l: if event is a patrol, include patrol leader object here
+    """
 
     func_lookup = {
         "age": _check_cat_age(cat, cat_info.get("age", [])),
         "status": _check_cat_status(cat, cat_info.get("status", [])),
-        "trait": _check_cat_trait(cat, cat_info.get("trait", []), cat_info.get("not_trait", [])),
-        "skills": _check_cat_skills(cat, cat_info.get("skill", []), cat_info.get("not_skill", [])),
+        "trait": _check_cat_trait(
+            cat, cat_info.get("trait", []), cat_info.get("not_trait", [])
+        ),
+        "skills": _check_cat_skills(
+            cat, cat_info.get("skill", []), cat_info.get("not_skill", [])
+        ),
         "backstory": _check_cat_backstory(cat, cat_info.get("backstory", [])),
-        "gender": _check_cat_gender(cat, cat_info.get("gender", []))
+        "gender": _check_cat_gender(cat, cat_info.get("gender", [])),
     }
 
     for func in func_lookup:
@@ -273,10 +321,10 @@ def event_for_cat(cat_info: dict, cat, cat_group: list = None, event_id: str = N
 
     if cat_info.get("relationship_status", []):
         if not filter_relationship_type(
-                group=cat_group,
-                filter_types=cat_info["relationship_status"],
-                event_id=event_id,
-                patrol_leader=p_l
+            group=cat_group,
+            filter_types=cat_info["relationship_status"],
+            event_id=event_id,
+            patrol_leader=p_l,
         ):
             return False
 
@@ -285,8 +333,8 @@ def event_for_cat(cat_info: dict, cat, cat_group: list = None, event_id: str = N
 
 def _check_cat_age(cat, ages: list) -> bool:
     """
-        checks if a cat's age is within ages list
-        """
+    checks if a cat's age is within ages list
+    """
     if "any" in ages or not ages:
         return True
 
@@ -295,8 +343,8 @@ def _check_cat_age(cat, ages: list) -> bool:
 
 def _check_cat_status(cat, statuses: list) -> bool:
     """
-        checks if cat's status is within statuses list
-        """
+    checks if cat's status is within statuses list
+    """
     if "any" in statuses or not statuses:
         return True
 
@@ -325,8 +373,8 @@ def _check_cat_trait(cat, traits: list, not_traits: list) -> bool:
 
 def _check_cat_skills(cat, skills: list, not_skills: list) -> bool:
     """
-        checks if the cat has the correct skills for skills and not skills lists
-        """
+    checks if the cat has the correct skills for skills and not skills lists
+    """
     if not skills and not not_skills:
         return True
 
@@ -340,9 +388,7 @@ def _check_cat_skills(cat, skills: list, not_skills: list) -> bool:
             print("Cat skill incorrectly formatted", _skill)
             continue
 
-        if cat.skills.meets_skill_requirement(
-                skill_info[0], int(skill_info[1])
-        ):
+        if cat.skills.meets_skill_requirement(skill_info[0], int(skill_info[1])):
             has_good_skill = True
             break
 
@@ -353,9 +399,7 @@ def _check_cat_skills(cat, skills: list, not_skills: list) -> bool:
             print("Cat skill incorrectly formatted", _skill)
             continue
 
-        if cat.skills.meets_skill_requirement(
-                skill_info[0], int(skill_info[1])
-        ):
+        if cat.skills.meets_skill_requirement(skill_info[0], int(skill_info[1])):
             has_bad_skill = True
             break
 
@@ -367,8 +411,8 @@ def _check_cat_skills(cat, skills: list, not_skills: list) -> bool:
 
 def _check_cat_backstory(cat, backstories: list) -> bool:
     """
-        checks if cat has the correct backstory
-        """
+    checks if cat has the correct backstory
+    """
     if not backstories:
         return True
 
@@ -380,8 +424,8 @@ def _check_cat_backstory(cat, backstories: list) -> bool:
 
 def _check_cat_gender(cat, genders: list) -> bool:
     """
-        checks if cat has the correct gender
-        """
+    checks if cat has the correct gender
+    """
     if not genders:
         return True
 

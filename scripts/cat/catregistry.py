@@ -1,3 +1,6 @@
+from typing import Union, Type
+
+
 class CatRegistry:
     _instance = None
 
@@ -43,6 +46,34 @@ class CatRegistry:
                 if not (cat.dead or cat.exiled or cat.outside)
             ]
         )
+
+    def get_alive_status_cats(
+        self,
+        get_status: list,
+        working: bool = False,
+        sort: bool = False,
+    ) -> list:
+        """
+            returns a list of cat objects for all living cats of get_status in Clan
+        st of statuses searching for
+            :param get_status:
+            :param bool working: default False, set to True if you would like the list to only include working cats
+            :param bool sort: default False, set to True if you would like list sorted by descending moon age
+        """
+
+        alive_cats = [
+            i
+            for i in self.all_cats_list
+            if i.status in get_status and not i.dead and not i.outside
+        ]
+
+        if working:
+            alive_cats = [i for i in alive_cats if not i.not_working()]
+
+        if sort:
+            alive_cats = sorted(alive_cats, key=lambda cat: cat.moons, reverse=True)
+
+        return alive_cats
 
 
 registry: CatRegistry = CatRegistry()

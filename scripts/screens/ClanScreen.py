@@ -148,12 +148,14 @@ class ClanScreen(Screens):
                     break
 
                 try:
-                    image = Cat.all_cats[x].sprite.convert_alpha()
+                    image = registry.all_cats[x].sprite.convert_alpha()
                     blend_layer = (
                         self.game_bgs[self.active_bg]
                         .subsurface(
                             ui_scale(
-                                pygame.Rect(tuple(Cat.all_cats[x].placement), (50, 50))
+                                pygame.Rect(
+                                    tuple(registry.all_cats[x].placement), (50, 50)
+                                )
                             )
                         )
                         .convert_alpha()

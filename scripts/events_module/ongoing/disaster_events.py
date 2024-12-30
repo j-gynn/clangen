@@ -1,10 +1,10 @@
 import random
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.event_class import Single_Event
 from scripts.events_module.generate_events import GenerateEvents
 from scripts.game_structure.game_essentials import game
-from scripts.utility import get_alive_status_cats
 
 
 # ---------------------------------------------------------------------------- #
@@ -175,7 +175,7 @@ class DisasterEvents:
 
         leader = Cat.fetch_cat(game.clan.leader)
         deputy = Cat.fetch_cat(game.clan.deputy)
-        med_cats = get_alive_status_cats(
+        med_cats = registry.get_alive_status_cats(
             ["medicine cat", "medicine cat apprentice"], sort=True
         )
 

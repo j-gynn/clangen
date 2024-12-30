@@ -39,7 +39,6 @@ from scripts.game_structure.screen_settings import screen
 from scripts.housekeeping.datadir import get_save_dir
 from scripts.utility import (
     clamp,
-    get_alive_status_cats,
     get_personality_compatibility,
     event_text_adjust,
     update_sprite,
@@ -1965,7 +1964,7 @@ class Cat:
             avoided = False
             if (
                 "blood loss" in new_injury.also_got
-                and len(get_alive_status_cats(["medicine cat"], working=True)) != 0
+                and len(registry.get_alive_status_cats(["medicine cat"], working=True)) != 0
             ):
                 clan_herbs = set()
                 needed_herbs = {"horsetail", "raspberry", "marigold", "cobwebs"}

@@ -26,6 +26,7 @@ from scripts.game_structure.localization import (
     get_lang_config,
 )
 from scripts.cat.catregistry import registry
+
 logger = logging.getLogger(__name__)
 from scripts.game_structure import image_cache, localization
 from scripts.cat.enums import CatAgeEnum
@@ -85,42 +86,6 @@ def get_alive_clan_queens():
                 queen_dict[parents[1].ID] = [cat]
                 living_kits.remove(cat)
     return queen_dict, living_kits
-
-
-def get_alive_status_cats(
-    Cat: Union["Cat", Type["Cat"]],
-    get_status: list,
-    working: bool = False,
-    sort: bool = False,
-) -> list:
-    """
-        returns a list of cat objects for all living cats of get_status in Clan
-    st of statuses searching for
-        :param get_status:
-        :param bool working: default False, set to True if you would like the list to only include working cats
-        :param bool sort: default False, set to True if you would like list sorted by descending moon age
-    """
-
-    alive_cats = [
-        i
-        for i in registry.all_cats_list
-        if i.status in get_status and not i.dead and not i.outside
-    ]
-
-    if working:
-        alive_cats = [i for i in alive_cats if not i.not_working()]
-
-    if sort:
-        alive_cats = sorted(alive_cats, key=lambda cat: cat.moons, reverse=True)
-
-    return alive_cats
-
-
-def get_living_cat_count():
-    """
-    Returns the int of all living cats, both in and out of the Clan
-    """
-    return len([1 for cat in registry.all_cats_list if not cat.dead])
 
 
 def get_cats_same_age(cat: "Cat", age_range=10):
@@ -2051,7 +2016,7 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
         kitty = Cat.fetch_cat(game.clan.deputy)
         cat_dict["dep_name"] = (str(kitty.name), choice(kitty.pronouns))
     if "med_name" in text:
-        kitty = choice(get_alive_status_cats(["medicine cat"], working=True))
+        kitty = choice(registry.get_alive_status_cats(["medicine cat"], working=True))
         cat_dict["med_name"] = (str(kitty.name), choice(kitty.pronouns))
 
     if cat_dict:
@@ -2207,7 +2172,7 @@ def event_text_adjust(
 
     # med_name
     if "med_name" in text:
-        med = choice(get_alive_status_cats(["medicine cat"], working=True))
+        med = choice(registry.get_alive_status_cats(["medicine cat"], working=True))
         replace_dict["med_name"] = (str(med.name), choice(med.pronouns))
 
     # assign all names and pronouns

@@ -19,9 +19,6 @@ from scripts.events_module.ongoing.ongoing_event import OngoingEvent
 from scripts.events_module.short.short_event import ShortEvent
 from scripts.cat.catregistry import registry
 from scripts.game_structure.game_essentials import game
-from scripts.utility import (
-    get_living_clan_cat_count,
-)
 from scripts.game_structure.localization import load_lang_resource
 
 
