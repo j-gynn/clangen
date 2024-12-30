@@ -75,9 +75,9 @@ class AgeCatsCommand(Command):
 class CatsCommand(Command):
     name = "cats"
     description = "Manage Cats"
-    aliases = ["cat"]
+    aliases = ["cat", "c"]
 
-    subCommands = [
+    sub_commands = [
         AddCatCommand(),
         RemoveCatCommand(),
         ListCatsCommand(),

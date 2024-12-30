@@ -3,9 +3,12 @@ import os
 from math import floor
 from random import choice
 
+import i18n
 import ujson
 
 from scripts.cat.cats import Cat, BACKSTORIES
+from scripts.game_structure.localization import get_new_pronouns
+from ..cat.personality import Personality
 from scripts.cat.pelts import Pelt
 from scripts.cat_relations.inheritance import Inheritance
 from scripts.housekeeping.version import SAVE_VERSION_NUMBER
@@ -32,13 +35,14 @@ def load_cats():
 
 def json_load():
     all_cats = []
-    cat_data = None
     clanname = game.switches["clan_list"][0]
     clan_cats_json_path = f"{get_save_dir()}/{clanname}/clan_cats.json"
-    with open(f"resources/dicts/conversion_dict.json", "r") as read_file:
+    with open(
+        f"resources/dicts/conversion_dict.json", "r", encoding="utf-8"
+    ) as read_file:
         convert = ujson.loads(read_file.read())
     try:
-        with open(clan_cats_json_path, "r") as read_file:
+        with open(clan_cats_json_path, "r", encoding="utf-8") as read_file:
             cat_data = ujson.loads(read_file.read())
     except PermissionError as e:
         game.switches["error_message"] = f"Can\t open {clan_cats_json_path}!"
@@ -147,11 +151,10 @@ def json_load():
             )
 
             new_cat.genderalign = cat["gender_align"]
-            # new_cat.pronouns = cat["pronouns"]
             new_cat.pronouns = (
                 cat["pronouns"]
                 if "pronouns" in cat
-                else [new_cat.default_pronouns[0].copy()]
+                else {i18n.config.get("locale"): get_new_pronouns(new_cat.genderalign)}
             )
             new_cat.backstory = cat["backstory"] if "backstory" in cat else None
             if new_cat.backstory in BACKSTORIES["conversion"]:
@@ -302,12 +305,16 @@ def csv_load(all_cats):
             get_save_dir() + "/" + game.switches["clan_list"][0] + "cats.csv"
         ):
             with open(
-                get_save_dir() + "/" + game.switches["clan_list"][0] + "cats.csv", "r"
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "cats.csv",
+                "r",
+                encoding="utf-8",
             ) as read_file:
                 cat_data = read_file.read()
         else:
             with open(
-                get_save_dir() + "/" + game.switches["clan_list"][0] + "cats.txt", "r"
+                get_save_dir() + "/" + game.switches["clan_list"][0] + "cats.txt",
+                "r",
+                encoding="utf-8",
             ) as read_file:
                 cat_data = read_file.read()
     if len(cat_data) > 0:
