@@ -1,7 +1,5 @@
 import re
 
-import ujson
-
 from scripts.cat.catregistry import registry
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
@@ -203,7 +201,6 @@ def event_for_herb_supply(trigger, supply_type, clan_size) -> bool:
 
     if supply_type == "any_herb":
         for herb in herb_supply.entire_supply:
-
             if herb_supply.get_herb_rating(herb) in trigger:
                 return True
         return False

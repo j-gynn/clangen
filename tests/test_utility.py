@@ -1,6 +1,8 @@
 import os
 import unittest
 
+from scripts.cat.catregistry import registry
+
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 
@@ -10,8 +12,8 @@ from scripts.utility import (
     get_highest_romantic_relation,
     get_personality_compatibility,
     get_amount_of_cats_with_relation_value_towards,
-    get_alive_clan_queens,
 )
+
 
 class TestPersonalityCompatibility(unittest.TestCase):
     current_traits = [
@@ -240,11 +242,17 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat6.status = "warrior"
 
     def tearDown(self) -> None:
+        registry.remove_cat(self.test_cat1.ID)
         del self.test_cat1
+        registry.remove_cat(self.test_cat2.ID)
         del self.test_cat2
+        registry.remove_cat(self.test_cat3.ID)
         del self.test_cat3
+        registry.remove_cat(self.test_cat4.ID)
         del self.test_cat4
+        registry.remove_cat(self.test_cat5.ID)
         del self.test_cat5
+        registry.remove_cat(self.test_cat6.ID)
         del self.test_cat6
 
     def test_single_mother(self):
@@ -262,8 +270,9 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat4.parent1 = self.test_cat3.ID
 
         # then
-        living_cats = [self.test_cat1, self.test_cat2, self.test_cat3, self.test_cat4]
-        self.assertEqual([self.test_cat1.ID], list(get_alive_clan_queens()[0].keys()))
+        self.assertEqual(
+            [self.test_cat1.ID], list(registry.get_alive_clan_queens[0].keys())
+        )
 
     def test_single_father(self):
         # given
@@ -280,8 +289,9 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat4.parent1 = self.test_cat3.ID
 
         # then
-        living_cats = [self.test_cat1, self.test_cat2, self.test_cat3, self.test_cat4]
-        self.assertEqual([self.test_cat1.ID], list(get_alive_clan_queens()[0].keys()))
+        self.assertEqual(
+            [self.test_cat1.ID], list(registry.get_alive_clan_queens[0].keys())
+        )
 
     def tests_hetero_pair(self):
         # given
@@ -304,15 +314,9 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat6.parent2 = self.test_cat4.ID
 
         # then
-        living_cats = [
-            self.test_cat1,
-            self.test_cat2,
-            self.test_cat3,
-            self.test_cat4,
-            self.test_cat5,
-            self.test_cat6,
-        ]
-        self.assertEqual([self.test_cat1.ID], list(get_alive_clan_queens()[0].keys()))
+        self.assertEqual(
+            [self.test_cat1.ID], list(registry.get_alive_clan_queens[0].keys())
+        )
 
     def test_gay_pair(self):
         # given
@@ -344,8 +348,8 @@ class TestGetQueens(unittest.TestCase):
             self.test_cat6,
         ]
         self.assertTrue(
-            [self.test_cat1.ID] == list(get_alive_clan_queens()[0].keys())
-            or [self.test_cat2.ID] == list(get_alive_clan_queens()[0].keys())
+            [self.test_cat1.ID] == list(registry.get_alive_clan_queens[0].keys())
+            or [self.test_cat2.ID] == list(registry.get_alive_clan_queens[0].keys())
         )
 
     def test_lesbian_pair(self):
@@ -369,17 +373,9 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat6.parent2 = self.test_cat4.ID
 
         # then
-        living_cats = [
-            self.test_cat1,
-            self.test_cat2,
-            self.test_cat3,
-            self.test_cat4,
-            self.test_cat5,
-            self.test_cat6,
-        ]
         self.assertTrue(
-            [self.test_cat1.ID] == list(get_alive_clan_queens()[0].keys())
-            or [self.test_cat2.ID] == list(get_alive_clan_queens()[0].keys())
+            [self.test_cat1.ID] == list(registry.get_alive_clan_queens[0].keys())
+            or [self.test_cat2.ID] == list(registry.get_alive_clan_queens[0].keys())
         )
 
     def test_poly_pair(self):
@@ -397,12 +393,6 @@ class TestGetQueens(unittest.TestCase):
         self.test_cat4.adoptive_parents.append(self.test_cat3.ID)
 
         # then
-        living_cats = [
-            self.test_cat1,
-            self.test_cat2,
-            self.test_cat3,
-            self.test_cat4,
-            self.test_cat5,
-            self.test_cat6,
-        ]
-        self.assertEqual([self.test_cat2.ID], list(get_alive_clan_queens()[0].keys()))
+        self.assertEqual(
+            [self.test_cat2.ID], list(registry.get_alive_clan_queens[0].keys())
+        )

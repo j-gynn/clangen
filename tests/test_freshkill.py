@@ -1,6 +1,9 @@
 import os
 import unittest
+
 import ujson
+
+from scripts.cat.catregistry import registry
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -9,7 +12,6 @@ from scripts.cat.cats import Cat
 from scripts.cat.skills import Skill, SkillPath
 from scripts.clan import Clan
 from scripts.clan_resources.freshkill import FreshkillPile
-from scripts.utility import get_alive_clan_queens
 
 
 class FreshkillPileTest(unittest.TestCase):
@@ -373,7 +375,7 @@ class FreshkillPileTest(unittest.TestCase):
 
         # when
         living_cats = [no_parent, father, kid, mother]
-        self.assertEqual([mother.ID], list(get_alive_clan_queens()[0].keys()))
+        self.assertEqual([mother.ID], list(registry.get_alive_clan_queens[0].keys()))
         freshkill_pile.tactic_status(living_cats)
 
         # then

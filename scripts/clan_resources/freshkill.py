@@ -8,7 +8,6 @@ from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.skills import SkillPath
 from scripts.game_structure.game_essentials import game
-from scripts.utility import get_alive_clan_queens
 
 
 class Nutrition:
@@ -126,7 +125,7 @@ class FreshkillPile:
         self.total_amount = sum(self.pile.values())
 
     def _update_needed_food(self, living_cats: List[Cat]) -> None:
-        queen_dict, living_kits = get_alive_clan_queens()
+        queen_dict, living_kits = registry.get_alive_clan_queens
         relevant_queens = []
         # kits under 3 months are feed by the queen
         for queen_id, their_kits in queen_dict.items():
@@ -260,7 +259,7 @@ class FreshkillPile:
         :param list living_cats: Cats to feed
         :param bool additional_food_round: Determines if not player-initiated, default False
         """
-        queen_dict, kits = get_alive_clan_queens()
+        queen_dict, kits = registry.get_alive_clan_queens
         fed_kits = []
         relevant_queens = []
         # kits under 3 months are feed by the queen
@@ -337,7 +336,7 @@ class FreshkillPile:
             return
 
         # first get special groups, which need to be looked out for when feeding
-        queen_dict, kits = get_alive_clan_queens()
+        queen_dict, kits = registry.get_alive_clan_queens
         fed_kits = []
         relevant_queens = []
         # kits under 3 months are feed by the queen
@@ -625,7 +624,7 @@ class FreshkillPile:
         """
         old_nutrition_info = deepcopy(self.nutrition_info)
         self.nutrition_info = {}
-        queen_dict, kits = get_alive_clan_queens()
+        queen_dict, kits = registry.get_alive_clan_queens
 
         for cat in living_cats:
             if str(cat.status) not in PREY_REQUIREMENT:
@@ -666,7 +665,7 @@ class FreshkillPile:
         if str(cat.status) in ["newborn", "kitten", "elder"]:
             factor = 2
 
-        queen_dict, kits = get_alive_clan_queens()
+        queen_dict, kits = registry.get_alive_clan_queens
         prey_status = str(cat.status)
         if cat.ID in queen_dict.keys() or "pregnant" in cat.injuries:
             prey_status = "queen/pregnant"

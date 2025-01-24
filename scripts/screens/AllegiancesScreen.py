@@ -7,13 +7,13 @@ from scripts.game_structure.screen_settings import MANAGER
 from scripts.utility import (
     get_text_box_theme,
     ui_scale,
-    get_alive_clan_queens,
     ui_scale_offset,
     adjust_list_text,
     event_text_adjust,
 )
 from .Screens import Screens
 from ..cat.catregistry import registry
+from ..cat.cats import Cat
 
 
 class AllegiancesScreen(Screens):
@@ -158,7 +158,7 @@ class AllegiancesScreen(Screens):
                 living_elders.append(cat)
 
         # Find Queens:
-        queen_dict, living_kits = get_alive_clan_queens()
+        queen_dict, living_kits = registry.get_alive_clan_queens
 
         # Remove queens from warrior or elder lists, if they are there.  Let them stay on any other lists.
         for q in queen_dict:

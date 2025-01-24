@@ -57,8 +57,7 @@ def medical_cats_condition_fulfilled(
 
     can_care_for = int(adjust_med_number * (amount_per_med + 1))
 
-    relevant_cats = list(filter(lambda c: not c.dead and not c.outside, all_cats)
-    )
+    relevant_cats = list(filter(lambda c: not c.dead and not c.outside, all_cats))
 
     if give_clanmembers_covered:
         return can_care_for

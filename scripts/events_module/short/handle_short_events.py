@@ -3,7 +3,6 @@ from typing import List
 
 import i18n
 
-from scripts.game_structure import localization
 from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
@@ -17,6 +16,7 @@ from scripts.clan_resources.freshkill import (
 from scripts.event_class import Single_Event
 from scripts.events_module.generate_events import GenerateEvents
 from scripts.events_module.relationship.relation_events import Relation_Events
+from scripts.game_structure import localization
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
     event_text_adjust,
@@ -843,13 +843,11 @@ class HandleShortEvents:
 
         if "reduce" in adjustment:
             self.herb_notice = i18n.t(
-                "screens.med_den.loss_event",
-                herbs=adjust_list_text(herb_list)
+                "screens.med_den.loss_event", herbs=adjust_list_text(herb_list)
             )
         elif "increase" in adjustment:
             self.herb_notice = i18n.t(
-                "screens.med_den.gain_event",
-                herbs=adjust_list_text(herb_list)
+                "screens.med_den.gain_event", herbs=adjust_list_text(herb_list)
             )
 
     def reset(self):
