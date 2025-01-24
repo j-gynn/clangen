@@ -134,7 +134,7 @@ class CatRegistry:
 
         return alive_cats
 
-    def get_cats_same_age(self, cat, age_range=10):
+    def get_cats_same_age(self, cat: "Cat", age_range=10):
         """
         Look for all cats in the Clan and returns a list of cats which are in the same age range as the given cat.
         :param cat: the given cat
@@ -159,7 +159,7 @@ class CatRegistry:
 
         return eligible_cats
 
-    def get_possible_mates(self, cat):
+    def get_possible_mates(self, cat: "Cat"):
         """
         Returns a list of cats which are possible mates for the input cat
         :param cat: the given cat

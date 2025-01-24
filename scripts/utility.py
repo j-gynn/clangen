@@ -880,30 +880,6 @@ def get_personality_compatibility(cat1, cat2):
     return None
 
 
-def get_cats_of_romantic_interest(cat):
-    """Returns a list of cats, those cats are love interest of the given cat"""
-    cats = []
-    for inter_cat in registry.all_cats.values():
-        if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
-            continue
-        if inter_cat.ID == cat.ID:
-            continue
-
-        if inter_cat.ID not in cat.relationships:
-            cat.create_one_relationship(inter_cat)
-            if cat.ID not in inter_cat.relationships:
-                inter_cat.create_one_relationship(cat)
-            continue
-
-        # Extra check to ensure they are potential mates
-        if (
-            inter_cat.is_potential_mate(cat, for_love_interest=True)
-            and cat.relationships[inter_cat.ID].romantic_love > 0
-        ):
-            cats.append(inter_cat)
-    return cats
-
-
 def get_amount_of_cats_with_relation_value_towards(cat, value, all_cats):
     """
     Looks how many cats have the certain value
