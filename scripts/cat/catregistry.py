@@ -1,5 +1,9 @@
 import logging
-from typing import Tuple, Dict, List
+from random import choice, random
+from typing import Tuple, Dict, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scripts.cat.cats import Cat
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +24,18 @@ class CatRegistry:
         self.all_cats.pop(cat_id)
 
     def fetch_cat(self, cat_id):
-        return self.all_cats[cat_id]
+        return self.all_cats.get(cat_id)
 
     @property
     def all_cats_list(self):
         return list(self.all_cats.values())
 
+    @all_cats_list.setter
+    def all_cats_list(self, value):
+        self._instance.all_cats = {cat.ID: cat for cat in value}
+
     @property
-    def living_cats_list(self):
+    def living_clan_cats_list(self):
         """
         Gets a list of all living clan cats
         :return:
@@ -60,7 +68,7 @@ class CatRegistry:
         queen_dict = {}
         living_kits = [
             cat
-            for cat in self.living_cats_list
+            for cat in self.living_clan_cats_list
             if not (cat.dead or cat.outside) and cat.status in ["kitten", "newborn"]
         ]
         for cat in living_kits.copy():
@@ -68,7 +76,7 @@ class CatRegistry:
             parents = [
                 self.fetch_cat(i)
                 for i in parents
-                if self.fetch_cat(i) in self.living_cats_list
+                if self.fetch_cat(i) in self.living_clan_cats_list
             ]
             if not parents:
                 continue
@@ -134,7 +142,7 @@ class CatRegistry:
         :returns: a list of Cat objects of all eligible cats
         """
         eligible_cats = []
-        for inter_cat in self.living_cats_list:
+        for inter_cat in self.living_clan_cats_list:
             if inter_cat.ID == cat.ID:
                 continue
 
@@ -150,6 +158,72 @@ class CatRegistry:
             eligible_cats.append(inter_cat)
 
         return eligible_cats
+
+    def get_possible_mates(self, cat):
+        """
+        Returns a list of cats which are possible mates for the input cat
+        :param cat: the given cat
+        :return: a list of Cat objects of all eligible cats
+        """
+        eligible_cats = []
+        for inter_cat in self.living_clan_cats_list:
+            if inter_cat.ID == cat.ID:
+                continue
+
+            if inter_cat.ID not in cat.relationships:
+                cat.create_one_relationship(inter_cat)
+            if cat.ID not in inter_cat.relationships:
+                inter_cat.create_one_relationship(cat)
+
+            if inter_cat.is_potential_mate(cat, for_love_interest=True):
+                eligible_cats.append(inter_cat)
+
+        return eligible_cats
+
+    def get_random_moon_cat(
+        self, main_cat: "Cat", parent_child_modifier=True, mentor_app_modifier=True
+    ):
+        """
+        returns a random cat for use in moon events
+        :param main_cat: cat object of main cat in event
+        :param parent_child_modifier: increase the chance of the random cat being a
+        parent of the main cat. Default True
+        :param mentor_app_modifier: increase the chance of the random cat being a mentor or
+        app of the main cat. Default True
+        """
+        possible_rc = [
+            cat for cat in registry.living_clan_cats_list if cat.ID != main_cat.ID
+        ]
+
+        if not possible_rc:
+            return None
+
+        random_cat = choice(possible_rc)
+
+        if parent_child_modifier and not int(random() * 3):
+            # this interaction will try to run with parent-child
+            possible_parents = []
+            for cat in [main_cat.parent1, main_cat.parent2]:
+                if self.fetch_cat(cat) in possible_rc:
+                    possible_parents.append(cat)
+            for cat in main_cat.adoptive_parents:
+                if self.fetch_cat(cat) in possible_rc:
+                    possible_parents.append(cat)
+
+            if possible_parents:
+                random_cat = self.fetch_cat(choice(possible_parents))
+
+        if mentor_app_modifier and (
+            main_cat.status
+            in ["apprentice", "mediator apprentice", "medicine cat apprentice"]
+            and main_cat.mentor
+            and not int(random() * 3)
+        ):
+            random_cat = self.fetch_cat(main_cat.mentor)
+        elif mentor_app_modifier and main_cat.apprentice and not int(random() * 3):
+            random_cat = self.fetch_cat(choice(main_cat.apprentice))
+
+        return random_cat
 
 
 registry: CatRegistry = CatRegistry()

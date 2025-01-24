@@ -36,7 +36,6 @@ from scripts.game_structure.windows import SaveError
 from scripts.utility import (
     change_clan_relations,
     change_clan_reputation,
-    get_random_moon_cat,
     ceremony_text_adjust,
     get_current_season,
     adjust_list_text,
@@ -523,7 +522,7 @@ class Events:
         if cat.status in ["mediator", "mediator apprentice"] and not cat.not_working():
             # 1/10 chance
             if not int(random.random() * 10):
-                random_cat = get_random_moon_cat(Cat, main_cat=cat)
+                random_cat = registry.get_random_moon_cat(main_cat=cat)
                 handle_short_events.handle_event(
                     event_type="misc",
                     main_cat=cat,
@@ -1706,7 +1705,7 @@ class Events:
             return
 
         # find random_cat
-        random_cat = get_random_moon_cat(Cat, main_cat=cat)
+        random_cat = registry.get_random_moon_cat(main_cat=cat)
 
         # chance to gain acc
         acc_chances = game.config["accessory_generation"]
@@ -1880,9 +1879,7 @@ class Events:
         chance = max(chance, 1)
 
         # choose other cat
-        random_cat = get_random_moon_cat(
-            Cat, main_cat=cat, parent_child_modifier=True, mentor_app_modifier=True
-        )
+        random_cat = registry.get_random_moon_cat(main_cat=cat)
 
         if (
             not int(random.random() * chance)
@@ -1906,7 +1903,7 @@ class Events:
         if hit:
             return
 
-        random_cat = get_random_moon_cat(Cat, main_cat=cat)
+        random_cat = registry.get_random_moon_cat(main_cat=cat)
 
         handle_short_events.handle_event(
             event_type="misc",
@@ -1921,9 +1918,7 @@ class Events:
         """
 
         # try to get the random_cat
-        random_cat = get_random_moon_cat(
-            Cat, cat, parent_child_modifier=True, mentor_app_modifier=True
-        )
+        random_cat = registry.get_random_moon_cat(main_cat=cat)
 
         # chance to kill leader: 1/50 by default
         if (
@@ -2293,7 +2288,7 @@ class Events:
         if cat.age.is_baby():
             return
 
-        random_cat = get_random_moon_cat(Cat, main_cat=cat)
+        random_cat = registry.get_random_moon_cat(main_cat=cat)
 
         transing_chance = game.config["transition_related"]
         chance = transing_chance["base_trans_chance"]

@@ -10,8 +10,6 @@ import pygame_gui
 import ujson
 
 from scripts.cat.cats import Cat, BACKSTORIES
-from ..cat.enums import CatAgeEnum
-from scripts.cat.pelts import Pelt
 from scripts.clan_resources.freshkill import FRESHKILL_ACTIVE
 from scripts.game_structure import image_cache
 from scripts.game_structure.game_essentials import game
@@ -29,9 +27,11 @@ from scripts.utility import (
     ui_scale_dimensions,
     shorten_text_to_fit,
     ui_scale_offset,
-    adjust_list_text, )
+    adjust_list_text,
+)
 from .Screens import Screens
 from ..cat.catregistry import registry
+from ..cat.enums import CatAgeEnum
 from ..cat.history import History
 from ..game_structure.localization import get_new_pronouns
 from ..game_structure.screen_settings import MANAGER
@@ -392,7 +392,9 @@ class ProfileScreen(Screens):
 
     def screen_switches(self):
         super().screen_switches()
-        self.the_cat = registry.all_cats.get(game.switches["cat"])
+        self.the_cat = registry.fetch_cat(game.switches["cat"])
+        # just in case they haven't been sorted yet
+        self.the_cat.sort_cats(registry.all_cats_list)
 
         # Set up the menu buttons, which appear on all cat profile images.
         self.next_cat_button = UISurfaceImageButton(

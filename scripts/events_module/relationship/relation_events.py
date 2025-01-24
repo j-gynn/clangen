@@ -12,7 +12,6 @@ from scripts.events_module.relationship.welcoming_events import Welcoming_Events
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
     get_cats_of_romantic_interest,
-    get_free_possible_mates,
 )
 
 
@@ -78,7 +77,7 @@ class Relation_Events:
         other_cat = None
 
         # get the cats which are relevant for romantic interactions
-        free_possible_mates = get_free_possible_mates(cat)
+        free_possible_mates = registry.get_possible_mates(cat)
         other_love_interest = get_cats_of_romantic_interest(cat)
         possible_cats = free_possible_mates
         if len(other_love_interest) > 0 and len(other_love_interest) < 3:

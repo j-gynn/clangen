@@ -803,9 +803,7 @@ class ListScreen(Screens):
         """
         self.current_group = "clan"
         self.death_status = "living"
-        self.full_cat_list = [
-            cat for cat in registry.all_cats_list if not cat.dead and not cat.outside
-        ]
+        self.full_cat_list = registry.living_clan_cats_list
 
     def get_cotc_cats(self):
         """
@@ -813,10 +811,11 @@ class ListScreen(Screens):
         """
         self.current_group = "cotc"
         self.death_status = "living"
-        self.full_cat_list = []
-        for the_cat in registry.all_cats_list:
-            if not the_cat.dead and the_cat.outside and not the_cat.driven_out:
-                self.full_cat_list.append(the_cat)
+        self.full_cat_list = [
+            cat
+            for cat in registry.all_cats_list
+            if not cat.dead and cat.outside and not cat.driven_out
+        ]
 
     def get_sc_cats(self):
         """
@@ -824,16 +823,15 @@ class ListScreen(Screens):
         """
         self.current_group = "sc"
         self.death_status = "dead"
-        self.full_cat_list = []
-        for the_cat in registry.all_cats_list:
-            if (
-                the_cat.dead
-                and the_cat.ID != game.clan.instructor.ID
-                and not the_cat.outside
-                and not the_cat.df
-                and not the_cat.faded
-            ):
-                self.full_cat_list.append(the_cat)
+        self.full_cat_list = [
+            cat
+            for cat in registry.all_cats_list
+            if cat.deaed
+            and cat.ID != game.clan.instructor.ID
+            and not cat.outside
+            and not cat.df
+            and not cat.faded
+        ]
 
     def get_df_cats(self):
         """
@@ -841,16 +839,14 @@ class ListScreen(Screens):
         """
         self.current_group = "df"
         self.death_status = "dead"
-        self.full_cat_list = []
-
-        for the_cat in registry.all_cats_list:
-            if (
-                the_cat.dead
-                and the_cat.ID != game.clan.instructor.ID
-                and the_cat.df
-                and not the_cat.faded
-            ):
-                self.full_cat_list.append(the_cat)
+        self.full_cat_list = [
+            cat
+            for cat in registry.all_cats_list
+            if cat.dead
+            and cat.ID != game.clan.instructor.ID
+            and cat.df
+            and not cat.faded
+        ]
 
     def get_ur_cats(self):
         """
@@ -858,11 +854,8 @@ class ListScreen(Screens):
         """
         self.current_group = "ur"
         self.death_status = "dead"
-        self.full_cat_list = []
-        for the_cat in registry.all_cats_list:
-            if (
-                the_cat.ID in game.clan.unknown_cats
-                and not the_cat.faded
-                and not the_cat.driven_out
-            ):
-                self.full_cat_list.append(the_cat)
+        self.full_cat_list = [
+            cat
+            for cat in registry.all_cats_list
+            if cat.ID in game.clan.unknown_cats and not cat.faded and not cat.driven_out
+        ]

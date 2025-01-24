@@ -698,7 +698,11 @@ class Cat:
                     major_chance -= 1
 
                 # decrease major grief chance if grave herbs are used
-                if body and not body_treated and "rosemary" in game.clan.herb_supply.entire_supply:
+                if (
+                    body
+                    and not body_treated
+                    and "rosemary" in game.clan.herb_supply.entire_supply
+                ):
                     body_treated = True
                     game.clan.herb_supply.remove_herb("rosemary", -1)
                     game.herb_events_list.append(
@@ -1974,10 +1978,7 @@ class Cat:
                     herb_used = choice(usable_herbs)
                     game.clan.herb_supply.remove_herb(herb_used, -1)
                     avoided = True
-                    text = i18n.t(
-                        "screens.med_den.blood_loss",
-                        name=self.name
-                    )
+                    text = i18n.t("screens.med_den.blood_loss", name=self.name)
                     game.herb_events_list.append(text)
 
             if not avoided:
@@ -3181,11 +3182,9 @@ class Cat:
 
     @staticmethod
     def sort_cats(given_list=None):
-        # disable unnecessary lambda in this function
-        # pylint: disable=unnecessary-lambda
-        if given_list is None:
-            given_list = []
-        if not given_list:
+        all_cats = False
+        if not given_list or given_list == registry.all_cats_list:
+            all_cats = True
             given_list = registry.all_cats_list
         if game.sort_type == "age":
             given_list.sort(key=lambda x: Cat.get_adjusted_age(x))
@@ -3203,6 +3202,9 @@ class Cat:
             given_list.sort(key=lambda x: x.experience, reverse=True)
         elif game.sort_type == "death":
             given_list.sort(key=lambda x: -1 * int(x.dead_for))
+
+        if all_cats:
+            registry.all_cats_list = given_list
 
         return
 
@@ -3548,7 +3550,6 @@ def create_example_cats():
                 ["kitten", "apprentice", "warrior", "warrior", "elder"]
             )
             game.choose_cats[cat_index] = create_cat(status=random_status)
-
 
 
 # CAT CLASS ITEMS
