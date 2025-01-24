@@ -13,7 +13,6 @@ from scripts.utility import (
 )
 from .Screens import Screens
 from ..cat.catregistry import registry
-from ..cat.cats import Cat
 
 
 class AllegiancesScreen(Screens):
@@ -114,7 +113,7 @@ class AllegiancesScreen(Screens):
         output = f"{str(cat.name).upper()} - {cat.describe_cat()} {extra_details}"
 
         if len(cat.apprentice) == 0:
-            return event_text_adjust(Cat, output, main_cat=cat)
+            return event_text_adjust(output, main_cat=cat)
 
         output += f"\n      {i18n.t('general.apprentice', count=len(cat.apprentice)).upper()}: "
         output += adjust_list_text(
@@ -125,7 +124,7 @@ class AllegiancesScreen(Screens):
             ]
         ).upper()
 
-        return event_text_adjust(Cat, output, main_cat=cat)
+        return event_text_adjust(output, main_cat=cat)
 
     def get_allegiances_text(self):
         """Determine Text. Ouputs list of tuples."""
@@ -247,7 +246,7 @@ class AllegiancesScreen(Screens):
                 for k in queen_dict[q]:
                     kittens += [
                         event_text_adjust(
-                            Cat, f"{k.name} - {k.describe_cat(short=True)}", main_cat=k
+                            f"{k.name} - {k.describe_cat(short=True)}", main_cat=k
                         )
                     ]
                 if len(kittens) == 1:
@@ -269,7 +268,6 @@ class AllegiancesScreen(Screens):
             for k in living_kits:
                 all_entries.append(
                     event_text_adjust(
-                        Cat,
                         f"{str(k.name).upper()} - {k.describe_cat(short=True)}",
                         main_cat=k,
                     )

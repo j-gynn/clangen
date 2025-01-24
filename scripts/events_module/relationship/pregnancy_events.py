@@ -13,6 +13,7 @@ from scripts.cat_relations.relationship import Relationship
 from scripts.event_class import Single_Event
 from scripts.events_module.short.condition_events import Condition_Events
 from scripts.game_structure.game_essentials import game
+from scripts.game_structure.localization import load_lang_resource
 from scripts.utility import (
     create_new_cat,
     get_highest_romantic_relation,
@@ -21,7 +22,6 @@ from scripts.utility import (
     change_relationship_values,
     adjust_list_text,
 )
-from scripts.game_structure.localization import load_lang_resource
 
 
 class Pregnancy_Events:
@@ -195,7 +195,7 @@ class Pregnancy_Events:
             cats_involved["r_c"] = other_cat
         for kit in kits:
             kit.thought = "hardcoded.new_kit_thought"
-            kit.thought = event_text_adjust(Cat, kit.thought, random_cat=cat)
+            kit.thought = event_text_adjust(kit.thought, random_cat=cat)
 
         # Normally, birth cooldown is only applied to cat who gave birth
         # However, if we don't apply birth cooldown to adoption, we get
@@ -262,7 +262,7 @@ class Pregnancy_Events:
             cat.get_injured("pregnant", severity=severity[0])
             text += choice(Pregnancy_Events.PREGNANT_STRINGS[f"{severity[0]}_severity"])
 
-            text = event_text_adjust(Cat, text, main_cat=cat, clan=clan)
+            text = event_text_adjust(text, main_cat=cat, clan=clan)
             game.cur_events_list.append(
                 Single_Event(text, "birth_death", cat.ID, cat_dict={"m_c": cat})
             )
@@ -306,7 +306,7 @@ class Pregnancy_Events:
             severity = random.choices(["minor", "major"], [3, 1], k=1)
             pregnant_cat.get_injured("pregnant", severity=severity[0])
             text += choice(Pregnancy_Events.PREGNANT_STRINGS[f"{severity[0]}_severity"])
-            text = event_text_adjust(Cat, text, main_cat=pregnant_cat, clan=clan)
+            text = event_text_adjust(text, main_cat=pregnant_cat, clan=clan)
             game.cur_events_list.append(
                 Single_Event(
                     text, "birth_death", pregnant_cat.ID, cat_dict={"m_c": cat}
@@ -364,7 +364,7 @@ class Pregnancy_Events:
         except:
             print("Is this an old save? Cat does not have the pregnant condition")
 
-        text = event_text_adjust(Cat, text, main_cat=cat, clan=game.clan)
+        text = event_text_adjust(text, main_cat=cat, clan=game.clan)
         game.cur_events_list.append(
             Single_Event(text, "birth_death", cat_dict={"m_c": cat})
         )
@@ -534,7 +534,7 @@ class Pregnancy_Events:
         print_event = print_event.replace("{insert}", insert)
 
         print_event = event_text_adjust(
-            Cat, print_event, main_cat=cat, random_cat=other_cat, clan=game.clan
+            print_event, main_cat=cat, random_cat=other_cat, clan=game.clan
         )
 
         # display event
@@ -833,14 +833,14 @@ class Pregnancy_Events:
                     parent1=cat.ID, parent2=other_cat.ID, moons=0, status="newborn"
                 )
                 kit.thought = i18n.t("hardcoded.new_kit_thought", name=str(cat.name))
-                kit.thought = event_text_adjust(Cat, kit.thought, random_cat=cat)
+                kit.thought = event_text_adjust(kit.thought, random_cat=cat)
             else:
                 # A one blood parent litter is the only option left.
                 kit = Cat(
                     parent1=cat.ID, moons=0, backstory=backstory, status="newborn"
                 )
                 kit.thought = i18n.t("hardcoded.new_kit_thought", name=str(cat.name))
-                kit.thought = event_text_adjust(Cat, kit.thought, random_cat=cat)
+                kit.thought = event_text_adjust(kit.thought, random_cat=cat)
 
             # Prevent duplicate prefixes in the same litter
             while kit.name.prefix in [kitty.name.prefix for kitty in all_kitten]:

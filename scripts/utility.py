@@ -1869,7 +1869,6 @@ def ongoing_event_text_adjust(Cat, text, clan=None, other_clan_name=None):
 
 
 def event_text_adjust(
-    Cat: Type["Cat"],
     text,
     *,
     patrol_leader=None,
@@ -1886,21 +1885,19 @@ def event_text_adjust(
     chosen_herb: str = None,
 ):
     """
-    handles finding abbreviations in the text and replacing them appropriately, returns the adjusted text
-    :param Cat Cat: always pass the Cat class
-    :param str text: the text being adjusted
+     handles finding abbreviations in the text and replacing them appropriately, returns the adjusted text
     :param Cat patrol_leader: Cat object for patrol_leader (p_l), if present
-    :param Cat main_cat: Cat object for main_cat (m_c), if present
-    :param Cat random_cat: Cat object for random_cat (r_c), if present
-    :param Cat stat_cat: Cat object for stat_cat (s_c), if present
-    :param Cat victim_cat: Cat object for victim_cat (mur_c), if present
-    :param list[Cat] patrol_cats: List of Cat objects for cats in patrol, if present
-    :param list[Cat] patrol_apprentices: List of Cat objects for patrol_apprentices (app#), if present
-    :param list[Cat] new_cats: List of Cat objects for new_cats (n_c:index), if present
-    :param list[Cat] multi_cats: List of Cat objects for multi_cat (multi_cat), if present
-    :param Clan clan: pass game.clan
-    :param OtherClan other_clan: OtherClan object for other_clan (o_c_n), if present
-    :param str chosen_herb: string of chosen_herb (chosen_herb), if present
+     :param Cat main_cat: Cat object for main_cat (m_c), if present
+     :param Cat random_cat: Cat object for random_cat (r_c), if present
+     :param Cat stat_cat: Cat object for stat_cat (s_c), if present
+     :param Cat victim_cat: Cat object for victim_cat (mur_c), if present
+     :param list[Cat] patrol_cats: List of Cat objects for cats in patrol, if present
+     :param list[Cat] patrol_apprentices: List of Cat objects for patrol_apprentices (app#), if present
+     :param list[Cat] new_cats: List of Cat objects for new_cats (n_c:index), if present
+     :param list[Cat] multi_cats: List of Cat objects for multi_cat (multi_cat), if present
+     :param Clan clan: pass game.clan
+     :param OtherClan other_clan: OtherClan object for other_clan (o_c_n), if present
+     :param str chosen_herb: string of chosen_herb (chosen_herb), if present
     """
     vowels = ["A", "E", "I", "O", "U"]
 
@@ -1993,12 +1990,12 @@ def event_text_adjust(
 
     # lead_name
     if "lead_name" in text:
-        leader = Cat.fetch_cat(game.clan.leader)
+        leader = registry.fetch_cat(game.clan.leader)
         replace_dict["lead_name"] = (str(leader.name), choice(leader.pronouns))
 
     # dep_name
     if "dep_name" in text:
-        deputy = Cat.fetch_cat(game.clan.deputy)
+        deputy = registry.fetch_cat(game.clan.deputy)
         replace_dict["dep_name"] = (str(deputy.name), choice(deputy.pronouns))
 
     # med_name

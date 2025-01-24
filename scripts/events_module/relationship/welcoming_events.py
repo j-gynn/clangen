@@ -7,11 +7,11 @@ import i18n
 from scripts.cat.cats import Cat
 from scripts.event_class import Single_Event
 from scripts.game_structure.game_essentials import game
+from scripts.game_structure.localization import load_lang_resource
 from scripts.utility import (
     change_relationship_values,
     event_text_adjust,
 )
-from scripts.game_structure.localization import load_lang_resource
 
 
 class Welcoming_Events:
@@ -64,7 +64,7 @@ class Welcoming_Events:
 
         # prepare string for display
         interaction_str = event_text_adjust(
-            Cat, interaction_str, main_cat=clan_cat, random_cat=new_cat
+            interaction_str, main_cat=clan_cat, random_cat=new_cat
         )
 
         # influence the relationship

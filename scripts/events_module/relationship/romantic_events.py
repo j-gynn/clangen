@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import i18n
 
+import scripts.cat_relations.interaction as interactions
 from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.cat.history import History
@@ -12,16 +13,15 @@ from scripts.cat_relations.relationship import (
     rel_fulfill_rel_constraints,
     cats_fulfill_single_interaction_constraints,
 )
-import scripts.cat_relations.interaction as interactions
 from scripts.event_class import Single_Event
 from scripts.game_structure.game_essentials import game
+from scripts.game_structure.localization import load_lang_resource
 from scripts.utility import (
     get_highest_romantic_relation,
     event_text_adjust,
     get_personality_compatibility,
     process_text,
 )
-from scripts.game_structure.localization import load_lang_resource
 
 
 class RomanticEvents:
@@ -953,7 +953,7 @@ class RomanticEvents:
             mate_string = mate_string.replace("(r_c_mate/mates)", insert)
 
         mate_string = event_text_adjust(
-            Cat, mate_string, main_cat=cat_from, random_cat=cat_to
+            mate_string, main_cat=cat_from, random_cat=cat_to
         )
         return mate_string
 

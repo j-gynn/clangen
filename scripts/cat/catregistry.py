@@ -72,12 +72,13 @@ class CatRegistry:
             if not (cat.dead or cat.outside) and cat.status in ["kitten", "newborn"]
         ]
         for cat in living_kits.copy():
-            parents = cat.get_parents()
-            parents = [
-                self.fetch_cat(i)
-                for i in parents
-                if self.fetch_cat(i) in self.living_clan_cats_list
-            ]
+            parents = list(cat.get_parents())
+            if isinstance(parents[0], str):
+                parents = [
+                    self.fetch_cat(i)
+                    for i in parents
+                    if self.fetch_cat(i) in self.living_clan_cats_list
+                ]
             if not parents:
                 continue
 

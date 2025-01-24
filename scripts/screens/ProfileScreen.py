@@ -60,7 +60,6 @@ def accessory_display_name(cat):
 def bs_blurb_text(cat):
     if cat.status in ["kittypet", "loner", "rogue", "former Clancat"]:
         return event_text_adjust(
-            Cat,
             i18n.t(
                 "cat.backstories.cats_outside_the_clan",
                 status=i18n.t(f"general.{cat.status}"),
@@ -69,7 +68,7 @@ def bs_blurb_text(cat):
         )
     else:
         return event_text_adjust(
-            Cat, i18n.t(f"cat.backstories.{cat.backstory}"), main_cat=cat
+            i18n.t(f"cat.backstories.{cat.backstory}"), main_cat=cat
         )
 
 
@@ -1257,7 +1256,6 @@ class ProfileScreen(Screens):
             for scar in scar_history:
                 # base adjustment to get the cat's name and moons if needed
                 new_text = event_text_adjust(
-                    Cat,
                     scar["text"],
                     main_cat=self.the_cat,
                     random_cat=Cat.fetch_cat(scar["involved"]),
@@ -1459,7 +1457,6 @@ class ProfileScreen(Screens):
         if event["text"] == death["text"] and event["moon"] == death["moon"]:
             if event["revealed"] is True:
                 final_text = event_text_adjust(
-                    Cat,
                     event["text"],
                     main_cat=self.the_cat,
                     random_cat=Cat.fetch_cat(death["involved"]),
@@ -1473,7 +1470,6 @@ class ProfileScreen(Screens):
                 return final_text
             else:
                 return event_text_adjust(
-                    Cat,
                     event["text"],
                     main_cat=self.the_cat,
                     random_cat=Cat.fetch_cat(death["involved"]),
@@ -1512,14 +1508,12 @@ class ProfileScreen(Screens):
 
                         if found_murder and text is not None and not event["revealed"]:
                             text = event_text_adjust(
-                                Cat,
                                 event["text"],
                                 main_cat=self.the_cat,
                                 random_cat=Cat.fetch_cat(death["involved"]),
                             )
                 if not found_murder:
                     text = event_text_adjust(
-                        Cat,
                         death["text"],
                         main_cat=self.the_cat,
                         random_cat=Cat.fetch_cat(death["involved"]),

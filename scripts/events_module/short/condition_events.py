@@ -173,7 +173,7 @@ class Condition_Events:
             # first event in string lists is always appropriate for history formatting
             history_event = possible_string_list[0]
 
-            event = event_text_adjust(Cat, event.strip(), main_cat=cat)
+            event = event_text_adjust(event.strip(), main_cat=cat)
 
             if cat.status == "leader":
                 history_event = history_event.replace("m_c ", "").replace(".", "")
@@ -246,7 +246,7 @@ class Condition_Events:
             cat.get_ill(illness)
 
         if event:
-            event_text = event_text_adjust(Cat, event, main_cat=cat)
+            event_text = event_text_adjust(event, main_cat=cat)
             types = ["health"]
             game.cur_events_list.append(
                 Single_Event(event_text, types, cat_dict={"m_c": cat})
@@ -324,7 +324,7 @@ class Condition_Events:
                     illness=illness,
                 )
 
-                event_string = event_text_adjust(Cat, text=event_string, main_cat=cat)
+                event_string = event_text_adjust(text=event_string, main_cat=cat)
 
         # if an event happened, then add event to cur_event_list and save death if it happened.
         if event_string:
@@ -579,7 +579,7 @@ class Condition_Events:
                         else i18n.t("defaults.illness_death_history_leader")
                     )
 
-                event = event_text_adjust(Cat, event, main_cat=cat)
+                event = event_text_adjust(event, main_cat=cat)
 
                 if cat.status == "leader":
                     event = event + " " + get_leader_life_notice()
@@ -610,7 +610,7 @@ class Condition_Events:
                 # choose event string
                 random_index = int(random.random() * len(possible_string_list))
                 event = possible_string_list[random_index]
-                event = event_text_adjust(Cat, event, main_cat=cat)
+                event = event_text_adjust(event, main_cat=cat)
                 event_list.append(event)
                 game.herb_events_list.append(event)
 
@@ -688,7 +688,7 @@ class Condition_Events:
                         else i18n.t("injury_death_history_leader")
                     )
 
-                event = event_text_adjust(Cat, event, main_cat=cat)
+                event = event_text_adjust(event, main_cat=cat)
 
                 if cat.status == "leader":
                     event = event + " " + get_leader_life_notice()
@@ -731,7 +731,7 @@ class Condition_Events:
                             "defaults.injury_healed_event", injury=new_injury
                         )
 
-                event = event_text_adjust(Cat, event, main_cat=cat)
+                event = event_text_adjust(event, main_cat=cat)
 
                 game.herb_events_list.append(event)
 
@@ -804,7 +804,7 @@ class Condition_Events:
 
                     event = possible_string_list[random_index]
                     event = event_text_adjust(
-                        Cat, event, main_cat=cat, random_cat=med_cat
+                        event, main_cat=cat, random_cat=med_cat
                     )  # adjust the text
 
                 if event is not None:
@@ -942,7 +942,7 @@ class Condition_Events:
                         med_cat = None
                 event = possible_string_list[random_index]
                 event = event_text_adjust(
-                    Cat, event, main_cat=cat, random_cat=med_cat
+                    event, main_cat=cat, random_cat=med_cat
                 )  # adjust the text
                 event_list.append(event)
                 if med_cat:
@@ -1051,7 +1051,7 @@ class Condition_Events:
                     # Don't add this to the condition event list: instead make it its own event, a ceremony.
                     game.cur_events_list.append(
                         Single_Event(
-                            event_text_adjust(Cat, event, main_cat=cat),
+                            event_text_adjust(event, main_cat=cat),
                             "ceremony",
                             retire_involved,
                             cat_dict=cat_dict,
@@ -1173,7 +1173,7 @@ class Condition_Events:
                     )
 
                 event = event_text_adjust(
-                    Cat, event, main_cat=cat, random_cat=med_cat
+                    event, main_cat=cat, random_cat=med_cat
                 )  # adjust the text
 
                 event_list.append(event)

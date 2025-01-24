@@ -157,7 +157,6 @@ class Events:
                     if _val[2] == "minor":
                         # Apply the grief message as a thought to the cat
                         text = event_text_adjust(
-                            Cat,
                             _val[0],
                             main_cat=Cat.fetch_cat(cat_id),
                             random_cat=Cat.fetch_cat(_val[1][0]),
@@ -356,11 +355,10 @@ class Events:
 
             # adjust text and add to event list
             event_text = event_text_adjust(
-                Cat,
                 event_text,
                 main_cat=gathering_cat,
-                other_clan=other_clan,
                 clan=game.clan,
+                other_clan=other_clan,
             )
             game.cur_events_list.insert(
                 4, Single_Event(event_text, "other_clans", [gathering_cat.ID])
@@ -479,10 +477,7 @@ class Events:
             # give new thought to cats
             if "new_thought" in cat_dict:
                 outsider_cat.thought = event_text_adjust(
-                    Cat,
-                    text=cat_dict["new_thought"],
-                    main_cat=outsider_cat,
-                    clan=game.clan,
+                    text=cat_dict["new_thought"], main_cat=outsider_cat, clan=game.clan
                 )
 
             if "kit_thought" in cat_dict:
@@ -492,10 +487,7 @@ class Events:
                     for kit_ID in additional_kits:
                         kit = Cat.fetch_cat(kit_ID)
                         kit.thought = event_text_adjust(
-                            Cat,
-                            text=cat_dict["kit_thought"],
-                            main_cat=kit,
-                            clan=game.clan,
+                            text=cat_dict["kit_thought"], main_cat=kit, clan=game.clan
                         )
 
             if "relationships" in cat_dict:
@@ -505,7 +497,7 @@ class Events:
 
             # adjust text and add to event list
             event_text = event_text_adjust(
-                Cat, text=event_text, main_cat=outsider_cat, clan=game.clan
+                text=event_text, main_cat=outsider_cat, clan=game.clan
             )
 
             game.cur_events_list.insert(
@@ -539,7 +531,7 @@ class Events:
                 game.cur_events_list.append(
                     Single_Event(
                         event_text_adjust(
-                            Cat, i18n.t("hardcoded.event_mediator_app"), main_cat=cat
+                            i18n.t("hardcoded.event_mediator_app"), main_cat=cat
                         ),
                         "ceremony",
                         cat.ID,
@@ -826,7 +818,7 @@ class Events:
             if additional_cats:
                 text += i18n.t("hardcoded.event_lost_kits", count=len(additional_cats))
 
-            text = event_text_adjust(Cat, text, main_cat=lost_cat, clan=game.clan)
+            text = event_text_adjust(text, main_cat=lost_cat, clan=game.clan)
 
             game.cur_events_list.append(Single_Event(text, "misc", cat_IDs))
 
@@ -1205,7 +1197,7 @@ class Events:
                 # game.ceremony_events_list.append(text)
                 text += " " + i18n.t("hardcoded.ceremony_closer")
 
-                text = event_text_adjust(Cat, text, main_cat=cat)
+                text = event_text_adjust(text, main_cat=cat)
 
                 game.cur_events_list.append(
                     Single_Event(text, "ceremony", game.clan.deputy.ID)
@@ -2334,7 +2326,7 @@ class Events:
                     0,
                     Single_Event(
                         event_text_adjust(
-                            Cat, i18n.t("defaults.warn_no_leader"), clan=game.clan
+                            i18n.t("defaults.warn_no_leader"), clan=game.clan
                         )
                     ),
                 )
@@ -2441,7 +2433,7 @@ class Events:
                     )
                     return
 
-            text = event_text_adjust(Cat, text, main_cat=random_cat, clan=game.clan)
+            text = event_text_adjust(text, main_cat=random_cat, clan=game.clan)
             random_cat.status_change("deputy")
             game.clan.deputy = random_cat
 

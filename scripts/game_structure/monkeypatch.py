@@ -1,6 +1,5 @@
 import i18n
 
-from scripts.cat.cats import Cat
 from scripts.game_structure.game_essentials import game
 from scripts.utility import event_text_adjust
 
@@ -34,7 +33,6 @@ def translate(text: str, **kwargs):
             dict[role] = kwargs[role]
     if dict is not None:
         return event_text_adjust(
-            Cat,
             output,
             patrol_leader=dict.get("p_l"),
             main_cat=dict.get("m_c"),

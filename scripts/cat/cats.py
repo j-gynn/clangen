@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Union, Callable
 import i18n
 import ujson  # type: ignore
 
+import scripts.game_structure.localization as pronouns
 from scripts.cat.catregistry import CatRegistry, registry
 from scripts.cat.enums import CatAgeEnum
 from scripts.cat.history import History
@@ -35,6 +36,7 @@ from scripts.event_class import Single_Event
 from scripts.events_module.generate_events import GenerateEvents
 from scripts.game_structure import image_cache
 from scripts.game_structure.game_essentials import game
+from scripts.game_structure.localization import load_lang_resource
 from scripts.game_structure.screen_settings import screen
 from scripts.housekeeping.datadir import get_save_dir
 from scripts.utility import (
@@ -44,9 +46,6 @@ from scripts.utility import (
     update_sprite,
     leader_ceremony_text_adjust,
 )
-from scripts.game_structure.localization import load_lang_resource
-
-import scripts.game_structure.localization as pronouns
 
 
 class Cat:
@@ -574,7 +573,7 @@ class Cat:
                 death_thought = Thoughts.leader_death_thought(
                     self, lives_left, darkforest
                 )
-                final_thought = event_text_adjust(self, death_thought, main_cat=self)
+                final_thought = event_text_adjust(death_thought, main_cat=self)
                 self.thought = final_thought
                 return ""
             elif game.clan.leader_lives <= 0:
@@ -582,7 +581,7 @@ class Cat:
                 game.just_died.append(self.ID)
                 game.clan.leader_lives = 0
                 death_thought = Thoughts.leader_death_thought(self, 0, darkforest)
-                final_thought = event_text_adjust(self, death_thought, main_cat=self)
+                final_thought = event_text_adjust(death_thought, main_cat=self)
                 self.thought = final_thought
                 if game.clan.instructor.df is False:
                     text = (
@@ -594,7 +593,7 @@ class Cat:
             self.dead = True
             game.just_died.append(self.ID)
             death_thought = Thoughts.new_death_thought(self, darkforest, isoutside)
-            final_thought = event_text_adjust(self, death_thought, main_cat=self)
+            final_thought = event_text_adjust(death_thought, main_cat=self)
             self.thought = final_thought
 
         for app in self.apprentice.copy():
@@ -731,7 +730,7 @@ class Cat:
 
                 text = choice(possible_strings)
                 text += " " + choice(MINOR_MAJOR_REACTION["major"])
-                text = event_text_adjust(Cat, text=text, main_cat=self, random_cat=cat)
+                text = event_text_adjust(text=text, main_cat=self, random_cat=cat)
 
                 cat.get_ill("grief stricken", event_triggered=True, severity="major")
 
@@ -819,7 +818,7 @@ class Cat:
                     )
 
                 text = event_text_adjust(
-                    Cat, choice(possible_strings), main_cat=self, random_cat=cat
+                    choice(possible_strings), main_cat=self, random_cat=cat
                 )
                 if cat.ID not in Cat.grief_strings:
                     Cat.grief_strings[cat.ID] = []
@@ -998,7 +997,7 @@ class Cat:
             output = f"an {output}" if output[0].lower() in "aeiou" else f"a {output}"
         # else:
         #     output = i18n.t("utility.indefinite", text=output, m_c=self)
-        event_text_adjust(Cat, output, main_cat=self)
+        event_text_adjust(output, main_cat=self)
         return output
 
     def convert_history(self, died_by, scar_events):
@@ -1585,11 +1584,7 @@ class Cat:
         )
 
         chosen_thought = event_text_adjust(
-            self.__class__,
-            chosen_thought,
-            main_cat=self,
-            random_cat=other_cat,
-            clan=game.clan,
+            chosen_thought, main_cat=self, random_cat=other_cat, clan=game.clan
         )
 
         # insert thought

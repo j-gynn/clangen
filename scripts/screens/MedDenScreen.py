@@ -4,7 +4,6 @@ import i18n
 import pygame
 import pygame_gui
 
-from scripts.cat.cats import Cat
 from scripts.clan_resources.herb.herb_supply import MESSAGES
 from scripts.game_structure.game_essentials import game
 from scripts.game_structure.ui_elements import (
@@ -363,19 +362,18 @@ class MedDenScreen(Screens):
                 meds_cover = choice(MESSAGES["no_meds_warning"])
             elif len(self.meds) == 1 and number == 0:
                 meds_cover = event_text_adjust(
-                    Cat=Cat,
                     text=choice(MESSAGES["single_not_working"]),
                     main_cat=self.meds[0],
                     clan=game.clan,
                 )
             elif len(self.meds) >= 2 and number == 0:
                 meds_cover = event_text_adjust(
-                    Cat=Cat, text=choice(MESSAGES["many_not_working"]), clan=game.clan
+                    text=choice(MESSAGES["many_not_working"]), clan=game.clan
                 )
 
             if meds_cover:
                 med_messages.append(
-                    event_text_adjust(Cat, meds_cover, main_cat=self.meds[0])
+                    event_text_adjust(meds_cover, main_cat=self.meds[0])
                 )
 
             if self.meds:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 import random
-import re
 from os.path import exists as path_exists
 from random import choice, choices
 from typing import List, Dict, Union, TYPE_CHECKING, Optional, Tuple
@@ -27,7 +26,6 @@ from scripts.utility import (
 from scripts.game_structure.game_essentials import game
 from scripts.cat.skills import SkillPath
 from scripts.cat.cats import Cat, ILLNESSES, INJURIES, PERMANENT
-from scripts.cat.enums import CatAgeEnum
 from scripts.cat.pelts import Pelt
 from scripts.cat_relations.relationship import Relationship
 from scripts.clan_resources.freshkill import (
@@ -218,7 +216,6 @@ class PatrolOutcome:
 
         # the text has to be processed before - otherwise leader might be referenced with their warrior name
         processed_text = event_text_adjust(
-            Cat,
             self.text,
             patrol_leader=patrol.patrol_leader,
             random_cat=patrol.random_cat,
@@ -241,7 +238,6 @@ class PatrolOutcome:
                 log = block.get("log") + " "
                 if isinstance(log, str):
                     block["log"] = event_text_adjust(
-                        Cat,
                         log,
                         patrol_leader=patrol.patrol_leader,
                         random_cat=patrol.random_cat,
@@ -255,7 +251,6 @@ class PatrolOutcome:
                 elif isinstance(log, list):
                     for i in range(1, len(log)):
                         block["log"][i] = event_text_adjust(
-                            Cat,
                             block["log"][i] + " ",
                             patrol_leader=patrol.patrol_leader,
                             random_cat=patrol.random_cat,
@@ -485,7 +480,7 @@ class PatrolOutcome:
                     game.clan.leader_lives = 0
                     results.append(
                         event_text_adjust(
-                            Cat, i18n.t("cat.history.leader_death_all"), main_cat=_cat
+                            i18n.t("cat.history.leader_death_all"), main_cat=_cat
                         )
                     )
                 elif "some_lives" in self.dead_cats:
@@ -493,7 +488,6 @@ class PatrolOutcome:
                     game.clan.leader_lives -= lives_lost
                     results.append(
                         event_text_adjust(
-                            Cat,
                             i18n.t("cat.history.leader_death_all", count=lives_lost),
                             main_cat=_cat,
                         )
@@ -502,7 +496,6 @@ class PatrolOutcome:
                     game.clan.leader_lives -= 1
                     results.append(
                         event_text_adjust(
-                            Cat,
                             i18n.t("cat.history.leader_death_all", count=1),
                             main_cat=_cat,
                         )

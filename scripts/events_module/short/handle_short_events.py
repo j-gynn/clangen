@@ -201,7 +201,6 @@ class HandleShortEvents:
         if self.chosen_event.relationships:
             # we're doing this here to make sure rel logs get adjusted text
             self.text = event_text_adjust(
-                Cat,
                 self.chosen_event.text,
                 main_cat=self.main_cat,
                 random_cat=self.random_cat,
@@ -286,7 +285,6 @@ class HandleShortEvents:
 
         # adjust text again to account for info that wasn't available when we do rel changes
         self.text = event_text_adjust(
-            Cat,
             self.chosen_event.text,
             main_cat=self.main_cat,
             random_cat=self.random_cat,
@@ -337,14 +335,14 @@ class HandleShortEvents:
             for cat in self.new_cats[-1]:
                 if cat.dead:
                     extra_text = event_text_adjust(
-                        Cat, i18n.t("defaults.event_dead_outsider"), main_cat=cat
+                        i18n.t("defaults.event_dead_outsider"), main_cat=cat
                     )
                 elif cat.outside:
                     if "unknown" in attribute_list:
                         extra_text = ""
                     else:
                         extra_text = event_text_adjust(
-                            Cat, i18n.t("defaults.event_met_outsider"), main_cat=cat
+                            i18n.t("defaults.event_met_outsider"), main_cat=cat
                         )
                 else:
                     Relation_Events.welcome_new_cats([cat])

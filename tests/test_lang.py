@@ -83,7 +83,7 @@ class TestLocalisation(unittest.TestCase):
                 ):
                     text = f"{{PRONOUN/m_c/{pronoun}}}"
                     self.assertEqual(
-                        event_text_adjust(Cat, text, main_cat=cat),
+                        event_text_adjust(text, main_cat=cat),
                         cat.pronouns[0][pronoun],
                     )
 
@@ -94,7 +94,7 @@ class TestLocalisation(unittest.TestCase):
             with self.subTest("plural pronouns", combination=key):
                 self.assertEqual(
                     event_text_adjust(
-                        Cat, text, main_cat=value[0][0], random_cat=value[0][1]
+                        text, main_cat=value[0][0], random_cat=value[0][1]
                     ),
                     value[1]["subject"],
                 )
