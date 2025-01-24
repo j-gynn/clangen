@@ -11,7 +11,6 @@ from scripts.events_module.relationship.romantic_events import RomanticEvents
 from scripts.events_module.relationship.welcoming_events import Welcoming_Events
 from scripts.game_structure.game_essentials import game
 from scripts.utility import (
-    get_cats_same_age,
     get_cats_of_romantic_interest,
     get_free_possible_mates,
 )
@@ -149,7 +148,9 @@ class Relation_Events:
         if not Relation_Events.can_trigger_events(cat):
             return
 
-        same_age_cats = get_cats_same_age(cat, game.config["mates"]["age_range"])
+        same_age_cats = registry.get_cats_same_age(
+            cat, game.config["mates"]["age_range"]
+        )
         if len(same_age_cats) > 0:
             random_cat = choice(same_age_cats)
             if (
@@ -226,7 +227,7 @@ class Relation_Events:
             return
 
         for new_cat in new_cats:
-            same_age_cats = get_cats_same_age(new_cat)
+            same_age_cats = registry.get_cats_same_age(new_cat)
             alive_cats = [
                 i for i in registry.all_cats.values() if not i.dead and not i.outside
             ]

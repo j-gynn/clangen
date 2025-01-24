@@ -126,5 +126,30 @@ class CatRegistry:
 
         return alive_cats
 
+    def get_cats_same_age(self, cat, age_range=10):
+        """
+        Look for all cats in the Clan and returns a list of cats which are in the same age range as the given cat.
+        :param cat: the given cat
+        :param int age_range: The allowed age difference between the two cats, default 10
+        :returns: a list of Cat objects of all eligible cats
+        """
+        eligible_cats = []
+        for inter_cat in self.living_cats_list:
+            if inter_cat.ID == cat.ID:
+                continue
+
+            if abs(inter_cat.moons - cat.moons) > age_range:
+                continue
+
+            if inter_cat.ID not in cat.relationships:
+                cat.create_one_relationship(inter_cat)
+
+            if cat.ID not in inter_cat.relationships:
+                inter_cat.create_one_relationship(cat)
+
+            eligible_cats.append(inter_cat)
+
+        return eligible_cats
+
 
 registry: CatRegistry = CatRegistry()

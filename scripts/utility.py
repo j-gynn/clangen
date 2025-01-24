@@ -45,34 +45,6 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------- #
 
 
-def get_cats_same_age(cat: "Cat", age_range=10):
-    """
-    Look for all cats in the Clan and returns a list of cats which are in the same age range as the given cat.
-    :param cat: the given cat
-    :param int age_range: The allowed age difference between the two cats, default 10
-    """
-    cats = []
-    for inter_cat in registry.all_cats.values():
-        if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
-            continue
-        if inter_cat.ID == cat.ID:
-            continue
-
-        if inter_cat.ID not in cat.relationships:
-            cat.create_one_relationship(inter_cat)
-            if cat.ID not in inter_cat.relationships:
-                inter_cat.create_one_relationship(cat)
-            continue
-
-        if (
-            inter_cat.moons <= cat.moons + age_range
-            and inter_cat.moons <= cat.moons - age_range
-        ):
-            cats.append(inter_cat)
-
-    return cats
-
-
 def get_free_possible_mates(cat):
     """Returns a list of available cats, which are possible mates for the given cat."""
     cats = []
