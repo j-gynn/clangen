@@ -7,6 +7,7 @@ TODO: Docs
 """
 
 import random
+
 # pylint: enable=line-too-long
 import traceback
 
@@ -185,10 +186,9 @@ class Events:
 
                 if len(ghost_names) > 2:
                     alive_cats = [
-                        kitty for kitty in registry.all_cats.values()
-                        if not kitty.dead
-                        and not kitty.outside
-                        and not kitty.exiled
+                        kitty
+                        for kitty in registry.all_cats.values()
+                        if not kitty.dead and not kitty.outside and not kitty.exiled
                     ]
                     # finds a percentage of the living Clan to become shaken
 
@@ -586,7 +586,8 @@ class Events:
         elif game.clan.clan_settings.get("hunting"):
             # handle warrior
             healthy_warriors = [
-                cat for cat in registry.all_cats.values()
+                cat
+                for cat in registry.all_cats.values()
                 if cat.status in ("warrior", "leader", "deputy")
                 and cat.available_to_work()
             ]
@@ -596,9 +597,9 @@ class Events:
 
             # handle apprentices
             healthy_apprentices = [
-                cat for cat in registry.all_cats.values()
-                if cat.status == "apprentice"
-                and cat.available_to_work()
+                cat
+                for cat in registry.all_cats.values()
+                if cat.status == "apprentice" and cat.available_to_work()
             ]
             app_amount = (
                 len(healthy_apprentices) * game.config["focus"]["hunting"]["apprentice"]
@@ -673,7 +674,8 @@ class Events:
 
             # handle herbs
             healthy_meds = [
-                cat for cat in registry.all_cats.values()
+                cat
+                for cat in registry.all_cats.values()
                 if cat.available_to_work() and cat.status == "medicine cat"
             ]
 
@@ -735,7 +737,9 @@ class Events:
             for condition_type, value in involved_cats.items():
                 game.cur_events_list.append(
                     Single_Event(
-                        i18n.t(text_snippet, condition=condition_type, count=len(value)),
+                        i18n.t(
+                            text_snippet, condition=condition_type, count=len(value)
+                        ),
                         "health",
                         value,
                     )
@@ -1809,7 +1813,8 @@ class Events:
         chance = 200
 
         alive_cats = [
-            kitty for kitty in Cat.all_cats.values()
+            kitty
+            for kitty in Cat.all_cats.values()
             if kitty.status != "leader" and not kitty.dead and not kitty.outside
         ]
 

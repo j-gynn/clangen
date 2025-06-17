@@ -104,7 +104,10 @@ def event_for_tags(tags: list, cat, other_cat=None) -> bool:
             ):
                 return False
 
-            if rank not in ("leader", "deputy") and not len(registry.get_alive_status_cats([rank])) >= 2:
+            if (
+                rank not in ("leader", "deputy")
+                and not len(registry.get_alive_status_cats([rank])) >= 2
+            ):
                 return False
 
     special_date = get_special_date()
@@ -285,7 +288,11 @@ def _check_cat_status(cat, statuses: list) -> bool:
     if cat.status in statuses:
         return True
 
-    if 'lost' in statuses and cat.status not in ["rogue", "loner", "kittypet", "former Clancat"] and cat.outside:
+    if (
+        "lost" in statuses
+        and cat.status not in ["rogue", "loner", "kittypet", "former Clancat"]
+        and cat.outside
+    ):
         return True
 
     return False

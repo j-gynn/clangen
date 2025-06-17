@@ -63,7 +63,6 @@ class Pregnancy_Events:
                 i
                 for i in registry.all_cats.values()
                 if not i.dead and not i.outside and not i.exiled
-
             ]
         )
         return len(Pregnancy_Events.biggest_family) > (living_cats / 10)
@@ -1113,7 +1112,6 @@ class Pregnancy_Events:
                 i
                 for i in registry.all_cats.values()
                 if not i.dead and not i.outside and not i.exiled
-
             ]
         )
         if living_cats < 10:

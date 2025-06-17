@@ -90,7 +90,7 @@ class Inheritance:
         # mates
         self.init_mates()
 
-        for inter_id, inter_cat in registry.all_cats.items():
+        for inter_id, inter_cat in registry.all_cats.copy().items():
             if inter_id == self.cat.ID:
                 continue
 
@@ -412,7 +412,9 @@ class Inheritance:
                         rel_type = self.get_exact_rel_type(mate_id)
                 self.kits_mates[mate_id] = {
                     "type": rel_type,
-                    "additional": [i18n.t("inheritance.mate_of_inter", name=str(inter_cat.name))],
+                    "additional": [
+                        i18n.t("inheritance.mate_of_inter", name=str(inter_cat.name))
+                    ],
                 }
 
     def init_siblings(self, inter_id, inter_cat):

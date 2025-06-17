@@ -90,9 +90,10 @@ def change_clan_reputation(difference):
     """
     game.clan.reputation += difference
     if game.clan.reputation < 0:
-        game.clan.reputation = 0 # clamp to 0
+        game.clan.reputation = 0  # clamp to 0
     elif game.clan.reputation > 100:
-        game.clan.reputation = 100 # clamp to 100
+        game.clan.reputation = 100  # clamp to 100
+
 
 def change_clan_relations(other_clan, difference):
     """
@@ -2074,7 +2075,8 @@ def event_text_adjust(
     # acc_plural (only works for main_cat's acc)
     if "acc_plural" in text:
         text = text.replace(
-            "acc_plural", i18n.t(f"cat.accessories.{main_cat.pelt.accessory[-1]}", count=2)
+            "acc_plural",
+            i18n.t(f"cat.accessories.{main_cat.pelt.accessory[-1]}", count=2),
         )
 
     # acc_singular (only works for main_cat's acc)
@@ -2612,9 +2614,15 @@ def generate_sprite(
 
         # draw accessories
         from scripts.cat.pelts import Pelt
+
         if not acc_hidden and cat.pelt.accessory:
             cat_accessories = cat.pelt.accessory
-            categories = ["collars", "tail_accessories", "body_accessories", "head_accessories"]
+            categories = [
+                "collars",
+                "tail_accessories",
+                "body_accessories",
+                "head_accessories",
+            ]
             for category in categories:
                 for accessory in cat_accessories:
                     if accessory in getattr(Pelt, category):
@@ -2630,7 +2638,8 @@ def generate_sprite(
                             )
                         elif accessory in cat.pelt.collars:
                             new_sprite.blit(
-                                sprites.sprites["collars" + accessory + cat_sprite], (0, 0)
+                                sprites.sprites["collars" + accessory + cat_sprite],
+                                (0, 0),
                             )
 
         # Apply fading fog
