@@ -62,7 +62,8 @@ class Pregnancy_Events:
             [
                 i
                 for i in registry.all_cats.values()
-                if not (i.dead or i.outside or i.exiled)
+                if not i.dead and not i.outside and not i.exiled
+
             ]
         )
         return len(Pregnancy_Events.biggest_family) > (living_cats / 10)
@@ -900,7 +901,7 @@ class Pregnancy_Events:
                     kit.relationships[the_cat.ID] = Relationship(kit, the_cat)
 
             #### REMOVE ACCESSORY ######
-            kit.pelt.accessory = None
+            kit.pelt.accessory = []
             clan.add_cat(kit)
 
             #### GIVE HISTORY ######
@@ -1111,7 +1112,8 @@ class Pregnancy_Events:
             [
                 i
                 for i in registry.all_cats.values()
-                if not (i.dead or i.outside or i.exiled)
+                if not i.dead and not i.outside and not i.exiled
+
             ]
         )
         if living_cats < 10:
@@ -1179,7 +1181,7 @@ class Pregnancy_Events:
         # AGE
         # - decrease the inverse chance if the whole clan is really old
         avg_age = int(
-            sum([cat.moons for cat in registry.all_cats.values()]) / living_cats
+            sum(cat.moons for cat in registry.all_cats.values()) / living_cats
         )
         if avg_age > 80:
             inverse_chance = int(inverse_chance * 0.8)

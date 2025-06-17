@@ -130,7 +130,9 @@ class AllegiancesScreen(Screens):
         """Determine Text. Ouputs list of tuples."""
 
         living_cats = [
-            i for i in registry.all_cats.values() if not (i.dead or i.outside)
+            cat for cat in registry.all_cats.values()
+            if not cat.dead and not cat.outside
+
         ]
         living_meds = []
         living_mediators = []
@@ -145,13 +147,13 @@ class AllegiancesScreen(Screens):
                 living_warriors.append(cat)
             elif cat.status == "mediator":
                 living_mediators.append(cat)
-            elif cat.status in [
+            elif cat.status in (
                 "apprentice",
                 "medicine cat apprentice",
                 "mediator apprentice",
-            ]:
+            ):
                 living_apprentices.append(cat)
-            elif cat.status in ["kitten", "newborn"]:
+            elif cat.status in ("kitten", "newborn"):
                 living_kits.append(cat)
             elif cat.status == "elder":
                 living_elders.append(cat)

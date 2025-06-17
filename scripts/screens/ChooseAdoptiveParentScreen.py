@@ -377,7 +377,7 @@ class ChooseAdoptiveParentScreen(Screens):
 
         birth_parents = [
             registry.fetch_cat(i)
-            for i in [self.the_cat.parent1, self.the_cat.parent2]
+            for i in (self.the_cat.parent1, self.the_cat.parent2)
             if isinstance(registry.fetch_cat(i), Cat)
         ]
 

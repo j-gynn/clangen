@@ -440,7 +440,7 @@ class ChooseMentorScreen(Screens):
             self.next_cat,
             self.previous_cat,
         ) = self.the_cat.determine_next_and_previous_cats(
-            filter_func = (lambda cat: cat.status in ["apprentice", "medicine cat apprentice", "mediator apprentice"])
+            filter_func = (lambda cat: cat.status in ("apprentice", "medicine cat apprentice", "mediator apprentice"))
         )
 
         self.next_cat_button.disable() if self.next_cat == 0 else self.next_cat_button.enable()
@@ -632,7 +632,7 @@ class ChooseMentorScreen(Screens):
             cat
             for cat in registry.all_cats_list
             if not (cat.dead or cat.outside)
-            and cat.status in ["warrior", "deputy", "leader"]
+            and cat.status in ("warrior", "deputy", "leader")
         ]
         valid_warrior_mentors = []
         invalid_warrior_mentors = []
