@@ -4,16 +4,12 @@ from random import choice, randint
 
 import ujson
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.events_module.relationship.group_events import GroupEvents
 from scripts.events_module.relationship.romantic_events import RomanticEvents
 from scripts.events_module.relationship.welcoming_events import Welcoming_Events
 from scripts.game_structure.game_essentials import game
-from scripts.utility import (
-    get_cats_same_age,
-    get_cats_of_romantic_interest,
-    get_free_possible_mates,
-)
 
 
 class Relation_Events:
@@ -78,8 +74,8 @@ class Relation_Events:
         other_cat = None
 
         # get the cats which are relevant for romantic interactions
-        free_possible_mates = get_free_possible_mates(cat)
-        other_love_interest = get_cats_of_romantic_interest(cat)
+        free_possible_mates = registry.get_free_possible_mates(cat)
+        other_love_interest = registry.get_cats_of_romantic_interest(cat)
         possible_cats = free_possible_mates
         if len(other_love_interest) > 0 and len(other_love_interest) < 3:
             possible_cats.extend(other_love_interest)
@@ -125,7 +121,7 @@ class Relation_Events:
         # relations with current mates
         if use_mate or cat.no_mates:
             cat_to_choose_from = [
-                cat.all_cats[mate_id]
+                registry.all_cats[mate_id]
                 for mate_id in cat.mate
                 if not cat.all_cats[mate_id].dead and not cat.all_cats[mate_id].outside
             ]
@@ -147,7 +143,9 @@ class Relation_Events:
         if not Relation_Events.can_trigger_events(cat):
             return
 
-        same_age_cats = get_cats_same_age(Cat, cat, game.config["mates"]["age_range"])
+        same_age_cats = registry.get_cats_same_age(
+            cat, game.config["mates"]["age_range"]
+        )
         if len(same_age_cats) > 0:
             random_cat = choice(same_age_cats)
             if (
@@ -225,7 +223,7 @@ class Relation_Events:
             return
 
         for new_cat in new_cats:
-            same_age_cats = get_cats_same_age(Cat, new_cat)
+            same_age_cats = registry.get_cats_same_age(new_cat)
             alive_cats = [
                 i for i in new_cat.all_cats.values() if not i.dead and not i.outside
             ]

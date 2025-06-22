@@ -331,10 +331,7 @@ class Cat:
         self._sprite: Optional[pygame.Surface] = None
         self._sprite_mask: Optional[pygame.Mask] = None
 
-    def __setattr__(self, name, value):
-        super().__setattr__(name, value)  # Set the attribute normally
-        if name != "ID":  # Avoid re-adding the cat based on its ID
-            registry.add_cat(self)
+        registry.add_cat(self)
 
     def init_faded(self, ID, status, prefix, suffix, moons, **kwargs):
         """Perform faded-specific initialization

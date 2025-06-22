@@ -1,5 +1,6 @@
 from typing import List
 
+from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.debug_commands.command import Command
 from scripts.debug_commands.utils import (
@@ -11,19 +12,12 @@ from scripts.events_module.relationship.pregnancy_events import Pregnancy_Events
 
 
 def get_cat_from_name_or_id(nameid: str) -> Cat:
-    try:
-        cat = [
-            x
-            for x in Cat.all_cats_list
-            if nameid.lower() == str(x.name).lower() or nameid == x.ID
-        ]
-        if len(cat) > 0:
-            cat = cat[0]
-        else:
-            cat = None
-    except:
-        cat = None
-    return cat
+    if (
+        nameid.isnumeric()
+    ):  # if it can be parsed as an int, it's an ID. otherwise, it's a name.
+        return registry.fetch_cat(nameid)
+    else:
+        return registry.fetch_from_name(nameid)
 
 
 class AddPregnancyCommand(Command):

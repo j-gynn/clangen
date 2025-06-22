@@ -1,6 +1,6 @@
 import logging
 from random import choice, random
-from typing import Tuple, Dict, List, TYPE_CHECKING
+from typing import Tuple, Dict, List, TYPE_CHECKING, Optional, Set
 
 if TYPE_CHECKING:
     from scripts.cat.cats import Cat
@@ -15,23 +15,73 @@ class CatRegistry:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.all_cats = {}  # Initialize the global list
+            cls._instance._dead_cat_ids = set()
+            cls._instance._outside_cat_ids = set()
         return cls._instance
 
-    def add_cat(self, cat):
+    def add_cat(self, cat: "Cat"):
+        """
+        Register a new cat in the registry
+        :param cat: Cat object to add to the registry
+        :return:
+        """
         self.all_cats[cat.ID] = cat
 
-    def remove_cat(self, cat_id):
+    def remove_cat(self, cat_id: str):
+        """
+        Removes a cat from the registry entirely.
+        :param cat_id: Cat ID to remove from the registry
+        :return:
+        """
         self.all_cats.pop(cat_id)
 
-    def fetch_cat(self, cat_id):
+    def fetch_cat(self, cat_id) -> Optional["Cat"]:
+        """
+        Fetch a cat based on ID.
+        :param cat_id: A possible cat ID
+        :return: Cat object corresponding to ID, or None if not found
+        """
         return self.all_cats.get(cat_id)
+
+    def fetch_from_name(self, cat_name: str) -> Optional["Cat"]:
+        """
+        Fetch a cat based on name. Use `fetch_cat(cat_id)` where possible.
+        :param cat_name: Part of or all of a cat's name
+        :return: Cat object corresponding to ID, or None if not found
+        """
+        cats = [
+            cat
+            for cat in self.all_cats_list
+            if cat_name.casefold() in str(cat.name).casefold()
+        ]
+        return cats[0] if len(cats) > 0 else None
+
+    def kill_cat(self, cat_id: str):
+        self._dead_cat_ids.add(cat_id)
+
+    def resurrect_cat(self, cat_id: str):
+        if cat_id in self.dead_cat_ids:
+            self._dead_cat_ids.remove(cat_id)
+
+    @property
+    def dead_cat_ids(self) -> Set[str]:
+        return self._dead_cat_ids
+
+    @dead_cat_ids.setter
+    def dead_cat_ids(self, value: Set[str]):
+        self._instance._dead_cat_ids = value
 
     @property
     def all_cats_list(self):
+        """
+        All cats in the registry, returned in list format
+        :return: List of cat objects
+        """
         return list(self.all_cats.values())
 
     @all_cats_list.setter
-    def all_cats_list(self, value):
+    def all_cats_list(self, value: List["Cat"]):
+        """Update the registry via list."""
         self._instance.all_cats = {cat.ID: cat for cat in value}
 
     @property
@@ -40,7 +90,12 @@ class CatRegistry:
         Gets a list of all living clan cats
         :return:
         """
-        return [cat for cat in registry.all_cats_list if not (cat.dead or cat.outside)]
+        cat_ids = set(self.all_cats.keys()).difference(self.dead_cat_ids)
+        return [
+            registry.all_cats[cat_id]
+            for cat_id in cat_ids
+            if not registry.all_cats[cat_id].outside
+        ]
 
     @property
     def get_living_cat_count(self) -> int:
@@ -180,6 +235,48 @@ class CatRegistry:
                 eligible_cats.append(inter_cat)
 
         return eligible_cats
+
+    def get_cats_of_romantic_interest(self, cat):
+        """Returns a list of cats, those cats are love interest of the given cat"""
+        cats = []
+        for inter_cat in self.all_cats.values():
+            if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
+                continue
+            if inter_cat.ID == cat.ID:
+                continue
+
+            if inter_cat.ID not in cat.relationships:
+                cat.create_one_relationship(inter_cat)
+                if cat.ID not in inter_cat.relationships:
+                    inter_cat.create_one_relationship(cat)
+                continue
+
+            # Extra check to ensure they are potential mates
+            if (
+                inter_cat.is_potential_mate(cat, for_love_interest=True)
+                and cat.relationships[inter_cat.ID].romantic_love > 0
+            ):
+                cats.append(inter_cat)
+        return cats
+
+    def get_free_possible_mates(self, cat):
+        """Returns a list of available cats, which are possible mates for the given cat."""
+        cats = []
+        for inter_cat in self.all_cats.values():
+            if inter_cat.dead or inter_cat.outside or inter_cat.exiled:
+                continue
+            if inter_cat.ID == cat.ID:
+                continue
+
+            if inter_cat.ID not in cat.relationships:
+                cat.create_one_relationship(inter_cat)
+                if cat.ID not in inter_cat.relationships:
+                    inter_cat.create_one_relationship(cat)
+                continue
+
+            if inter_cat.is_potential_mate(cat, for_love_interest=True):
+                cats.append(inter_cat)
+        return cats
 
     def get_random_moon_cat(
         self, main_cat: "Cat", parent_child_modifier=True, mentor_app_modifier=True

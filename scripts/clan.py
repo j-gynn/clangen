@@ -221,6 +221,8 @@ class Clan:
                 ]
             ),
         )
+        registry.dead_cat_ids = set(self.instructor.ID)
+        registry.outside_cat_ids = set()
         self.instructor.dead = True
         self.instructor.dead_for = randint(20, 200)
         self.add_cat(self.instructor)
@@ -231,10 +233,9 @@ class Clan:
         for i in key_copy:  # Going through all currently existing cats
             # cat_class is a Cat-object
             not_found = True
-            for x in self.starting_members:
-                if registry.all_cats[i] == x:
-                    self.add_cat(registry.all_cats[i])
-                    not_found = False
+            if registry.fetch_cat(i) in self.starting_members:
+                self.add_cat(registry.all_cats[i])
+                not_found = False
             if (
                 registry.all_cats[i] != self.leader
                 and registry.all_cats[i] != self.medicine_cat

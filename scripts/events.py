@@ -260,9 +260,10 @@ class Events:
         # handle the herb supply for the moon
         game.clan.herb_supply.handle_moon(
             clan_size=registry.get_living_clan_cat_count,
-            clan_cats=Cat.all_cats_list,
+            clan_cats=registry.all_cats_list,
             med_cats=registry.get_alive_status_cats(
-                get_status=["medicine cat", "medicine cat apprentice"], working=True,
+                get_status=["medicine cat", "medicine cat apprentice"],
+                working=True,
             ),
         )
 
@@ -614,7 +615,8 @@ class Events:
         elif game.clan.clan_settings.get("herb gathering"):
             # get medicine cats
             healthy_meds = registry.get_alive_status_cats(
-                get_status=["medicine cat", "medicine cat apprentice"], working=True,
+                get_status=["medicine cat", "medicine cat apprentice"],
+                working=True,
             )
             # get warriors to help
             healthy_warriors = registry.get_alive_status_cats(
@@ -2394,7 +2396,7 @@ class Events:
                         lambda x: not x.dead
                         and not x.outside
                         and x.status == "warrior",
-                        Cat.all_cats_list,
+                        registry.all_cats_list,
                     )
                 )
                 if all_warriors:

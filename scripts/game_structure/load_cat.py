@@ -215,6 +215,8 @@ def json_load():
                 cat["previous_mates"] if "previous_mates" in cat else []
             )
             new_cat.dead = cat["dead"]
+            if new_cat.dead:
+                registry.kill_cat(new_cat.ID)
             new_cat.dead_for = cat["dead_moons"]
             new_cat.experience = cat["experience"]
             new_cat.apprentice = cat["current_apprentice"]
@@ -450,6 +452,8 @@ def csv_load(all_cats):
                     if len(attr) >= 32:
                         # Is the cat dead
                         the_cat.dead = attr[32]
+                        if the_cat.dead:
+                            registry.kill_cat(the_cat.ID)
                         the_cat.pelt.cat_sprites["dead"] = attr[33]
                 game.switches[
                     "error_message"
