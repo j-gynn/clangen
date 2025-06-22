@@ -4,12 +4,16 @@ from random import choice, randint
 
 import ujson
 
-from scripts.cat.catregistry import registry
 from scripts.cat.cats import Cat
 from scripts.events_module.relationship.group_events import GroupEvents
 from scripts.events_module.relationship.romantic_events import RomanticEvents
 from scripts.events_module.relationship.welcoming_events import Welcoming_Events
 from scripts.game_structure.game_essentials import game
+from scripts.utility import (
+    get_cats_same_age,
+    get_cats_of_romantic_interest,
+    get_free_possible_mates,
+)
 
 
 class Relation_Events:
@@ -74,12 +78,8 @@ class Relation_Events:
         other_cat = None
 
         # get the cats which are relevant for romantic interactions
-        free_possible_mates = registry.get_possible_mates(cat)
-        other_love_interest = [
-            inter_cat
-            for inter_cat in free_possible_mates
-            if cat.relationships[inter_cat.ID].romantic_love > 0
-        ]
+        free_possible_mates = get_free_possible_mates(cat)
+        other_love_interest = get_cats_of_romantic_interest(cat)
         possible_cats = free_possible_mates
         if len(other_love_interest) > 0 and len(other_love_interest) < 3:
             possible_cats.extend(other_love_interest)
@@ -125,10 +125,9 @@ class Relation_Events:
         # relations with current mates
         if use_mate or cat.no_mates:
             cat_to_choose_from = [
-                registry.all_cats[mate_id]
+                cat.all_cats[mate_id]
                 for mate_id in cat.mate
-                if not registry.all_cats[mate_id].dead
-                and not registry.all_cats[mate_id].outside
+                if not cat.all_cats[mate_id].dead and not cat.all_cats[mate_id].outside
             ]
 
         if not cat_to_choose_from:
@@ -148,9 +147,7 @@ class Relation_Events:
         if not Relation_Events.can_trigger_events(cat):
             return
 
-        same_age_cats = registry.get_cats_same_age(
-            cat, game.config["mates"]["age_range"]
-        )
+        same_age_cats = get_cats_same_age(Cat, cat, game.config["mates"]["age_range"])
         if len(same_age_cats) > 0:
             random_cat = choice(same_age_cats)
             if (
@@ -185,7 +182,7 @@ class Relation_Events:
 
         possible_interaction_cats = [
             cat
-            for cat in registry.all_cats.values()
+            for cat in Cat.all_cats.values()
             if not cat.dead and not cat.outside and not cat.exiled
         ]
 
@@ -203,7 +200,7 @@ class Relation_Events:
             cat, possible_interaction_cats
         )
         for id in interacted_cat_ids:
-            inter_cat = registry.all_cats[id]
+            inter_cat = Cat.all_cats[id]
             Relation_Events.trigger_event(inter_cat)
 
     @staticmethod
@@ -228,9 +225,9 @@ class Relation_Events:
             return
 
         for new_cat in new_cats:
-            same_age_cats = registry.get_cats_same_age(new_cat)
+            same_age_cats = get_cats_same_age(Cat, new_cat)
             alive_cats = [
-                i for i in registry.all_cats.values() if not i.dead and not i.outside
+                i for i in new_cat.all_cats.values() if not i.dead and not i.outside
             ]
             number = game.config["new_cat"]["cat_amount_welcoming"]
 
@@ -274,7 +271,7 @@ class Relation_Events:
         """Returns a list of cats, where the relationship from main_cat towards the cat fulfill the given constraints."""
         cat_list = [
             cat
-            for cat in registry.all_cats.values()
+            for cat in Cat.all_cats.values()
             if not cat.dead and not cat.outside and not cat.exiled
         ]
         cat_list.remove(main_cat)

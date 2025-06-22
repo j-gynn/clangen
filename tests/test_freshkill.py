@@ -374,7 +374,9 @@ class FreshkillPileTest(unittest.TestCase):
 
         # when
         living_cats = [no_parent, father, kid, mother]
-        self.assertEqual([mother.ID], list(registry.get_alive_clan_queens[0].keys()))
+        self.assertEqual(
+            [mother.ID], list(registry.get_alive_clan_queens[0].keys())
+        )
         freshkill_pile.tactic_status(living_cats)
 
         # then

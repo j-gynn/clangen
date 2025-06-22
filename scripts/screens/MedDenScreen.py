@@ -345,9 +345,7 @@ class MedDenScreen(Screens):
             med_messages = []
 
             amount_per_med = get_amount_cat_for_one_medic(game.clan)
-            number = amount_clanmembers_covered(
-                registry.all_cats.values(), amount_per_med
-            )
+            number = amount_clanmembers_covered(registry.all_cats.values(), amount_per_med)
 
             meds_cover = i18n.t(
                 "screens.med_den.meds_cover", clansize=number, count=len(self.meds)

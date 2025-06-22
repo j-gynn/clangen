@@ -262,7 +262,7 @@ class Events:
             clan_size=registry.get_living_clan_cat_count,
             clan_cats=Cat.all_cats_list,
             med_cats=registry.get_alive_status_cats(
-                get_status=["medicine cat", "medicine cat apprentice"], working=True
+                get_status=["medicine cat", "medicine cat apprentice"], working=True,
             ),
         )
 
@@ -614,7 +614,7 @@ class Events:
         elif game.clan.clan_settings.get("herb gathering"):
             # get medicine cats
             healthy_meds = registry.get_alive_status_cats(
-                get_status=["medicine cat", "medicine cat apprentice"], working=True
+                get_status=["medicine cat", "medicine cat apprentice"], working=True,
             )
             # get warriors to help
             healthy_warriors = registry.get_alive_status_cats(

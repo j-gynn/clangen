@@ -12,6 +12,7 @@ from scripts.utility import (
     get_highest_romantic_relation,
     get_personality_compatibility,
     get_amount_of_cats_with_relation_value_towards,
+    get_alive_clan_queens,
 )
 
 
