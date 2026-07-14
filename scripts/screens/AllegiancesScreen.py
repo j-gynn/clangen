@@ -7,7 +7,7 @@ from scripts.game_structure import game
 from scripts.game_structure.screen_settings import MANAGER
 from ..ui.theme import get_text_box_theme
 from ..events_module.text_adjust import event_text_adjust, adjust_list_text
-from ..ui.scale import ui_scale, ui_scale_offset
+from ..ui.scale import ui_scale, ui_scale_offset, ui_scale_dimensions
 from ..clan_package.get_clan_cats import get_alive_clan_queens
 from .Screens import Screens
 from ..cat.enums import CatRank
@@ -34,6 +34,21 @@ class AllegiancesScreen(Screens):
 
     def screen_switches(self):
         super().screen_switches()
+        x = 0
+        self.add_bgs(
+            bgs={
+                "allegiances": pygame.transform.scale(
+                    pygame.image.load(
+                        "resources/images/camp_bg/allegiances/forest.png"
+                    ).convert(),
+                    ui_scale_dimensions((800, 700)),
+                )
+            },
+            radius=2,
+        )
+
+        self.set_bg(None, "allegiances")
+
         # Heading
         self.heading = pygame_gui.elements.UITextBox(
             "screens.allegiances.heading",
