@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING, Dict
-
 from scripts.cat.registry_module._query import CatQuery
 
 if TYPE_CHECKING:
@@ -17,7 +16,12 @@ class CatStore:
         self._cats.pop(cat_id)
 
     def get(self, cat_id) -> "Cat":
-        return self._cats[cat_id]
+        try:
+            return self._cats[cat_id]
+        except KeyError:
+            from scripts.cat.factories.faded_cat_factory import FadedCatFactory
+
+            return FadedCatFactory.create_cat(ID=cat_id)
 
     def clear(self):
         self._cats = {}
