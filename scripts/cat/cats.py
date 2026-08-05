@@ -797,39 +797,6 @@ class Cat:
         if switch_get_value(Switch.sort_type) == "rank" and resort:
             Cat.sort_cats()
 
-    def rank_change_traits_skill(self, mentor):
-        """Updates trait and skill upon ceremony"""
-
-        if self.status.rank in (
-            CatRank.WARRIOR,
-            CatRank.MEDICINE_CAT,
-            CatRank.MEDIATOR,
-        ):
-            # Give a couple doses of mentor influence:
-            if mentor:
-                max_influence = randint(0, 2)
-                i = 0
-                while max_influence > i:
-                    i += 1
-                    affect_personality = self.personality.mentor_influence(
-                        Cat.fetch_cat(mentor).personality
-                    )
-                    affect_skills = self.skills.mentor_influence(Cat.fetch_cat(mentor))
-                    if affect_personality:
-                        self.history.add_facet_mentor_influence(
-                            mentor.ID,
-                            affect_personality[0],
-                            affect_personality[1],
-                        )
-                    if affect_skills:
-                        self.history.add_skill_mentor_influence(
-                            affect_skills[0], affect_skills[1], affect_skills[2]
-                        )
-
-            self.history.add_mentor_skill_influence_strings()
-            self.history.add_mentor_facet_influence_strings()
-        return
-
     def change_name(self, new_prefix=None, new_suffix=None):
         self.name = Name(
             prefix=new_prefix,
@@ -1866,21 +1833,6 @@ class Cat:
             if self.illnesses[illness]["severity"] != "minor"
         ]
         return "starving" in non_minor_illnesses and len(non_minor_illnesses) == 1
-
-    def retire_cat(self):
-        """This is only for cats that retire due to health condition"""
-
-        # There are some special tasks we need to do for apprentice
-        # Note that although you can un-retire cats, they will be a full warrior/med_cat/mediator
-        if self.moons > 6 and self.status.rank.is_any_apprentice_rank():
-            _ment = Cat.fetch_cat(self.mentor) if self.mentor else None
-            self.rank_change(
-                CatRank.WARRIOR
-            )  # Temp switch them to warrior, so the following step will work
-            self.rank_change_traits_skill(_ment)
-
-        self.rank_change(CatRank.ELDER)
-        return
 
     def is_ill(self):
         """Returns true if the cat is ill."""

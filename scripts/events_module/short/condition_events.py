@@ -9,6 +9,7 @@ import logging
 from scripts.cat.cats import Cat
 from scripts.cat.enums import CatAge, CatRank
 from scripts.cat.history import History
+from scripts.cat.microservices.mentor_service import rank_change_traits_skill
 from scripts.clan_package.settings import get_clan_setting
 from scripts.clan_resources.freshkill import (
     FRESHKILL_ACTIVE,
@@ -1107,7 +1108,12 @@ class Condition_Events:
                             newname=cat.name.prefix + cat.name.suffix,
                         )
 
-                    cat.retire_cat()
+                    if cat.moons > 6 and cat.status.rank.is_any_apprentice_rank():
+                        _ment = Cat.fetch_cat(cat.mentor) if cat.mentor else None
+                        cat.rank_change(CatRank.WARRIOR)
+                        # Temp switch them to warrior, so the following step will work
+                        rank_change_traits_skill(cat, _ment)
+                    cat.rank_change(CatRank.ELDER)
                     # Don't add this to the condition event list: instead make it its own event, a ceremony.
                     game.cur_events_list.append(
                         Single_Event(

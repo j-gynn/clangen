@@ -13,6 +13,7 @@ from scripts.cat.microservices.mentor_service import (
     get_dead_former_mentor,
     determine_mentor_tag_for_ceremony,
     update_mentorship,
+    rank_change_traits_skill,
 )
 from scripts.cat.registry_module.store import cat_store
 from scripts.config import get_config
@@ -1586,7 +1587,7 @@ def ceremony(cat, promoted_to, preparedness="prepared"):
     # Grab current mentor, if they have one, before it's removed.
     old_name = str(cat.name)
     cat.rank_change(promoted_to)
-    cat.rank_change_traits_skill(mentor)
+    rank_change_traits_skill(cat, mentor)
 
     involved_cats = [cat.ID]  # Clearly, the cat the ceremony is about is involved.
 

@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randint
 from typing import TYPE_CHECKING, Optional, Tuple
 
 from scripts.cat.enums import CatRank
@@ -133,3 +133,36 @@ def determine_mentor_tag_for_ceremony(
 def get_current_apprentices(cat_id):
     cat = cat_store.get(cat_id)
     return [cat_store.get(app) for app in cat.apprentice]
+
+def rank_change_traits_skill(app, mentor):
+    """Updates trait and skill upon ceremony"""
+
+    if app.status.rank in (
+        CatRank.WARRIOR,
+        CatRank.MEDICINE_CAT,
+        CatRank.MEDIATOR,
+    ):
+        # Give a couple doses of mentor influence:
+        if mentor:
+            max_influence = randint(0, 2)
+            i = 0
+            while max_influence > i:
+                i += 1
+                affect_personality = app.personality.mentor_influence(
+                    Cat.fetch_cat(mentor).personality
+                )
+                affect_skills = app.skills.mentor_influence(Cat.fetch_cat(mentor))
+                if affect_personality:
+                    app.history.add_facet_mentor_influence(
+                        mentor.ID,
+                        affect_personality[0],
+                        affect_personality[1],
+                    )
+                if affect_skills:
+                    app.history.add_skill_mentor_influence(
+                        affect_skills[0], affect_skills[1], affect_skills[2]
+                    )
+
+        app.history.add_mentor_skill_influence_strings()
+        app.history.add_mentor_facet_influence_strings()
+    return
