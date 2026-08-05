@@ -22,5 +22,8 @@ class CatStore:
     def clear(self):
         self._cats = {}
 
+    def query(self) -> CatQuery:
+        return CatQuery(list(self._cats.items()))
+
 
 cat_store: CatStore = CatStore()
