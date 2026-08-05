@@ -23,7 +23,7 @@ class CatStore:
         self._cats = {}
 
     def query(self) -> CatQuery:
-        return CatQuery(list(self._cats.items()))
+        return CatQuery(lambda: iter(self._cats.values()))
 
 
 cat_store: CatStore = CatStore()
