@@ -66,7 +66,7 @@ def remove_mentorship(mentor_id, *app_ids):
 
 
 def update_mentorship(*apps: "Cat"):
-    if not apps:
+    if not apps or not apps[0]:
         return
     for app in apps:
         if (
@@ -77,8 +77,10 @@ def update_mentorship(*apps: "Cat"):
             remove_mentorship(app.mentor, app.ID)
             return
 
-        if not is_valid_mentor_for_app(cat_store.get(app.mentor), app):
+        if app.mentor and not is_valid_mentor_for_app(cat_store.get(app.mentor), app):
             remove_mentorship(app.mentor, app.ID)
+
+        if not app.mentor:
             add_mentorship(choose_random_mentor(app), app.ID)
 
 
@@ -97,8 +99,7 @@ def choose_random_mentor(app):
         .in_group(app.status.group)
         .with_rank(*mentor_type[app.status.rank.get_adult_version()])
     )
-    priority_mentors = potential_mentors.copy()
-    priority_mentors.filter(lambda cat: not cat.apprentice).filter(
+    priority_mentors = potential_mentors.filter(lambda cat: not cat.apprentice).filter(
         lambda cat: not cat.not_working()
     )
 
@@ -123,7 +124,7 @@ def determine_mentor_tag_for_ceremony(
     if rank in mentor_type:
         mentor_query.with_rank(mentor_type[rank])
 
-    if mentor_query:
+    if mentor_query.all():
         mentor = list(mentor_query)[-1]
         return f"alive_{'leader_' if mentor.status.is_leader else ''}mentor", mentor
     return "no_valid_previous_mentor", None

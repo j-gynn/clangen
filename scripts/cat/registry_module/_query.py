@@ -13,6 +13,9 @@ class CatQuery:
     def __iter__(self):
         return iter(self._source())
 
+    def __bool__(self):
+        return next(iter(self), None) is not None
+
     def all(self):
         return list(self)
 

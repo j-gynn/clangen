@@ -519,7 +519,7 @@ class Cat:
             and self.status.get_last_living_group() == CatGroup.PLAYER_CLAN_ID
             and not self.status.is_exiled(CatGroup.PLAYER_CLAN_ID)
         ):
-            self.grief(self, body)
+            self.grief(body)
 
         # mark the sprite as outdated
         self.pelt.rebuild_sprite = True

@@ -309,7 +309,7 @@ def one_moon():
     check_and_promote_deputy()
 
     # validate that every mentorship is appropriate
-    update_mentorship(cat_store.query().has_mentor())
+    update_mentorship(cat_store.query().has_mentor().all())
 
     # Resort
     if switch_get_value(Switch.sort_type) != "id":

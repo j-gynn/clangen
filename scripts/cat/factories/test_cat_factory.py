@@ -12,7 +12,7 @@ from scripts.cat.status import Status
 class TestCatFactory(NewCatFactory):
     @classmethod
     def _build_cat(cls, **kwargs) -> Cat:
-        return super()._build_cat()
+        return super()._build_cat(**kwargs)
 
     @classmethod
     def _get_random_age(cls):
