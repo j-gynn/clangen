@@ -18,11 +18,16 @@ class CatQuery:
             cat for cat in self._cats if not cat.status.group.is_afterlife()
         )
 
-    def in_group(self, group: CatGroup):
+    def dead(self):
+        return CatQuery(
+            cat for cat in self._cats if cat.status.group.is_afterlife()
+        )
+
+    def in_group(self, *groups: CatGroup):
         return CatQuery(
             cat
             for cat in self._cats
-            if cat.status.group == group or cat.status.get_last_living_group() == group
+            if cat.status.group in groups or cat.status.get_last_living_group() in groups
         )
 
     def in_player_clan(self):
@@ -33,8 +38,16 @@ class CatQuery:
             or cat.status.get_last_living_group() == CatGroup.PLAYER_CLAN
         )
 
-    def with_rank(self, rank: CatRank):
-        return CatQuery(cat for cat in self._cats if cat.status.rank == rank)
+    def with_rank(self, *ranks: CatRank):
+        return CatQuery(cat for cat in self._cats if cat.status.rank in ranks)
 
-    def with_age(self, age: CatAge):
-        return CatQuery(cat for cat in self._cats if cat.age == age)
+    def with_age(self, *ages: CatAge):
+        return CatQuery(cat for cat in self._cats if cat.age in ages)
+
+    # NICHE
+
+    def can_work(self):
+        return CatQuery(cat for cat in self._cats if not cat.not_working())
+
+    def cannot_work(self):
+        return CatQuery(cat for cat in self._cats if cat.not_working())
