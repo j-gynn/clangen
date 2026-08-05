@@ -7,11 +7,13 @@ from scripts.cat.registry_module.store import CatStore, cat_store
 
 
 class BaseCatFactory(ABC):
-    def create_cat(self, **kwargs) -> Cat:
-        cat = self._build_cat(**kwargs)
+    @classmethod
+    def create_cat(cls, **kwargs) -> Cat:
+        cat = cls._build_cat(**kwargs)
         cat_store.add(cat)
         return cat
 
+    @classmethod
     @abstractmethod
-    def _build_cat(self, **kwargs) -> Cat:
+    def _build_cat(cls, **kwargs) -> Cat:
         pass

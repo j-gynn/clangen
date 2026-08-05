@@ -10,7 +10,8 @@ from scripts.cat.status import Status
 
 
 class TestCatFactory(NewCatFactory):
-    def _build_cat(self, **kwargs) -> Cat:
+    @classmethod
+    def _build_cat(cls, **kwargs) -> Cat:
         return super()._build_cat()
 
     @classmethod
