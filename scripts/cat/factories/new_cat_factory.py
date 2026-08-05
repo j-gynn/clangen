@@ -27,7 +27,7 @@ class NewCatFactory(BaseCatFactory, ABC):
     rng = BASE_RNG()
 
     @classmethod
-    def create_cat(cls, **overrides):
+    def _build_cat(cls, **overrides):
         """
         Create a new cat with randomness. Override any elements of the creation with keyword arguments
         :param overrides: Any desired overrides to the random generation

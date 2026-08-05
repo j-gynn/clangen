@@ -1,3 +1,4 @@
+from scripts.cat.cats import Cat
 from scripts.cat.enums import CatAge
 from scripts.cat.factories.new_cat_factory import NewCatFactory
 from scripts.cat.personality import Personality
@@ -9,6 +10,9 @@ from scripts.cat.status import Status
 
 
 class TestCatFactory(NewCatFactory):
+    def _build_cat(self, **kwargs) -> Cat:
+        return super()._build_cat()
+
     @classmethod
     def _get_random_age(cls):
         return CatAge.NEWBORN

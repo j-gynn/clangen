@@ -31,7 +31,7 @@ class LoadCatFactory(BaseCatFactory):
         CONVERT = ujson.loads(read_file.read())
 
     @classmethod
-    def create_cat(cls, **kwargs) -> Cat:
+    def _build_cat(cls, **kwargs) -> Cat:
         """
         Takes a dict from save data & constructs the cat
         :param kwargs: save file dict

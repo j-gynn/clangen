@@ -13,7 +13,7 @@ from scripts.cat.status import Status
 
 class FadedCatFactory(BaseCatFactory):
     @classmethod
-    def create_cat(cls, **kwargs) -> Cat:
+    def _build_cat(cls, **kwargs) -> Cat:
         if isinstance(kwargs["status"], str):
             status = Status(rank=kwargs["status"])
             # they are definitely dead
