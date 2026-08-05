@@ -15,6 +15,7 @@ from scripts.cat.enums import (
 )
 from scripts.cat.factories.new_cat_factory import NewCatFactory
 from scripts.cat.factories.enums import CatType
+from scripts.cat.microservices.mentor_service import update_mentorship
 from scripts.cat.names import names
 from scripts.cat_relations.enums import RelType
 from scripts.cat_relations.inheritance2 import inheritance_db
@@ -623,7 +624,7 @@ def create_new_cat(
                 new_cat.status._change_rank(CatRank(rank))
             # give apprentice aged cat a mentor
             if new_cat.status.rank.is_any_apprentice_rank():
-                new_cat.update_mentor()
+                update_mentorship(new_cat)
                 # ensuring that any cats joining as an apprentice will display the correct skills
                 new_cat.skills.primary.interest_only = True
                 if new_cat.skills.secondary:

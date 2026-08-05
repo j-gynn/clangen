@@ -120,6 +120,26 @@ class CatRank(StrEnum):
     def get_num_of_clan_ranks() -> int:
         return len([enum for enum in CatRank if enum.is_any_clancat_rank()])
 
+    def get_baby_version(self):
+        if self in [self.WARRIOR, self.DEPUTY, self.LEADER, self.ELDER]:
+            return self.APPRENTICE
+        if self == self.MEDICINE_CAT:
+            return self.MEDICINE_APPRENTICE
+        if self == self.MEDIATOR:
+            return self.MEDIATOR_APPRENTICE
+        return self
+
+    def get_adult_version(self):
+        if self == self.APPRENTICE:
+            return self.WARRIOR
+        if self == self.MEDICINE_APPRENTICE:
+            return self.MEDICINE_CAT
+        if self == self.MEDIATOR_APPRENTICE:
+            return self.MEDIATOR
+        if self.is_baby():
+            return self.WARRIOR
+        return self
+
 
 class CatStanding(StrEnum):
     MEMBER = "member"

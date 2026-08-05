@@ -511,12 +511,6 @@ class Cat:
 
         self.get_new_thought(CatThought.ON_DEATH)
 
-        for app in self.apprentice.copy():
-            fetched_cat = Cat.fetch_cat(app)
-            if fetched_cat:
-                fetched_cat.update_mentor()
-        self.update_mentor()
-
         # handle grief
         # since we just yeeted them to their afterlife, we gotta check their previous group affiliation, not current
         if (
@@ -535,12 +529,6 @@ class Cat:
 
         self.status.exile_from_group()
         self.get_new_thought(CatThought.ON_EXILE)
-
-        for app in self.apprentice:
-            fetched_cat = Cat.fetch_cat(app)
-            if fetched_cat:
-                fetched_cat.update_mentor()
-        self.update_mentor()
 
     def grief(self, body: bool):
         """
@@ -705,16 +693,6 @@ class Cat:
         self.status.leave_group(new_social_status=new_social_status)
         self.get_new_thought()
 
-        for app in self.apprentice.copy():
-            app_ob = Cat.fetch_cat(app)
-            if app_ob:
-                app_ob.update_mentor()
-
-        self.update_mentor()
-
-        for x in self.apprentice:
-            Cat.fetch_cat(x).update_mentor()
-
     def become_lost(self):
         """Makes a Clan cat a lost cat. Makes status changes and removes apprentices."""
 
@@ -722,17 +700,7 @@ class Cat:
             new_social_status=choice([CatSocial.KITTYPET, CatSocial.LONER])
         )
 
-        for app in self.apprentice.copy():
-            app_ob = Cat.fetch_cat(app)
-            if app_ob:
-                app_ob.update_mentor()
-
-        self.update_mentor()
-
         self.get_new_thought(CatThought.ON_LOST)
-
-        for x in self.apprentice:
-            Cat.fetch_cat(x).update_mentor()
 
     def add_to_clan(self) -> List[str]:
         """Makes an "outside cat" a Clan cat. Returns a list of IDs for any additional cats that
@@ -781,12 +749,6 @@ class Cat:
         self.status._change_rank(new_rank)  # pylint: disable=protected-access
 
         self.name.status = new_rank
-
-        self.update_mentor()
-        for app in self.apprentice.copy():
-            fetched_cat = Cat.fetch_cat(app)
-            if isinstance(fetched_cat, Cat):
-                fetched_cat.update_mentor()
 
         # If they have any apprentices, make sure they are still valid:
         if old_rank == CatRank.MEDICINE_CAT and game.clan:
@@ -1376,10 +1338,6 @@ class Cat:
 
         # Set personality to correct type
         self.personality.set_kit(self.age.is_baby())
-        # Upon age-change
-
-        if self.status.rank.is_any_apprentice_rank():
-            self.update_mentor()
 
     def get_new_thought(
         self,
@@ -2042,112 +2000,6 @@ class Cat:
                 f"WARNING: There was an error reading the condition file of cat #{self}.\n",
                 e,
             )
-
-    # ---------------------------------------------------------------------------- #
-    #                                    mentor                                    #
-    # ---------------------------------------------------------------------------- #
-
-    def is_valid_mentor(self, potential_mentor: Cat):
-        # If not an app, don't need a mentor
-        if not self.status.rank.is_any_apprentice_rank():
-            return False
-
-        # App and mentor must be members of the same clan
-        if self.status.group_ID != potential_mentor.status.group_ID:
-            return False
-
-        # Match jobs
-        if (
-            self.status.rank == CatRank.MEDICINE_APPRENTICE
-            and potential_mentor.status.rank != CatRank.MEDICINE_CAT
-        ):
-            return False
-        if (
-            self.status.rank == CatRank.APPRENTICE
-            and potential_mentor.status.rank
-            not in [CatRank.LEADER, CatRank.DEPUTY, CatRank.WARRIOR]
-        ):
-            return False
-        if (
-            self.status.rank == CatRank.MEDIATOR_APPRENTICE
-            and potential_mentor.status.rank != CatRank.MEDIATOR
-        ):
-            return False
-
-        return True
-
-    def __remove_mentor(self):
-        """Should only be called by update_mentor, also sets fields on mentor."""
-        if not self.mentor:
-            return
-        mentor_cat = Cat.fetch_cat(self.mentor)
-        if not mentor_cat:
-            return
-        if self.ID in mentor_cat.apprentice:
-            mentor_cat.apprentice.remove(self.ID)
-        if self.moons > 6:
-            if self.ID not in mentor_cat.former_apprentices:
-                mentor_cat.former_apprentices.append(self.ID)
-            if mentor_cat.ID not in self.former_mentor:
-                self.former_mentor.append(mentor_cat.ID)
-        self.mentor = None
-
-    def __add_mentor(self, new_mentor_id: str):
-        """Should only be called by update_mentor, also sets fields on mentor."""
-        # reset patrol number
-        self.patrol_with_mentor = 0
-        self.mentor = new_mentor_id
-        mentor_cat = Cat.fetch_cat(self.mentor)
-        if not mentor_cat:
-            return
-        if self.ID not in mentor_cat.apprentice:
-            mentor_cat.apprentice.append(self.ID)
-
-    def update_mentor(self, new_mentor: Any = None):
-        """Takes mentor's ID as argument, mentor could just be set via this function."""
-        # No !!
-        if isinstance(new_mentor, Cat):
-            print("Everything is terrible!! (new_mentor {new_mentor} is a Cat D:)")
-            return
-
-        # Check if cat can have a mentor
-        if (
-            self.dead
-            or self.status.is_outsider
-            or not self.status.rank.is_any_apprentice_rank()
-        ):
-            self.__remove_mentor()
-            return
-
-        # If eligible, cat should get a mentor.
-        if new_mentor:
-            self.__remove_mentor()
-            self.__add_mentor(new_mentor)
-
-        # Check if current mentor is valid
-        if self.mentor:
-            mentor_cat = Cat.fetch_cat(
-                self.mentor
-            )  # This will return None if there is no current mentor
-            if mentor_cat and not self.is_valid_mentor(mentor_cat):
-                self.__remove_mentor()
-
-        # Need to pick a random mentor if not specified
-        if not self.mentor:
-            potential_mentors = []
-            priority_mentors = []
-            for cat in self.all_cats.values():
-                if self.is_valid_mentor(cat):
-                    potential_mentors.append(cat)
-                    if not cat.apprentice and not cat.not_working():
-                        priority_mentors.append(cat)
-            # First try for a cat who currently has no apprentices and is working
-            if priority_mentors:  # length of list > 0
-                new_mentor = choice(priority_mentors)
-            elif potential_mentors:  # length of list > 0
-                new_mentor = choice(potential_mentors)
-            if new_mentor:
-                self.__add_mentor(new_mentor.ID)
 
     # ---------------------------------------------------------------------------- #
     #                                 relationships                                #

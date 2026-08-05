@@ -8,6 +8,8 @@ from scripts.cat.factories.test_cat_factory import TestCatFactory
 
 import i18n
 
+from scripts.cat.microservices.mentor_service import update_mentorship, add_mentorship
+
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 
@@ -436,7 +438,7 @@ class TestUpdateMentor(unittest.TestCase):
             moons=20,
             status_dict={"rank": CatRank.WARRIOR},
         )
-        app.update_mentor(mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
 
         # when
         self.assertTrue(app.ID in mentor.apprentice)
@@ -444,7 +446,7 @@ class TestUpdateMentor(unittest.TestCase):
         self.assertEqual(app.mentor, mentor.ID)
 
         app.status.exile_from_group()
-        app.update_mentor()
+        update_mentorship(app)
 
         # then
         self.assertFalse(app.ID in mentor.apprentice)

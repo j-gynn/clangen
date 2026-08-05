@@ -16,8 +16,18 @@ class CatQuery:
     def all(self):
         return list(self)
 
+    def first(self):
+        return next(iter(self), None)
+
     def filter(self, predicate):
         return CatQuery(lambda: (cat for cat in self if predicate(cat)))
+
+    def by_id(self, *ids):
+        if len(ids) == 1 and isinstance(ids[0], (list, tuple, set)):
+            ids = ids[0]
+        if not ids:
+            return self.filter(lambda cat: False)
+        return self.filter(lambda cat: cat.ID in ids)
 
     # common combinations
 
@@ -52,6 +62,9 @@ class CatQuery:
 
     def with_age(self, *ages: CatAge):
         return self.filter(lambda cat: cat.age in ages)
+
+    def has_mentor(self):
+        return self.filter(lambda cat: cat.mentor is not None)
 
     def near_group_id(self, *groups):
         if not groups:

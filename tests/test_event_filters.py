@@ -3,6 +3,7 @@ import os
 from copy import deepcopy
 from itertools import permutations
 
+from scripts.cat.microservices.mentor_service import add_mentorship
 from scripts.cat.personality import Personality
 from scripts.cat.skills import Skill, SkillPath
 from scripts.clan_resources.point_of_interest import (
@@ -658,7 +659,7 @@ class TestInterpersonalRelationshipConstraints(unittest.TestCase):
             moons=26, status_dict=StatusDict(rank=CatRank.WARRIOR)
         )
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
 
         with self.subTest("are app/mentor, expected app/mentor"):
             self.assertTrue(
@@ -702,7 +703,7 @@ class TestInterpersonalRelationshipConstraints(unittest.TestCase):
             status_dict=StatusDict(rank=CatRank.WARRIOR),
         )
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
 
         with self.subTest("are mentor/app, expected mentor/app"):
             self.assertTrue(
@@ -746,7 +747,7 @@ class TestInterpersonalRelationshipConstraints(unittest.TestCase):
             status_dict=StatusDict(rank=CatRank.WARRIOR),
         )
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
         with self.subTest(
             "are mentor/app, expected not mentor/app and not parent/child"
         ):
@@ -1260,7 +1261,7 @@ class TestInterpersonalRelationshipConstraints2(unittest.TestCase):
             moons=8, status_dict=StatusDict(rank=CatRank.APPRENTICE)
         )
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
 
         involved_cats = {"app": app, "mentor": mentor, "app2": app2}
 
@@ -1362,7 +1363,7 @@ class TestInterpersonalRelationshipConstraints2(unittest.TestCase):
             moons=8, status_dict=StatusDict(rank=CatRank.APPRENTICE)
         )
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
 
         involved_cats = {"app": app, "mentor": mentor, "app2": app2}
 
@@ -1449,7 +1450,7 @@ class TestInterpersonalRelationshipConstraints2(unittest.TestCase):
         )
         involved_cats = {"mentor": mentor, "app": app}
 
-        app.update_mentor(new_mentor=mentor.ID)
+        add_mentorship(mentor.ID, app.ID)
         with self.subTest(
             "are mentor/app, expected not mentor/app and not parent/child"
         ):

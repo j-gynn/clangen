@@ -7,6 +7,14 @@ TODO: Docs
 """
 import logging
 import random
+
+from scripts.cat.microservices.mentor_service import (
+    get_mentor,
+    get_dead_former_mentor,
+    determine_mentor_tag_for_ceremony,
+    update_mentorship,
+)
+from scripts.cat.registry_module.store import cat_store
 from scripts.config import get_config
 
 # pylint: enable=line-too-long
@@ -300,6 +308,9 @@ def one_moon():
     check_leader()
     check_and_promote_deputy()
 
+    # validate that every mentorship is appropriate
+    update_mentorship(cat_store.query().has_mentor())
+
     # Resort
     if switch_get_value(Switch.sort_type) != "id":
         Cat.sort_cats()
@@ -532,7 +543,7 @@ def handle_lead_den_event():
                                 invited_cat.specsuffix_hidden = False
                         # if cat is an apprentice, make sure they get a mentor!
                         if invited_cat.status.rank == CatRank.APPRENTICE:
-                            invited_cat.update_mentor()
+                            update_mentorship(invited_cat)
                         # if the cat chose to become a mediator but the settings don't allow it, make them a warrior instead
                         if (
                             invited_cat.status.rank == CatRank.MEDIATOR
@@ -1570,12 +1581,12 @@ def ceremony(cat, promoted_to, preparedness="prepared"):
     """
     # ceremony = []
 
-    _ment = (
-        Cat.fetch_cat(cat.mentor) if cat.mentor else None
-    )  # Grab current mentor, if they have one, before it's removed.
+    mentor = get_mentor(cat)
+
+    # Grab current mentor, if they have one, before it's removed.
     old_name = str(cat.name)
     cat.rank_change(promoted_to)
-    cat.rank_change_traits_skill(_ment)
+    cat.rank_change_traits_skill(mentor)
 
     involved_cats = [cat.ID]  # Clearly, the cat the ceremony is about is involved.
 
@@ -1586,20 +1597,9 @@ def ceremony(cat, promoted_to, preparedness="prepared"):
 
     possible_ceremonies = set()
     dead_mentor = None
-    mentor = None
     previous_alive_mentor = None
     dead_parents = []
     living_parents = []
-    mentor_type = {
-        CatRank.MEDICINE_CAT: [CatRank.MEDICINE_CAT],
-        CatRank.WARRIOR: [
-            CatRank.WARRIOR,
-            CatRank.DEPUTY,
-            CatRank.LEADER,
-            CatRank.ELDER,
-        ],
-        CatRank.MEDIATOR: [CatRank.MEDIATOR],
-    }
 
     try:
         # Get all the ceremonies for the role ----------------------------------------
@@ -1615,44 +1615,23 @@ def ceremony(cat, promoted_to, preparedness="prepared"):
         tags = []
 
         # CURRENT MENTOR TAG CHECK
-        if cat.mentor:
-            if Cat.fetch_cat(cat.mentor).status.is_leader:
+        if mentor is not None:
+            if mentor.status.is_leader:
                 tags.append("yes_leader_mentor")
             else:
                 tags.append("yes_mentor")
-            mentor = Cat.fetch_cat(cat.mentor)
         else:
             tags.append("no_mentor")
 
-        for c in reversed(cat.former_mentor):
-            if Cat.fetch_cat(c) and Cat.fetch_cat(c).dead:
-                tags.append("dead_mentor")
-                dead_mentor = Cat.fetch_cat(c)
-                break
+        if (dead_mentor := get_dead_former_mentor(cat)) is not None:
+            tags.append("dead_mentor")
 
         # Unlike dead mentors, living mentors must be VALID
         # they must have the correct status for the role the cat
         # is being promoted too.
-        valid_living_former_mentors = []
-        for c in cat.former_mentor:
-            if Cat.fetch_cat(c).status.alive_in_player_clan:
-                if promoted_to in mentor_type:
-                    if Cat.fetch_cat(c).status.rank in mentor_type[promoted_to]:
-                        valid_living_former_mentors.append(c)
-                else:
-                    valid_living_former_mentors.append(c)
-
-        # ALL FORMER MENTOR TAG CHECKS
-        if valid_living_former_mentors:
-            #  Living Former mentors. Grab the latest living valid mentor.
-            previous_alive_mentor = Cat.fetch_cat(valid_living_former_mentors[-1])
-            if previous_alive_mentor.status.is_leader:
-                tags.append("alive_leader_mentor")
-            else:
-                tags.append("alive_mentor")
-        else:
-            # This tag means the cat has no living, valid mentors.
-            tags.append("no_valid_previous_mentor")
+        tag, previous_alive_mentor = determine_mentor_tag_for_ceremony(cat, promoted_to)
+        tags.append(tag)
+        del tag
 
         # Now we add the mentor stuff:
         temp = possible_ceremonies.intersection(ceremony_id_by_tag["general_mentor"])
@@ -1951,6 +1930,7 @@ def handle_apprentice_EX(cat):
             ran = constants.CONFIG["graduation"]["base_app_timeskip_ex"]
 
         mentor_modifier = 1
+
         if not cat.mentor or Cat.fetch_cat(cat.mentor).not_working():
             # Sick mentor debuff
             mentor_modifier = 0.7
