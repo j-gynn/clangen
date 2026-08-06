@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 from scripts.cat.enums import CatGroup, CatRank, CatAge
 
 if TYPE_CHECKING:
-    from scripts.cat.cats import Cat
+    pass
 
 
 class CatQuery:
@@ -62,6 +62,9 @@ class CatQuery:
 
     def with_rank(self, *ranks: CatRank):
         return self.filter(lambda cat: cat.status.rank in ranks)
+
+    def with_not_rank(self, *ranks: CatRank):
+        return self.filter(lambda cat: cat.status.rank not in ranks)
 
     def with_age(self, *ages: CatAge):
         return self.filter(lambda cat: cat.age in ages)

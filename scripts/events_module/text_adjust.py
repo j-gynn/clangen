@@ -1,8 +1,8 @@
+import logging
 import re
 from math import floor
 from random import choice, sample, randint
 from typing import Type, List, TYPE_CHECKING
-import logging
 
 import i18n
 import pygame
@@ -14,6 +14,7 @@ from scripts.cat.pronouns import (
     get_pronouns,
     get_new_pronouns,
 )
+from scripts.cat.registry_module.store import cat_store
 from scripts.cat.sprites.load_sprites import sprites
 from scripts.clan_package.get_clan_cats import find_alive_cats_with_rank
 from scripts.clan_resources.point_of_interest import (
@@ -609,12 +610,7 @@ def _replace_clan_name(text, abbreviation, clan_name):
 
 
 def leader_ceremony_text_adjust(
-    Cat,
-    text,
-    leader,
-    life_giver=None,
-    virtue=None,
-    extra_lives: int = None,
+    text, leader, life_giver=None, virtue=None, extra_lives: int = None
 ):
     """
     used to adjust the text for leader ceremonies
@@ -626,8 +622,8 @@ def leader_ceremony_text_adjust(
 
     if life_giver:
         replace_dict["r_c"] = (
-            str(Cat.fetch_cat(life_giver).name),
-            choice(Cat.fetch_cat(life_giver).pronouns),
+            str(cat_store.get(life_giver).name),
+            choice(cat_store.get(life_giver).pronouns),
         )
 
     text = process_text(text, replace_dict)
