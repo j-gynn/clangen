@@ -8,6 +8,7 @@ import pygame_gui
 import ujson
 
 from scripts.cat.cats import Cat, BACKSTORIES
+from scripts.cat.enums import CatRank
 from scripts.cat.factories.create_example_cat import create_option_preview_cat
 from scripts.cat.pelts import Pelt
 from scripts.cat.personality import Personality
@@ -101,7 +102,9 @@ class EventEditScreen(Screens):
     rel_value_types: dict = rel_type_tiers
     """Dict of all relationship values and associated levels."""
 
-    all_ranks: list = Cat.rank_sort_order.copy()
+    all_ranks: list = [
+        k for k, v in sorted(CatRank.order_dict().items(), key=lambda x: x[1])
+    ]
     """List of all possible ranks from highest to lowest."""
     all_ranks.reverse()
 

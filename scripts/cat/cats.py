@@ -87,21 +87,6 @@ class Cat:
         CatAge.SENIOR: constants.CONFIG["cat_ages"]["senior"],
     }
 
-    # This in is in reverse order: top of the list at the bottom
-    rank_sort_order = [
-        CatRank.NEWBORN,
-        CatRank.KITTEN,
-        CatRank.ELDER,
-        CatRank.APPRENTICE,
-        CatRank.WARRIOR,
-        CatRank.MEDIATOR_APPRENTICE,
-        CatRank.MEDIATOR,
-        CatRank.MEDICINE_APPRENTICE,
-        CatRank.MEDICINE_CAT,
-        CatRank.DEPUTY,
-        CatRank.LEADER,
-    ]
-
     gender_tags = {"female": "F", "male": "M"}
 
     # EX levels and ranges.
@@ -2410,10 +2395,7 @@ class Cat:
 
     @staticmethod
     def rank_order(cat: Cat):
-        if cat.status.rank in Cat.rank_sort_order:
-            return Cat.rank_sort_order.index(cat.status.rank)
-        else:
-            return 0
+        return cat.status.rank.order
 
     @staticmethod
     def get_adjusted_age(cat: Cat):

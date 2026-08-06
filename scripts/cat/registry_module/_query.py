@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
 from scripts.cat.enums import CatGroup, CatRank, CatAge
-
-if TYPE_CHECKING:
-    pass
+from scripts.cat.registry_module.sort import CatSort, SortKey
 
 
 class CatQuery:
+    _current_sort: CatSort = CatSort.AGE
+
     def __init__(self, source):
         self._source = source
 
@@ -24,6 +24,15 @@ class CatQuery:
 
     def filter(self, predicate):
         return CatQuery(lambda: (cat for cat in self if predicate(cat)))
+
+    def order_by(self, key: SortKey = None, reverse=False):
+        if not key:
+            key = self._current_sort
+
+        if isinstance(key, SortKey):
+            reverse = key.reverse
+
+        return CatQuery(lambda cat: sorted(self, key=key, reverse=reverse))
 
     def by_id(self, *ids):
         if len(ids) == 1 and isinstance(ids[0], (list, tuple, set)):

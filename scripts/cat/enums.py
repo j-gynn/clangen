@@ -73,6 +73,26 @@ class CatRank(StrEnum):
     ROGUE = "rogue"
     KITTYPET = "kittypet"
 
+    @staticmethod
+    def order_dict() -> dict:
+        return {
+            CatRank.NEWBORN: 0,
+            CatRank.KITTEN: 1,
+            CatRank.ELDER: 2,
+            CatRank.APPRENTICE: 3,
+            CatRank.WARRIOR: 4,
+            CatRank.MEDIATOR_APPRENTICE: 5,
+            CatRank.MEDIATOR: 6,
+            CatRank.MEDICINE_APPRENTICE: 7,
+            CatRank.MEDICINE_CAT: 8,
+            CatRank.DEPUTY: 9,
+            CatRank.LEADER: 10,
+        }
+
+    @property
+    def order(self):
+        return self.order_dict().get(self, 0)
+
     def is_baby(self) -> bool:
         return self in (self.NEWBORN, self.KITTEN)
 
