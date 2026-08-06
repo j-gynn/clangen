@@ -5,6 +5,7 @@ import os
 import ujson
 
 from scripts.cat.enums import CatGroup
+from scripts.cat.microservices.leader_ceremony import generate_lead_ceremony
 from scripts.cat.skills import SkillPath
 from scripts.game_structure import game
 from scripts.events_module.text_adjust import adjust_list_text
@@ -569,7 +570,7 @@ class History:
         generates and adds lead ceremony to history
         """
 
-        self.lead_ceremony = self.cat.generate_lead_ceremony()
+        self.lead_ceremony = generate_lead_ceremony(self.cat)
 
     # ---------------------------------------------------------------------------- #
     #                                 retrieving                                   #
@@ -581,7 +582,7 @@ class History:
         """
 
         if not self.lead_ceremony:
-            self.cat.generate_lead_ceremony()
+            generate_lead_ceremony(self.cat)
         return str(self.lead_ceremony)
 
     def get_possible_history(self, condition=None):

@@ -15,7 +15,6 @@ import i18n
 import ujson  # type: ignore
 
 import scripts.game_structure.localization as pronouns
-import scripts.game_structure.screen_settings
 from scripts.cat import pronouns
 from scripts.cat.enums import (
     CatAge,
@@ -66,7 +65,7 @@ from scripts.game_structure import image_cache, constants, game
 from scripts.game_structure.game.save_load import safe_save
 from scripts.game_structure.game.settings import game_setting_get
 from scripts.game_structure.game.switches import switch_get_value, Switch
-from scripts.game_structure.screen_settings import screen
+import scripts.game_structure.screen_settings
 from scripts.housekeeping.datadir import get_save_dir
 
 if TYPE_CHECKING:
@@ -76,7 +75,6 @@ if TYPE_CHECKING:
 class Cat:
     """The cat class."""
 
-    used_screen = screen
     current_pronoun_lang = None
 
     age_moons = {

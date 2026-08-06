@@ -20,6 +20,7 @@ from scripts.cat.cats import Cat, cat_class, BACKSTORIES
 from scripts.cat.enums import CatRank, CatGroup, CatSocial
 from scripts.cat.factories.new_cat_factory import NewCatFactory
 from scripts.cat.factories.enums import CatType
+from scripts.cat.microservices.leader_ceremony import generate_lead_ceremony
 from scripts.cat.names import names
 from scripts.cat.save_load import (
     save_cats,
@@ -372,7 +373,7 @@ class Clan:
 
         # create leader's ceremony and give lives
         if self.leader:
-            self.leader.generate_lead_ceremony()
+            generate_lead_ceremony(self.leader)
 
         self.save_clan()
         save_clanlist(self.save_id)
@@ -456,7 +457,7 @@ class Clan:
         """
 
         if leader:
-            leader.generate_lead_ceremony()
+            generate_lead_ceremony(leader)
             self.leader = leader
             Cat.all_cats[leader.ID].rank_change(CatRank.LEADER)
             self.leader_predecessors += 1

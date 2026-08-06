@@ -80,7 +80,7 @@ def generate_lead_ceremony(cat):
     relationships = cat.relationships.values()
 
     for rel in relationships:
-        kitty = cat_store.get(rel.cat_to)
+        kitty = rel.cat_to
         if kitty and kitty.dead and kitty.status.rank != CatRank.NEWBORN:
             # check where they reside
             if starclan:

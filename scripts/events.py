@@ -8,6 +8,7 @@ TODO: Docs
 import logging
 import random
 
+from scripts.cat.microservices.leader_ceremony import generate_lead_ceremony
 from scripts.cat.microservices.mentor_service import (
     get_mentor,
     get_dead_former_mentor,
@@ -1270,7 +1271,7 @@ def perform_ceremonies(cat):
         if not game.clan.leader or not game.clan.leader.status.alive_in_player_clan:
             game.clan.leader_lives = 9
             ceremony(cat, CatRank.LEADER)
-            cat.generate_lead_ceremony()
+            generate_lead_ceremony(cat)
             game.clan.deputy = None
             game.clan.leader = cat
 
