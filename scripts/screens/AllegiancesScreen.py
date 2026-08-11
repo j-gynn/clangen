@@ -5,12 +5,13 @@ import pygame_gui
 from scripts.cat.cats import Cat
 from scripts.game_structure import game
 from scripts.game_structure.screen_settings import MANAGER
+from ..cat.registry_module.store import cat_store
 from ..ui.theme import get_text_box_theme
 from ..events_module.text_adjust import event_text_adjust, adjust_list_text
 from ..ui.scale import ui_scale, ui_scale_offset
 from ..clan_package.get_clan_cats import get_alive_clan_queens
 from .Screens import Screens
-from ..cat.enums import CatRank
+from ..cat.enums import CatRank, CatGroup
 from ..ui.elements.modified_scrolling_container import UIModifiedScrollingContainer
 
 
@@ -129,18 +130,14 @@ class AllegiancesScreen(Screens):
         return event_text_adjust(Cat, output, main_cat=cat)
 
     def get_allegiances_text(self):
-        """Determine Text. Ouputs list of tuples."""
-
-        living_cats = [
-            i for i in Cat.all_cats.values() if i.status.alive_in_player_clan
-        ]
+        """Determine Text. Outputs list of tuples."""
         living_meds = []
         living_mediators = []
         living_warriors = []
         living_apprentices = []
         living_kits = []
         living_elders = []
-        for cat in living_cats:
+        for cat in cat_store.iter_cats_in_group(CatGroup.PLAYER_CLAN):
             if cat.status.rank == CatRank.MEDICINE_CAT:
                 living_meds.append(cat)
             elif cat.status.rank == CatRank.WARRIOR:
@@ -155,7 +152,9 @@ class AllegiancesScreen(Screens):
                 living_elders.append(cat)
 
         # Find Queens:
-        queen_dict, living_kits = get_alive_clan_queens(living_cats)
+        queen_dict, living_kits = get_alive_clan_queens(
+            cat_store.get_cats_in_group(CatGroup.PLAYER_CLAN)
+        )
 
         # Remove queens from warrior or elder lists, if they are there.  Let them stay on any other lists.
         for q in queen_dict:

@@ -220,9 +220,7 @@ class Clan:
             self.clan_cats.append(self.medicine_cat.ID)
             self.med_cat_list.append(self.medicine_cat.ID)
             if self.medicine_cat.status.rank != CatRank.MEDICINE_CAT:
-                Cat.all_cats[self.medicine_cat.ID].rank_change(
-                    CatRank.MEDICINE_CAT, new_thought=False
-                )
+                self.medicine_cat.rank_change(CatRank.MEDICINE_CAT, new_thought=False)
 
     @property
     def settings(self):

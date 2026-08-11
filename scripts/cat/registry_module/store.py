@@ -38,6 +38,13 @@ class CatStore:
 
             return FadedCatFactory.create_cat(ID=cat_id)
 
+    def iter(self):
+        """
+        Yield cats in the store to loop through
+        :return:
+        """
+        yield self._cats.values()
+
     def get_cats_in_group(self, group_id: CatGroup) -> list["Cat"]:
         return [self._cats[i] for i in self._groups[group_id]]
 

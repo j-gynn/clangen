@@ -5,6 +5,7 @@ import pygame_gui
 
 from scripts.cat.cats import Cat
 from scripts.game_structure.game.switches import switch_get_value, Switch
+from ..cat.registry_module.store import cat_store
 from ..ui.elements.surface_image_button import UISurfaceImageButton
 from ..ui.theme import get_text_box_theme
 from ..ui.scale import ui_scale
@@ -30,7 +31,7 @@ class CeremonyScreen(Screens):
         self.hide_menu_buttons()
         self.show_mute_buttons()
 
-        self.the_cat = Cat.all_cats.get(switch_get_value(Switch.cat), "")
+        self.the_cat = cat_store.get(switch_get_value(Switch.cat))
 
         if self.the_cat.status.is_leader:
             self.header = pygame_gui.elements.UITextBox(
