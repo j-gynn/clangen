@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import pygame
 import pygame_gui
 
+from scripts.game_structure.events.custom_event import FULLSCREEN_REVERT
 from scripts.game_structure.screen_settings import MANAGER
 from scripts.ui.elements.surface_image_button import UISurfaceImageButton
 from scripts.ui.generate_button import get_button_dict, ButtonStyles
@@ -82,7 +83,7 @@ class ConfirmDisplayChangesWindow(GameWindow):
 
         # make a timeout that will call in 10 seconds - if this window isn't closed,
         # it'll be used to revert the change
-        pygame.time.set_timer(pygame.USEREVENT + 10, 10000, loops=1)
+        pygame.time.set_timer(FULLSCREEN_REVERT, 10000, loops=1)
 
         self.source_screen_name = source_screen.name.replace(" ", "_")
 
@@ -103,7 +104,7 @@ class ConfirmDisplayChangesWindow(GameWindow):
                 self.kill()
             elif event.ui_element == self.revert_button:
                 self.revert_changes()
-        elif event.type == pygame.USEREVENT + 10:
+        elif event.type == FULLSCREEN_REVERT:
             self.revert_changes()
             self.kill()
         return super().process_event(event)

@@ -62,14 +62,14 @@ from scripts.events_module.thoughts.generate_thoughts import (
     get_other_cat_for_thought,
 )
 from scripts.game_structure import image_cache, constants, game
+from scripts.game_structure.events.custom_event import CAT_GROUP_CHANGE
 from scripts.game_structure.game.save_load import safe_save
 from scripts.game_structure.game.settings import game_setting_get
 from scripts.game_structure.game.switches import switch_get_value, Switch
 import scripts.game_structure.screen_settings
 from scripts.housekeeping.datadir import get_save_dir
 
-if TYPE_CHECKING:
-    import pygame
+import pygame
 
 
 class Cat:
@@ -338,7 +338,18 @@ class Cat:
                 # afterlife thinks this cat is ok
                 else:
                     self.history.add_afterlife_acceptance(afterlife_group)
+
+            old_group = self.status.group
             self.status.send_to_afterlife()
+            # announce change for CatStore to detect
+            pygame.event.post(
+                pygame.event.Event(
+                    CAT_GROUP_CHANGE,
+                    cat_id=self.ID,
+                    old_group=old_group,
+                    new_group=self.status.group,
+                )
+            )
 
     @property
     def dead_for(self) -> int:
@@ -665,18 +676,38 @@ class Cat:
 
     def leave_clan(self, new_social_status: CatSocial):
         """Removes cat from the Clan willingly. Makes status changes and removes apprentices."""
+        old_group = self.status.group
         if not new_social_status:
             new_social_status = choice(
                 (CatSocial.KITTYPET, CatSocial.LONER, CatSocial.ROGUE)
             )
         self.status.leave_group(new_social_status=new_social_status)
         self.get_new_thought()
+        # announce change for CatStore to detect
+        pygame.event.post(
+            pygame.event.Event(
+                CAT_GROUP_CHANGE,
+                cat_id=self.ID,
+                old_group=old_group,
+                new_group=self.status.group,
+            )
+        )
 
     def become_lost(self):
         """Makes a Clan cat a lost cat. Makes status changes and removes apprentices."""
 
+        old_group = self.status.group
         self.status.become_lost(
             new_social_status=choice([CatSocial.KITTYPET, CatSocial.LONER])
+        )
+        # announce change for CatStore to detect
+        pygame.event.post(
+            pygame.event.Event(
+                CAT_GROUP_CHANGE,
+                cat_id=self.ID,
+                old_group=old_group,
+                new_group=self.status.group,
+            )
         )
 
         self.get_new_thought(CatThought.ON_LOST)

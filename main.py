@@ -9,6 +9,7 @@ import threading
 import pygame
 
 import scripts.game_structure.screen_settings
+from scripts.cat.registry_module.store import cat_store
 from scripts.cat.sprites.load_sprites import sprites
 from scripts.clan import Afterlife, clan_class
 
@@ -259,6 +260,7 @@ while 1:
                     show_confirm_dialog=False,
                 )
 
+        cat_store.process_event(event)
         controller_manager.process_event(event)
         keyboard_manager.process_event(event)
 
