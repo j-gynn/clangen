@@ -137,7 +137,7 @@ class AllegiancesScreen(Screens):
         living_apprentices = []
         living_kits = []
         living_elders = []
-        for cat in cat_store.iter_cats_in_group(CatGroup.PLAYER_CLAN):
+        for cat in cat_store.query_group(CatGroup.PLAYER_CLAN):
             if cat.status.rank == CatRank.MEDICINE_CAT:
                 living_meds.append(cat)
             elif cat.status.rank == CatRank.WARRIOR:
@@ -153,7 +153,7 @@ class AllegiancesScreen(Screens):
 
         # Find Queens:
         queen_dict, living_kits = get_alive_clan_queens(
-            cat_store.get_cats_in_group(CatGroup.PLAYER_CLAN)
+            cat_store.query_group(CatGroup.PLAYER_CLAN).all()
         )
 
         # Remove queens from warrior or elder lists, if they are there.  Let them stay on any other lists.

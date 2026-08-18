@@ -22,6 +22,9 @@ class CatQuery:
     def first(self):
         return next(iter(self), None)
 
+    def amount(self):
+        return sum(1 for _ in self)
+
     def filter(self, predicate):
         return CatQuery(lambda: (cat for cat in self if predicate(cat)))
 
@@ -34,7 +37,7 @@ class CatQuery:
 
         return CatQuery(lambda cat: sorted(self, key=key, reverse=reverse))
 
-    def by_id(self, *ids):
+    def by_ids(self, *ids):
         if len(ids) == 1 and isinstance(ids[0], (list, tuple, set)):
             ids = ids[0]
         if not ids:

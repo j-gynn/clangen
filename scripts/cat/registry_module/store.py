@@ -38,34 +38,18 @@ class CatStore:
 
             return FadedCatFactory.create_cat(ID=cat_id)
 
-    def iter(self):
-        """
-        Yield cats in the store to loop through
-        :return:
-        """
-        yield self._cats.values()
-
-    def get_cats_in_group(self, group_id: CatGroup) -> list["Cat"]:
-        return [self._cats[i] for i in self._groups[group_id]]
-
-    def get_group_size(self, group: CatGroup = CatGroup.PLAYER_CLAN) -> int:
-        return len(self._groups[group])
-
-    def iter_cats_in_group(self, group_id: CatGroup) -> Generator["Cat", None, None]:
-        """
-        Used for iterating over cats without making a list of them first
-        :param group_id: CatGroup to iterate over
-        :return: Yields cats in the group
-        """
-        for cat_id in self._groups.get(group_id, ()):
-            yield self._cats[cat_id]
-
     def clear(self):
         self._cats.clear()
         self._groups.clear()
 
-    def query(self) -> CatQuery:
+    def query_ids(self, *ids) -> CatQuery:
+        return CatQuery(lambda: iter(self.get(cat_id) for cat_id in ids))
+
+    def query_cats(self) -> CatQuery:
         return CatQuery(lambda: iter(self._cats.values()))
+
+    def query_group(self, group: CatGroup = None) -> CatQuery:
+        return CatQuery(lambda: iter(self._cats[c] for c in self._groups[group]))
 
 
 cat_store: CatStore = CatStore()

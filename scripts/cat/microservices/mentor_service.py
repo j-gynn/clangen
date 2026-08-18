@@ -53,7 +53,7 @@ def remove_mentorship(mentor_id, *app_ids):
     if mentor_id is None:
         return
     mentor = cat_store.get(mentor_id)
-    apps = list(cat_store.query().by_id(*app_ids))
+    apps = list(cat_store.query_cats().by_ids(*app_ids))
     for app in apps:
         if app.ID in mentor.apprentice:
             mentor.apprentice.remove(app.ID)
@@ -94,7 +94,7 @@ def is_valid_mentor_for_app(mentor, app):
 
 def choose_random_mentor(app):
     potential_mentors = (
-        cat_store.query()
+        cat_store.query_cats()
         .alive()
         .in_group(app.status.group)
         .with_rank(*mentor_type[app.status.rank.get_adult_version()])
@@ -114,13 +114,15 @@ def get_dead_former_mentor(cat):
     :param cat: Cat object whose former mentor we are finding
     :return:
     """
-    return cat_store.query().by_id(reversed(cat.former_mentor)).dead().first()
+    return cat_store.query_cats().by_ids(reversed(cat.former_mentor)).dead().first()
 
 
 def determine_mentor_tag_for_ceremony(
     cat: "Cat", rank: CatRank
 ) -> Tuple[str, Optional["Cat"]]:
-    mentor_query = cat_store.query().by_id(cat.former_mentor).alive().in_player_clan()
+    mentor_query = (
+        cat_store.query_cats().by_ids(cat.former_mentor).alive().in_player_clan()
+    )
     if rank in mentor_type:
         mentor_query.with_rank(mentor_type[rank])
 
@@ -133,6 +135,7 @@ def determine_mentor_tag_for_ceremony(
 def get_current_apprentices(cat_id):
     cat = cat_store.get(cat_id)
     return [cat_store.get(app) for app in cat.apprentice]
+
 
 def rank_change_traits_skill(app, mentor):
     """Updates trait and skill upon ceremony"""

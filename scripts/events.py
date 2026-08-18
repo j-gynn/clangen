@@ -109,13 +109,6 @@ def one_moon():
     game.patrolled.clear()
     game.just_died.clear()
 
-    if any(
-        cat.status.rank.is_active_clan_rank() and cat.status.alive_in_player_clan
-        for cat in Cat.all_cats.values()
-    ):
-        # todo: this links nowhere, can it be removed?
-        switch_set_value(Switch.no_able_left, False)
-
     # age up the clan, set current season
     game.clan.age += 1
 
@@ -125,12 +118,7 @@ def one_moon():
 
     if game.clan.game_mode in ("expanded", "cruel_season") and game.clan.freshkill_pile:
         # feed the cats and update the nutrient status
-        relevant_cats = list(
-            filter(
-                lambda _cat: _cat.status.alive_in_player_clan,
-                Cat.all_cats.values(),
-            )
-        )
+        relevant_cats = cat_store.query_group(CatGroup.PLAYER_CLAN)
         game.clan.freshkill_pile.time_skip(relevant_cats, game.freshkill_event_list)
         # get the moonskip freshkill
         get_moon_freshkill()
@@ -147,8 +135,8 @@ def one_moon():
     trigger_future_events()
 
     # Calling of "one_moon" functions.
-    other_clan_cats = [c for c in Cat.all_cats_list if c.status.is_other_clancat]
-    for cat in Cat.all_cats_list.copy():
+    other_clan_cats = cat_store.query_group(CatGroup.OTHER_CLAN).all()
+    for cat in cat_store.query_group(CatGroup.PLAYER_CLAN):
         cat.thought = None
         if cat.status.alive_in_player_clan or cat.status.group.is_afterlife():
             one_moon_cat(cat)
@@ -163,7 +151,7 @@ def one_moon():
     if game.clan.grief_strings:
         # Grab all the dead or outside cats, who should not have grief text
         for ID in game.clan.grief_strings.copy():
-            check_cat = Cat.all_cats.get(ID)
+            check_cat = cat_store.get(ID)
             if isinstance(check_cat, Cat):
                 if check_cat.dead or not check_cat.status.alive_in_player_clan:
                     game.clan.grief_strings.pop(ID)
@@ -204,21 +192,18 @@ def one_moon():
             )
 
             if len(ghost_names) > 2:
-                alive_cats = [
-                    kitty
-                    for kitty in Cat.all_cats.values()
-                    if kitty.status.alive_in_player_clan
-                ]
-
                 # finds a percentage of the living Clan to become shaken
 
-                if len(alive_cats) == 0:
+                if (
+                    cat_count := cat_store.query_group(CatGroup.PLAYER_CLAN).amount()
+                    == 0
+                ):
                     return
                 else:
                     shaken_cats = random.sample(
-                        alive_cats,
+                        cat_store.query_group(CatGroup.PLAYER_CLAN).all(),
                         k=max(
-                            int((len(alive_cats) * random.randint(4, 6)) / 100),
+                            int((cat_count * random.randint(4, 6)) / 100),
                             1,
                         ),
                     )
@@ -277,7 +262,7 @@ def one_moon():
     # handle the herb supply for the moon
     game.clan.herb_supply.handle_moon(
         clan_size=get_living_clan_cat_count(Cat),
-        clan_cats=[c for c in Cat.all_cats_list if c.status.alive_in_player_clan],
+        clan_cats=cat_store.query_group(CatGroup.PLAYER_CLAN).all(),
         med_cats=find_alive_cats_with_rank(
             Cat,
             ranks=[CatRank.MEDICINE_CAT, CatRank.MEDICINE_APPRENTICE],
@@ -288,7 +273,7 @@ def one_moon():
     if game.clan.game_mode in ("expanded", "cruel_season"):
         amount_per_med = get_amount_cat_for_one_medic(game.clan)
         med_fulfilled = medicine_cats_can_cover_clan(
-            Cat.all_cats.values(), amount_per_med
+            cat_store.query_group(CatGroup.PLAYER_CLAN).all(), amount_per_med
         )
 
         if not med_fulfilled:
@@ -296,8 +281,8 @@ def one_moon():
             game.cur_events_list.insert(0, Single_Event(string, "health"))
     else:
         has_med = any(
-            cat.status.rank.is_any_medicine_rank() and cat.status.alive_in_player_clan
-            for cat in Cat.all_cats.values()
+            cat.status.rank.is_any_medicine_rank()
+            for cat in cat_store.query_group(CatGroup.PLAYER_CLAN).all()
         )
         if not has_med:
             string = i18n.t("defaults.warn_no_medcats")
@@ -311,7 +296,7 @@ def one_moon():
     check_and_promote_deputy()
 
     # validate that every mentorship is appropriate
-    update_mentorship(cat_store.query().has_mentor().all())
+    update_mentorship(cat_store.query_cats().has_mentor().all())
 
     # Resort
     if switch_get_value(Switch.sort_type) != "id":
@@ -622,9 +607,8 @@ def get_moon_freshkill():
         filter(
             lambda c: c.status.rank
             in (CatRank.WARRIOR, CatRank.APPRENTICE, CatRank.LEADER, CatRank.DEPUTY)
-            and c.status.alive_in_player_clan
             and not c.not_working(),
-            Cat.all_cats.values(),
+            cat_store.query_group(CatGroup.PLAYER_CLAN),
         )
     )
 
@@ -669,12 +653,12 @@ def handle_focus():
         return
     elif get_clan_setting("hunting"):
         # handle warrior
-        healthy_warriors = [
-            cat
-            for cat in Cat.all_cats.values()
-            if cat.status.rank.is_any_adult_warrior_like_rank()
-            and cat.available_to_work()
-        ]
+        healthy_warriors = (
+            cat_store.query_group(CatGroup.PLAYER_CLAN)
+            .can_work()
+            .with_rank(CatRank.WARRIOR, CatRank.DEPUTY, CatRank.LEADER)
+            .all()
+        )
 
         warrior_amount = len(healthy_warriors) * get_config(
             f"focus.hunting.{CatRank.WARRIOR}"
@@ -935,8 +919,8 @@ def handle_fading(cat):
             # Unset their mate, if they have one
             if len(cat.mate) > 0:
                 for mate_id in cat.mate:
-                    if Cat.all_cats.get(mate_id):
-                        cat.unset_mate(Cat.all_cats.get(mate_id))
+                    if mate := cat_store.get(mate_id):
+                        cat.unset_mate(mate)
 
             # If the cat is the current med, leader, or deputy, remove them
             if game.clan.leader:
@@ -1410,7 +1394,7 @@ def _is_suitable_medcat_app(cat) -> bool:
 
     # check if the Clan has sufficient med cats
     enough_working_meds = medicine_cats_can_cover_clan(
-        Cat.all_cats.values(),
+        cat_store.query_group(CatGroup.PLAYER_CLAN).all(),
         amount_per_med=get_amount_cat_for_one_medic(game.clan),
     )
 

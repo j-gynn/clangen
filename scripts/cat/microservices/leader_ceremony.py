@@ -112,7 +112,7 @@ def generate_lead_ceremony(cat):
             life_givers.append(rel.cat_to.ID)
 
     cats_in_afterlife = (
-        cat_store.query()
+        cat_store.query_cats()
         .in_group(CatGroup.PLAYER_CLAN)
         .in_group(CatGroup.STARCLAN if starclan else CatGroup.DARK_FOREST)
         .filter(lambda c: c.ID not in life_givers)
@@ -162,7 +162,7 @@ def generate_lead_ceremony(cat):
     lives = []
     used_lives = []
     used_virtues = []
-    for giver_cat in cat_store.query().by_id(*life_givers):
+    for giver_cat in cat_store.query_cats().by_ids(*life_givers):
         if not giver_cat:
             continue
         life_list = []
