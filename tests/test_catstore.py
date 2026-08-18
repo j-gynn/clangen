@@ -61,3 +61,12 @@ class TestCatStore(unittest.TestCase):
         self.assertEqual(cat, next(playerclan_iter))
         self.assertEqual(cat2, next(playerclan_iter))
         self.assertRaises(StopIteration, next, playerclan_iter)
+
+    def test_group_size(self):
+        TestCatFactory.create_cat(status_dict={"group_ID": CatGroup.PLAYER_CLAN_ID})
+        TestCatFactory.create_cat(status_dict={"group_ID": CatGroup.PLAYER_CLAN_ID})
+        TestCatFactory.create_cat(
+            status_dict={"rank": CatRank.WARRIOR, "group_ID": CatGroup.STARCLAN_ID}
+        )
+        self.assertEqual(2, cat_store.get_group_size(CatGroup.PLAYER_CLAN))
+        self.assertEqual(1, cat_store.get_group_size(CatGroup.STARCLAN))

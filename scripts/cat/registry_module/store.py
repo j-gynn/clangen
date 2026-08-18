@@ -48,6 +48,9 @@ class CatStore:
     def get_cats_in_group(self, group_id: CatGroup) -> list["Cat"]:
         return [self._cats[i] for i in self._groups[group_id]]
 
+    def get_group_size(self, group: CatGroup = CatGroup.PLAYER_CLAN) -> int:
+        return len(self._groups[group])
+
     def iter_cats_in_group(self, group_id: CatGroup) -> Generator["Cat", None, None]:
         """
         Used for iterating over cats without making a list of them first
